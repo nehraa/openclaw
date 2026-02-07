@@ -26,6 +26,22 @@ function generateId(): string {
   return `interaction-${Date.now()}-${++idCounter}`;
 }
 
+/** Common stop words filtered out during topic extraction (module-level for reuse). */
+const STOP_WORDS = new Set([
+  "a", "an", "the", "is", "are", "was", "were", "be", "been", "being",
+  "have", "has", "had", "do", "does", "did", "will", "would", "could",
+  "should", "may", "might", "shall", "can", "need", "must", "ought",
+  "i", "me", "my", "we", "our", "you", "your", "he", "him", "his",
+  "she", "her", "it", "its", "they", "them", "their", "what", "which",
+  "who", "whom", "this", "that", "these", "those", "am", "in", "on",
+  "at", "to", "for", "of", "with", "by", "from", "as", "into", "about",
+  "between", "through", "during", "before", "after", "above", "below",
+  "and", "but", "or", "nor", "not", "so", "if", "then", "than", "too",
+  "very", "just", "because", "how", "when", "where", "why", "all",
+  "each", "every", "both", "few", "more", "most", "other", "some",
+  "such", "no", "only", "same", "also", "up", "out", "off",
+]);
+
 /**
  * Configure the learning system.
  */
@@ -76,18 +92,16 @@ export function logInteraction(
   }
 
   chatLogs.set(userId, userLog);
-  return interaction;
+  return structuredClone(interaction);
 }
 
 /**
- * Retrieve chat history for a user.
+ * Retrieve chat history for a user (deep-cloned to prevent mutation of stored data).
  */
 export function getChatHistory(userId: string, limit?: number): ChatInteraction[] {
   const log = chatLogs.get(userId) ?? [];
-  if (limit !== undefined && limit > 0) {
-    return log.slice(-limit);
-  }
-  return [...log];
+  const slice = limit !== undefined && limit > 0 ? log.slice(-limit) : log;
+  return slice.map((entry) => structuredClone(entry));
 }
 
 /**
@@ -117,115 +131,6 @@ export function getInteractionCount(userId: string): number {
  * Filters out common stop words and returns significant terms.
  */
 export function extractTopics(text: string): string[] {
-  const STOP_WORDS = new Set([
-    "a",
-    "an",
-    "the",
-    "is",
-    "are",
-    "was",
-    "were",
-    "be",
-    "been",
-    "being",
-    "have",
-    "has",
-    "had",
-    "do",
-    "does",
-    "did",
-    "will",
-    "would",
-    "could",
-    "should",
-    "may",
-    "might",
-    "shall",
-    "can",
-    "need",
-    "must",
-    "ought",
-    "i",
-    "me",
-    "my",
-    "we",
-    "our",
-    "you",
-    "your",
-    "he",
-    "him",
-    "his",
-    "she",
-    "her",
-    "it",
-    "its",
-    "they",
-    "them",
-    "their",
-    "what",
-    "which",
-    "who",
-    "whom",
-    "this",
-    "that",
-    "these",
-    "those",
-    "am",
-    "in",
-    "on",
-    "at",
-    "to",
-    "for",
-    "of",
-    "with",
-    "by",
-    "from",
-    "as",
-    "into",
-    "about",
-    "between",
-    "through",
-    "during",
-    "before",
-    "after",
-    "above",
-    "below",
-    "and",
-    "but",
-    "or",
-    "nor",
-    "not",
-    "so",
-    "if",
-    "then",
-    "than",
-    "too",
-    "very",
-    "just",
-    "because",
-    "how",
-    "when",
-    "where",
-    "why",
-    "all",
-    "each",
-    "every",
-    "both",
-    "few",
-    "more",
-    "most",
-    "other",
-    "some",
-    "such",
-    "no",
-    "only",
-    "same",
-    "also",
-    "up",
-    "out",
-    "off",
-  ]);
-
   const words = text
     .toLowerCase()
     .replace(/[^\w\s]/g, " ")

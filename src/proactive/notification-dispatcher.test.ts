@@ -66,6 +66,38 @@ describe("createNotification", () => {
     });
     expect(notif).toBeUndefined();
   });
+
+  it("should enforce defaultMinRelevance threshold", () => {
+    configureProactive({ defaultMinRelevance: 0.5 });
+    const below = createNotification("user1", {
+      title: "Low",
+      body: "Low relevance",
+      relevance: 0.3,
+      topics: [],
+    });
+    expect(below).toBeUndefined();
+
+    const above = createNotification("user1", {
+      title: "High",
+      body: "High relevance",
+      relevance: 0.6,
+      topics: [],
+    });
+    expect(above).toBeDefined();
+  });
+
+  it("should deep-clone returned notification (mutation-safe)", () => {
+    const notif = createNotification("user1", {
+      title: "Test",
+      body: "Test",
+      relevance: 0.5,
+      topics: ["ai"],
+    });
+    // Mutating returned object should not affect stored state
+    notif!.topics.push("hacked");
+    const stored = getNotifications("user1");
+    expect(stored[0].topics).toEqual(["ai"]);
+  });
 });
 
 describe("getNotifications", () => {

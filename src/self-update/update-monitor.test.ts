@@ -185,6 +185,68 @@ describe("approveProposal", () => {
   });
 });
 
+describe("requireApproval config", () => {
+  it("should skip awaiting_approval when requireApproval is false", () => {
+    configureSelfUpdate({ requireApproval: false });
+    const proposal = discoverUpdate({
+      title: "Test",
+      description: "Test update",
+      category: "model",
+      source: "test",
+    });
+    // Trying to move to awaiting_approval should auto-promote to approved
+    const updated = updateProposalStatus(proposal!.id, "awaiting_approval");
+    expect(updated!.status).toBe("approved");
+  });
+});
+
+describe("autoApplyLowRisk config", () => {
+  it("should auto-apply low-risk approved proposals with passing tests", () => {
+    configureSelfUpdate({ autoApplyLowRisk: true, requireApproval: false });
+    const proposal = discoverUpdate({
+      title: "Minor tweak",
+      description: "A small low-risk improvement to the system",
+      category: "performance",
+      source: "monitor",
+      risk: "low",
+    });
+    updateProposalStatus(proposal!.id, "testing", {
+      testResults: {
+        passed: true,
+        testsRun: 5,
+        testsPassed: 5,
+        summary: "All tests passed",
+        completedAt: new Date().toISOString(),
+      },
+    });
+    // Moving to awaiting_approval should cascade: skip approval → auto-apply
+    const updated = updateProposalStatus(proposal!.id, "awaiting_approval");
+    expect(updated!.status).toBe("applied");
+  });
+
+  it("should NOT auto-apply medium-risk proposals", () => {
+    configureSelfUpdate({ autoApplyLowRisk: true, requireApproval: false });
+    const proposal = discoverUpdate({
+      title: "Medium risk",
+      description: "A medium-risk improvement to the system",
+      category: "performance",
+      source: "monitor",
+      risk: "medium",
+    });
+    updateProposalStatus(proposal!.id, "testing", {
+      testResults: {
+        passed: true,
+        testsRun: 5,
+        testsPassed: 5,
+        summary: "All tests passed",
+        completedAt: new Date().toISOString(),
+      },
+    });
+    const updated = updateProposalStatus(proposal!.id, "awaiting_approval");
+    expect(updated!.status).toBe("approved"); // approved but NOT auto-applied
+  });
+});
+
 describe("rejectProposal", () => {
   it("should reject with a reason", () => {
     const proposal = discoverUpdate({

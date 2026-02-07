@@ -30,7 +30,7 @@ export function subscribe(
   };
 
   subscriptions.set(userId, sub);
-  return { ...sub };
+  return structuredClone(sub);
 }
 
 /**
@@ -49,7 +49,7 @@ export function unsubscribe(userId: string): void {
  */
 export function getSubscription(userId: string): Subscription | undefined {
   const sub = subscriptions.get(userId);
-  return sub ? { ...sub } : undefined;
+  return sub ? structuredClone(sub) : undefined;
 }
 
 /**
@@ -82,7 +82,7 @@ export function updateSubscription(
   }
   sub.updatedAt = new Date().toISOString();
 
-  return { ...sub };
+  return structuredClone(sub);
 }
 
 /**
@@ -91,7 +91,7 @@ export function updateSubscription(
 export function getActiveSubscriptions(): Subscription[] {
   return Array.from(subscriptions.values())
     .filter((s) => s.optedIn)
-    .map((s) => ({ ...s }));
+    .map((s) => structuredClone(s));
 }
 
 /**

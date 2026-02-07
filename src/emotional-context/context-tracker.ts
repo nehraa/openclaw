@@ -51,7 +51,7 @@ export function processMessage(
   updateAggregates(context);
   sessions.set(sessionKey, context);
 
-  return { ...context };
+  return structuredClone(context);
 }
 
 /**
@@ -59,7 +59,7 @@ export function processMessage(
  */
 export function getEmotionalContext(sessionKey: string): EmotionalContext | undefined {
   const context = sessions.get(sessionKey);
-  return context ? { ...context } : undefined;
+  return context ? structuredClone(context) : undefined;
 }
 
 /**

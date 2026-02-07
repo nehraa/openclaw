@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   buildCodeCompletionPrompt,
+  buildCodeGenerationPrompt,
   buildCodeReviewPrompt,
+  buildRefactoringPrompt,
+  buildTestGenerationPrompt,
+  extractPrimaryCode,
   parseCodeSuggestions,
 } from "./copilot-assist.js";
 
@@ -63,6 +67,101 @@ describe("buildCodeCompletionPrompt", () => {
   });
 });
 
+describe("buildCodeGenerationPrompt", () => {
+  it("should build a generation prompt with defaults", () => {
+    const prompt = buildCodeGenerationPrompt("A REST API handler for user registration");
+    expect(prompt).toContain("Generate typescript code");
+    expect(prompt).toContain("user registration");
+    expect(prompt).toContain("production-ready");
+  });
+
+  it("should include framework and requirements", () => {
+    const prompt = buildCodeGenerationPrompt("WebSocket handler", {
+      framework: "Express",
+      requirements: ["Support reconnection", "Handle timeouts"],
+    });
+    expect(prompt).toContain("Express");
+    expect(prompt).toContain("Support reconnection");
+    expect(prompt).toContain("Handle timeouts");
+  });
+
+  it("should include existing code context", () => {
+    const prompt = buildCodeGenerationPrompt("Add logging", {
+      existingCode: "function process() {}",
+    });
+    expect(prompt).toContain("function process()");
+  });
+
+  it("should support concise style", () => {
+    const prompt = buildCodeGenerationPrompt("Hello world", { style: "concise" });
+    expect(prompt).toContain("minimal, clean code");
+  });
+
+  it("should include fileName when specified", () => {
+    const prompt = buildCodeGenerationPrompt("A utility module", { fileName: "utils.ts" });
+    expect(prompt).toContain("utils.ts");
+  });
+});
+
+describe("buildRefactoringPrompt", () => {
+  it("should build refactoring prompt for simplify goal", () => {
+    const prompt = buildRefactoringPrompt("const x = a ? a : b;", "simplify");
+    expect(prompt).toContain("Refactor");
+    expect(prompt).toContain("Simplify");
+    expect(prompt).toContain("reduce complexity");
+  });
+
+  it("should support modularize goal", () => {
+    const prompt = buildRefactoringPrompt("big function here", "modularize");
+    expect(prompt).toContain("smaller, well-named functions");
+  });
+
+  it("should support optimize goal", () => {
+    const prompt = buildRefactoringPrompt("slow code", "optimize");
+    expect(prompt).toContain("Optimize");
+    expect(prompt).toContain("performance");
+  });
+
+  it("should support type-safety goal", () => {
+    const prompt = buildRefactoringPrompt("any everywhere", "type-safety");
+    expect(prompt).toContain("type safety");
+    expect(prompt).toContain("remove `any`");
+  });
+
+  it("should support test-friendly goal", () => {
+    const prompt = buildRefactoringPrompt("coupled code", "test-friendly");
+    expect(prompt).toContain("testable");
+    expect(prompt).toContain("dependency injection");
+  });
+
+  it("should include context when provided", () => {
+    const prompt = buildRefactoringPrompt("code", "simplify", { context: "This is a hook" });
+    expect(prompt).toContain("This is a hook");
+  });
+});
+
+describe("buildTestGenerationPrompt", () => {
+  it("should build test generation prompt with defaults", () => {
+    const prompt = buildTestGenerationPrompt("function add(a, b) { return a + b; }");
+    expect(prompt).toContain("vitest");
+    expect(prompt).toContain("thorough");
+  });
+
+  it("should support exhaustive coverage", () => {
+    const prompt = buildTestGenerationPrompt("code", { coverage: "exhaustive" });
+    expect(prompt).toContain("exhaustive");
+    expect(prompt).toContain("property-based");
+  });
+
+  it("should include existing tests", () => {
+    const prompt = buildTestGenerationPrompt("code", {
+      existingTests: "it('should add', () => {})",
+    });
+    expect(prompt).toContain("avoid duplicating");
+    expect(prompt).toContain("should add");
+  });
+});
+
 describe("parseCodeSuggestions", () => {
   it("should extract code blocks from markdown", () => {
     const response = "Here's the code:\n```typescript\nconst x = 1;\n```\n";
@@ -104,5 +203,27 @@ describe("parseCodeSuggestions", () => {
   it("should return empty for empty response", () => {
     expect(parseCodeSuggestions("")).toEqual([]);
     expect(parseCodeSuggestions("   ")).toEqual([]);
+  });
+
+  it("should parse non-word language IDs like c++ and objective-c", () => {
+    const response = "```c++\nint main() {}\n```\n\n```objective-c\n@interface Foo\n```";
+    const suggestions = parseCodeSuggestions(response);
+    expect(suggestions).toHaveLength(2);
+    expect(suggestions[0].language).toBe("c++");
+    expect(suggestions[1].language).toBe("objective-c");
+  });
+});
+
+describe("extractPrimaryCode", () => {
+  it("should return the longest code block", () => {
+    const response = "```ts\na\n```\n\n```ts\nconst longCode = true;\nconst more = true;\n```";
+    const result = extractPrimaryCode(response);
+    expect(result).toBeDefined();
+    expect(result!.code).toContain("longCode");
+  });
+
+  it("should return undefined for empty response", () => {
+    expect(extractPrimaryCode("")).toBeUndefined();
+    expect(extractPrimaryCode("   ")).toBeUndefined();
   });
 });

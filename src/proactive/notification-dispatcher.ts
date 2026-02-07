@@ -21,14 +21,37 @@ const notifications = new Map<string, Notification[]>();
 /** Daily notification counts keyed by "userId:date". */
 const dailyCounts = new Map<string, number>();
 
+/** Last date string used for pruning stale daily counts. */
+let lastPruneDate = "";
+
 let idCounter = 0;
 
 function generateId(): string {
   return `notif-${Date.now()}-${++idCounter}`;
 }
 
+function todayString(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 function dailyKey(userId: string): string {
-  return `${userId}:${new Date().toISOString().slice(0, 10)}`;
+  return `${userId}:${todayString()}`;
+}
+
+/**
+ * Prune stale daily count entries from previous days to prevent unbounded growth.
+ */
+function pruneStaleDailyCounts(): void {
+  const today = todayString();
+  if (today === lastPruneDate) {
+    return;
+  }
+  lastPruneDate = today;
+  for (const key of dailyCounts.keys()) {
+    if (!key.endsWith(`:${today}`)) {
+      dailyCounts.delete(key);
+    }
+  }
 }
 
 /**
@@ -48,9 +71,10 @@ export function getProactiveConfig(): ProactiveConfig {
 /**
  * Create a notification for a user.
  *
- * Respects daily rate limits and system enablement.
+ * Respects daily rate limits, system enablement, and the configured
+ * `defaultMinRelevance` threshold — notifications below this relevance are dropped.
  *
- * @returns The created notification, or undefined if rate-limited or disabled.
+ * @returns The created notification, or undefined if rate-limited, below threshold, or disabled.
  */
 export function createNotification(
   userId: string,
@@ -66,6 +90,14 @@ export function createNotification(
   if (!activeConfig.enabled) {
     return undefined;
   }
+
+  // Enforce global minimum relevance threshold
+  if (params.relevance < activeConfig.defaultMinRelevance) {
+    return undefined;
+  }
+
+  // Prune stale entries from previous days
+  pruneStaleDailyCounts();
 
   const key = dailyKey(userId);
   const count = dailyCounts.get(key) ?? 0;
@@ -85,7 +117,7 @@ export function createNotification(
     body: params.body,
     url: params.url,
     relevance: params.relevance,
-    topics: params.topics,
+    topics: [...params.topics],
     channel,
     createdAt: new Date().toISOString(),
     status: "pending",
@@ -96,7 +128,7 @@ export function createNotification(
   notifications.set(userId, userNotifs);
   dailyCounts.set(key, count + 1);
 
-  return notification;
+  return structuredClone(notification);
 }
 
 /**
@@ -116,7 +148,7 @@ export function getNotifications(
     userNotifs = userNotifs.slice(-options.limit);
   }
 
-  return userNotifs.map((n) => ({ ...n }));
+  return userNotifs.map((n) => structuredClone(n));
 }
 
 /**
@@ -161,5 +193,6 @@ export function markFailed(userId: string, notificationId: string): boolean {
 export function clearAllNotifications(): void {
   notifications.clear();
   dailyCounts.clear();
+  lastPruneDate = "";
   idCounter = 0;
 }

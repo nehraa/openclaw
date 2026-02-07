@@ -41,15 +41,23 @@ export function filterContent(
     ? subscription.topicFilters
     : Object.keys(topicInterests ?? {});
 
+  // Normalize topicInterests keys to lowercase for consistent lookup
+  const normalizedInterests: Record<string, number> | undefined = topicInterests
+    ? Object.fromEntries(
+        Object.entries(topicInterests).map(([key, value]) => [key.toLowerCase(), value]),
+      )
+    : undefined;
+
   for (const itemTopic of item.topics) {
     const normalized = itemTopic.toLowerCase();
     for (const filter of filterTopics) {
+      const filterLower = filter.toLowerCase();
       if (
-        normalized === filter.toLowerCase() ||
-        normalized.includes(filter.toLowerCase()) ||
-        filter.toLowerCase().includes(normalized)
+        normalized === filterLower ||
+        normalized.includes(filterLower) ||
+        filterLower.includes(normalized)
       ) {
-        const interest = topicInterests?.[filter] ?? 0.5;
+        const interest = normalizedInterests?.[filterLower] ?? 0.5;
         totalRelevance += interest;
         matchedTopics.push(itemTopic);
         break;

@@ -68,7 +68,7 @@ export function updatePreferences(userId: string): UserPreferences {
   };
 
   preferences.set(userId, updated);
-  return { ...updated };
+  return structuredClone(updated);
 }
 
 /**
@@ -76,7 +76,7 @@ export function updatePreferences(userId: string): UserPreferences {
  */
 export function getPreferences(userId: string): UserPreferences | undefined {
   const prefs = preferences.get(userId);
-  return prefs ? { ...prefs } : undefined;
+  return prefs ? structuredClone(prefs) : undefined;
 }
 
 /**

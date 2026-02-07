@@ -1,7 +1,11 @@
 export {
   buildCodeCompletionPrompt,
+  buildCodeGenerationPrompt,
   buildCodeReviewPrompt,
+  buildRefactoringPrompt,
+  buildTestGenerationPrompt,
   checkCopilotStatus,
+  extractPrimaryCode,
   parseCodeSuggestions,
 } from "./copilot-assist.js";
 export type {

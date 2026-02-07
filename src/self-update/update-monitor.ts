@@ -77,11 +77,18 @@ export function discoverUpdate(params: {
   };
 
   proposals.set(proposal.id, proposal);
-  return { ...proposal };
+  return structuredClone(proposal);
 }
 
 /**
  * Transition a proposal to a new status.
+ *
+ * Respects `requireApproval`: when enabled, proposals must go through
+ * "awaiting_approval" before being approved. When disabled, proposals
+ * can transition directly from "testing" to "approved".
+ *
+ * Respects `autoApplyLowRisk`: when enabled, a low-risk proposal that
+ * passes safety checks and tests is automatically moved to "applied".
  */
 export function updateProposalStatus(
   proposalId: string,
@@ -103,7 +110,22 @@ export function updateProposalStatus(
     proposal.testResults = context.testResults;
   }
 
-  return { ...proposal };
+  // When approval is not required, skip the awaiting_approval step
+  if (!activeConfig.requireApproval && status === "awaiting_approval") {
+    proposal.status = "approved";
+  }
+
+  // Auto-apply low-risk proposals when enabled and tests passed
+  if (
+    activeConfig.autoApplyLowRisk &&
+    proposal.status === "approved" &&
+    proposal.risk === "low" &&
+    proposal.testResults?.passed
+  ) {
+    proposal.status = "applied";
+  }
+
+  return structuredClone(proposal);
 }
 
 /**
@@ -187,7 +209,7 @@ export function runSafetyCheck(proposalId: string): SafetyCheck | undefined {
  */
 export function getProposal(proposalId: string): UpdateProposal | undefined {
   const proposal = proposals.get(proposalId);
-  return proposal ? { ...proposal } : undefined;
+  return proposal ? structuredClone(proposal) : undefined;
 }
 
 /**
@@ -205,7 +227,7 @@ export function listProposals(filter?: { status?: UpdateStatus; category?: Updat
 
   return result
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
-    .map((p) => ({ ...p }));
+    .map((p) => structuredClone(p));
 }
 
 /**
