@@ -11,7 +11,12 @@ import { getChatHistory } from "./chat-logger.js";
 /** In-memory preference store. */
 const preferences = new Map<string, UserPreferences>();
 
-/** Decay factor for older topic signals (exponential decay). */
+/**
+ * Decay factor for older topic signals (exponential decay).
+ * Each step back in history multiplies the weight by this factor,
+ * so the most recent interaction has weight 1.0 and the Nth previous
+ * has weight 0.95^N. This ensures recent topics dominate preferences.
+ */
 const TOPIC_DECAY = 0.95;
 
 /**

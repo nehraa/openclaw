@@ -6,7 +6,10 @@
  * and integration with the existing Copilot token management.
  */
 
-import { DEFAULT_COPILOT_API_BASE_URL, resolveCopilotApiToken } from "../../providers/github-copilot-token.js";
+import {
+  DEFAULT_COPILOT_API_BASE_URL,
+  resolveCopilotApiToken,
+} from "../../providers/github-copilot-token.js";
 
 /** Configuration for Copilot code assistance. */
 export type CopilotAssistConfig = {
@@ -50,7 +53,8 @@ export async function checkCopilotStatus(agentDir?: string): Promise<CopilotStat
       return {
         authenticated: false,
         baseUrl: DEFAULT_COPILOT_API_BASE_URL,
-        error: "No Copilot token available. Run 'openclaw config auth github-copilot' to authenticate.",
+        error:
+          "No Copilot token available. Run 'openclaw config auth github-copilot' to authenticate.",
       };
     }
 
@@ -85,7 +89,8 @@ export function buildCodeReviewPrompt(
 
   const focusInstructions: Record<string, string> = {
     bugs: "Focus on finding bugs, logical errors, and edge cases.",
-    performance: "Focus on performance issues, unnecessary allocations, and optimization opportunities.",
+    performance:
+      "Focus on performance issues, unnecessary allocations, and optimization opportunities.",
     security: "Focus on security vulnerabilities, injection risks, and unsafe operations.",
     style: "Focus on code style, readability, naming conventions, and best practices.",
     all: "Review for bugs, performance, security, and code style.",
@@ -140,8 +145,7 @@ export function parseCodeSuggestions(response: string): CodeSuggestion[] {
   const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
   const suggestions: CodeSuggestion[] = [];
 
-  let match: RegExpExecArray | null = codeBlockRegex.exec(response);
-  while (match !== null) {
+  for (const match of response.matchAll(codeBlockRegex)) {
     const language = match[1] || undefined;
     const text = match[2].trim();
     if (text.length > 0) {
@@ -151,7 +155,6 @@ export function parseCodeSuggestions(response: string): CodeSuggestion[] {
         confidence: text.length > 100 ? "high" : text.length > 20 ? "medium" : "low",
       });
     }
-    match = codeBlockRegex.exec(response);
   }
 
   // If no code blocks found, treat the whole response as a suggestion

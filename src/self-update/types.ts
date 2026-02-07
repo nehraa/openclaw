@@ -77,7 +77,10 @@ export type SafetyCheck = {
     passed: boolean;
     details: string;
   }>;
-  /** Overall risk level after analysis. */
+  /**
+   * Overall risk level after analysis. May escalate beyond the proposal's
+   * initial `risk` field — e.g. "critical" when both category and impact checks fail.
+   */
   riskLevel: "low" | "medium" | "high" | "critical";
   /** ISO timestamp when the check was completed. */
   checkedAt: string;

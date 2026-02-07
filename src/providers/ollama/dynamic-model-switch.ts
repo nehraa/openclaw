@@ -44,22 +44,46 @@ const DEFAULT_TIMEOUT_MS = 5000;
 /** Keywords suggesting complex tasks. */
 const COMPLEXITY_KEYWORDS: Record<TaskComplexity, string[]> = {
   reasoning: [
-    "prove", "theorem", "derive", "analyze", "logic", "mathematical",
-    "deduce", "reason", "evaluate", "critique", "compare", "contrast",
-    "synthesize", "hypothesize",
+    "prove",
+    "theorem",
+    "derive",
+    "analyze",
+    "logic",
+    "mathematical",
+    "deduce",
+    "reason",
+    "evaluate",
+    "critique",
+    "compare",
+    "contrast",
+    "synthesize",
+    "hypothesize",
   ],
   complex: [
-    "explain", "implement", "design", "architect", "refactor", "optimize",
-    "debug", "troubleshoot", "integrate", "migrate",
+    "explain",
+    "implement",
+    "design",
+    "architect",
+    "refactor",
+    "optimize",
+    "debug",
+    "troubleshoot",
+    "integrate",
+    "migrate",
   ],
   moderate: [
-    "write", "create", "generate", "describe", "summarize", "translate",
-    "convert", "format", "list", "outline",
+    "write",
+    "create",
+    "generate",
+    "describe",
+    "summarize",
+    "translate",
+    "convert",
+    "format",
+    "list",
+    "outline",
   ],
-  simple: [
-    "hello", "hi", "thanks", "yes", "no", "ok", "help",
-    "what", "when", "where", "who",
-  ],
+  simple: ["hello", "hi", "thanks", "yes", "no", "ok", "help", "what", "when", "where", "who"],
 };
 
 /**
@@ -118,9 +142,10 @@ export function selectModelForTask(
   switch (complexity) {
     case "reasoning": {
       // Prefer reasoning-capable models, largest available
-      const model = reasoningModels.length > 0
-        ? reasoningModels[reasoningModels.length - 1]
-        : sorted[sorted.length - 1];
+      const model =
+        reasoningModels.length > 0
+          ? reasoningModels[reasoningModels.length - 1]
+          : sorted[sorted.length - 1];
       return {
         modelId: model.name,
         complexity,
@@ -164,6 +189,8 @@ export function selectModelForTask(
  * Create an Ollama connection configuration.
  *
  * Supports local instances and remote/cloud Ollama servers.
+ * Resolution order for baseUrl: options.baseUrl → OLLAMA_HOST env var → default (127.0.0.1:11434).
+ * Resolution order for apiKey: options.apiKey → OLLAMA_API_KEY env var.
  */
 export function createOllamaConnection(
   options?: Partial<OllamaConnectionConfig>,
@@ -209,10 +236,7 @@ export async function checkOllamaConnection(
 /**
  * Perform dynamic model selection: classify the task and pick the best model.
  */
-export function dynamicModelSelect(
-  input: string,
-  models: OllamaModelInfo[],
-): ModelSwitchResult {
+export function dynamicModelSelect(input: string, models: OllamaModelInfo[]): ModelSwitchResult {
   const complexity = classifyTaskComplexity(input);
   return selectModelForTask(models, complexity);
 }
