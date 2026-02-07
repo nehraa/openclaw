@@ -5,8 +5,8 @@
  * including topic interests and preferred communication style.
  */
 
-import { getChatHistory } from "./chat-logger.js";
 import type { UserPreferences } from "./types.js";
+import { getChatHistory } from "./chat-logger.js";
 
 /** In-memory preference store. */
 const preferences = new Map<string, UserPreferences>();
@@ -41,13 +41,15 @@ export function updatePreferences(userId: string): UserPreferences {
     topicInterests[topic] = Math.round((score / maxScore) * 100) / 100;
   }
 
-  // Infer verbosity preference from average message length
-  const avgInputLength =
-    history.length > 0
-      ? history.reduce((sum, h) => sum + h.input.length, 0) / history.length
-      : 0;
+  // Infer verbosity preference from average message length (keep default when no history)
   const verbosity: "concise" | "moderate" | "detailed" =
-    avgInputLength < 50 ? "concise" : avgInputLength < 200 ? "moderate" : "detailed";
+    history.length > 0
+      ? (() => {
+          const avgInputLength =
+            history.reduce((sum, h) => sum + h.input.length, 0) / history.length;
+          return avgInputLength < 50 ? "concise" : avgInputLength < 200 ? "moderate" : "detailed";
+        })()
+      : existing.preferredStyle.verbosity;
 
   const updated: UserPreferences = {
     ...existing,
