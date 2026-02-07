@@ -98,7 +98,7 @@ export function processMessage(
     ? selectModelForTask(ollamaModels, taskComplexity)
     : undefined;
 
-  // 3. Log interaction (output TBD — log input now, output can be appended later)
+  // 3. Log interaction (output is empty here; call recordResponse() after generating a response)
   const topics = extractTopics(input);
   logInteraction(userId, input, "", { channel, topics });
 
