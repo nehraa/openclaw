@@ -35,6 +35,10 @@ import { stripHeartbeatToken } from "../heartbeat.js";
 import { isSilentReplyText, SILENT_REPLY_TOKEN } from "../tokens.js";
 import { buildThreadingToolContext, resolveEnforceFinalTag } from "./agent-runner-utils.js";
 import { createBlockReplyPayloadKey, type BlockReplyPipeline } from "./block-reply-pipeline.js";
+import {
+  integrateOrchestratorForMessage,
+  applyOrchestratorHints,
+} from "./orchestrator-integration.js";
 import { parseReplyDirectives } from "./reply-directives.js";
 import { applyReplyTagsToPayload, isRenderablePayload } from "./reply-payloads.js";
 
@@ -152,89 +156,93 @@ export async function runAgentTurnWithFallback(params: {
           params.followupRun.run.config,
           resolveAgentIdFromSessionKey(params.followupRun.run.sessionKey),
         ),
-        run: (provider, model) => {
-          // Notify that model selection is complete (including after fallback).
-          // This allows responsePrefix template interpolation with the actual model.
-          params.opts?.onModelSelected?.({
-            provider,
-            model,
-            thinkLevel: params.followupRun.run.thinkLevel,
-          });
+        run: (() => {
+          // Compute orchestration ONCE before the run callback to avoid
+          // duplicating side effects (learning logs, emotional context tracking)
+          // across model/provider failover retries.
+          const resolvedSessionKey = params.sessionKey ?? params.followupRun.run.sessionKey;
+          const orchestration = resolvedSessionKey
+            ? integrateOrchestratorForMessage(
+                params.commandBody,
+                resolvedSessionKey,
+                params.followupRun.run.config,
+                params.sessionCtx,
+              )
+            : undefined;
+          const enrichedExtraSystemPrompt = orchestration
+            ? applyOrchestratorHints(
+                params.followupRun.run.extraSystemPrompt ?? "",
+                orchestration.responseHints,
+              )
+            : params.followupRun.run.extraSystemPrompt;
 
-          if (isCliProvider(provider, params.followupRun.run.config)) {
-            const startedAt = Date.now();
-            emitAgentEvent({
-              runId,
-              stream: "lifecycle",
-              data: {
-                phase: "start",
-                startedAt,
-              },
+          return (provider, model) => {
+            // Notify that model selection is complete (including after fallback).
+            // This allows responsePrefix template interpolation with the actual model.
+            params.opts?.onModelSelected?.({
+              provider,
+              model,
+              thinkLevel: params.followupRun.run.thinkLevel,
             });
-            const cliSessionId = getCliSessionId(params.getActiveSessionEntry(), provider);
-            return (async () => {
-              let lifecycleTerminalEmitted = false;
-              try {
-                const result = await runCliAgent({
-                  sessionId: params.followupRun.run.sessionId,
-                  sessionKey: params.sessionKey,
-                  agentId: params.followupRun.run.agentId,
-                  sessionFile: params.followupRun.run.sessionFile,
-                  workspaceDir: params.followupRun.run.workspaceDir,
-                  config: params.followupRun.run.config,
-                  prompt: params.commandBody,
-                  provider,
-                  model,
-                  thinkLevel: params.followupRun.run.thinkLevel,
-                  timeoutMs: params.followupRun.run.timeoutMs,
-                  runId,
-                  extraSystemPrompt: params.followupRun.run.extraSystemPrompt,
-                  ownerNumbers: params.followupRun.run.ownerNumbers,
-                  cliSessionId,
-                  images: params.opts?.images,
-                });
 
-                // CLI backends don't emit streaming assistant events, so we need to
-                // emit one with the final text so server-chat can populate its buffer
-                // and send the response to TUI/WebSocket clients.
-                const cliText = result.payloads?.[0]?.text?.trim();
-                if (cliText) {
+            if (isCliProvider(provider, params.followupRun.run.config)) {
+              const startedAt = Date.now();
+              emitAgentEvent({
+                runId,
+                stream: "lifecycle",
+                data: {
+                  phase: "start",
+                  startedAt,
+                },
+              });
+              const cliSessionId = getCliSessionId(params.getActiveSessionEntry(), provider);
+              return (async () => {
+                let lifecycleTerminalEmitted = false;
+                try {
+                  const result = await runCliAgent({
+                    sessionId: params.followupRun.run.sessionId,
+                    sessionKey: params.sessionKey,
+                    agentId: params.followupRun.run.agentId,
+                    sessionFile: params.followupRun.run.sessionFile,
+                    workspaceDir: params.followupRun.run.workspaceDir,
+                    config: params.followupRun.run.config,
+                    prompt: params.commandBody,
+                    provider,
+                    model,
+                    thinkLevel: params.followupRun.run.thinkLevel,
+                    timeoutMs: params.followupRun.run.timeoutMs,
+                    runId,
+                    extraSystemPrompt: enrichedExtraSystemPrompt,
+                    ownerNumbers: params.followupRun.run.ownerNumbers,
+                    cliSessionId,
+                    images: params.opts?.images,
+                  });
+
+                  // CLI backends don't emit streaming assistant events, so we need to
+                  // emit one with the final text so server-chat can populate its buffer
+                  // and send the response to TUI/WebSocket clients.
+                  const cliText = result.payloads?.[0]?.text?.trim();
+                  if (cliText) {
+                    emitAgentEvent({
+                      runId,
+                      stream: "assistant",
+                      data: { text: cliText },
+                    });
+                  }
+
                   emitAgentEvent({
                     runId,
-                    stream: "assistant",
-                    data: { text: cliText },
+                    stream: "lifecycle",
+                    data: {
+                      phase: "end",
+                      startedAt,
+                      endedAt: Date.now(),
+                    },
                   });
-                }
+                  lifecycleTerminalEmitted = true;
 
-                emitAgentEvent({
-                  runId,
-                  stream: "lifecycle",
-                  data: {
-                    phase: "end",
-                    startedAt,
-                    endedAt: Date.now(),
-                  },
-                });
-                lifecycleTerminalEmitted = true;
-
-                return result;
-              } catch (err) {
-                emitAgentEvent({
-                  runId,
-                  stream: "lifecycle",
-                  data: {
-                    phase: "error",
-                    startedAt,
-                    endedAt: Date.now(),
-                    error: String(err),
-                  },
-                });
-                lifecycleTerminalEmitted = true;
-                throw err;
-              } finally {
-                // Defensive backstop: never let a CLI run complete without a terminal
-                // lifecycle event, otherwise downstream consumers can hang.
-                if (!lifecycleTerminalEmitted) {
+                  return result;
+                } catch (err) {
                   emitAgentEvent({
                     runId,
                     stream: "lifecycle",
@@ -242,227 +250,244 @@ export async function runAgentTurnWithFallback(params: {
                       phase: "error",
                       startedAt,
                       endedAt: Date.now(),
-                      error: "CLI run completed without lifecycle terminal event",
+                      error: String(err),
                     },
                   });
+                  lifecycleTerminalEmitted = true;
+                  throw err;
+                } finally {
+                  // Defensive backstop: never let a CLI run complete without a terminal
+                  // lifecycle event, otherwise downstream consumers can hang.
+                  if (!lifecycleTerminalEmitted) {
+                    emitAgentEvent({
+                      runId,
+                      stream: "lifecycle",
+                      data: {
+                        phase: "error",
+                        startedAt,
+                        endedAt: Date.now(),
+                        error: "CLI run completed without lifecycle terminal event",
+                      },
+                    });
+                  }
                 }
-              }
-            })();
-          }
-          const authProfileId =
-            provider === params.followupRun.run.provider
-              ? params.followupRun.run.authProfileId
-              : undefined;
-          return runEmbeddedPiAgent({
-            sessionId: params.followupRun.run.sessionId,
-            sessionKey: params.sessionKey,
-            agentId: params.followupRun.run.agentId,
-            messageProvider: params.sessionCtx.Provider?.trim().toLowerCase() || undefined,
-            agentAccountId: params.sessionCtx.AccountId,
-            messageTo: params.sessionCtx.OriginatingTo ?? params.sessionCtx.To,
-            messageThreadId: params.sessionCtx.MessageThreadId ?? undefined,
-            groupId: resolveGroupSessionKey(params.sessionCtx)?.id,
-            groupChannel:
-              params.sessionCtx.GroupChannel?.trim() ?? params.sessionCtx.GroupSubject?.trim(),
-            groupSpace: params.sessionCtx.GroupSpace?.trim() ?? undefined,
-            senderId: params.sessionCtx.SenderId?.trim() || undefined,
-            senderName: params.sessionCtx.SenderName?.trim() || undefined,
-            senderUsername: params.sessionCtx.SenderUsername?.trim() || undefined,
-            senderE164: params.sessionCtx.SenderE164?.trim() || undefined,
-            // Provider threading context for tool auto-injection
-            ...buildThreadingToolContext({
-              sessionCtx: params.sessionCtx,
+              })();
+            }
+            const authProfileId =
+              provider === params.followupRun.run.provider
+                ? params.followupRun.run.authProfileId
+                : undefined;
+            return runEmbeddedPiAgent({
+              sessionId: params.followupRun.run.sessionId,
+              sessionKey: params.sessionKey,
+              agentId: params.followupRun.run.agentId,
+              messageProvider: params.sessionCtx.Provider?.trim().toLowerCase() || undefined,
+              agentAccountId: params.sessionCtx.AccountId,
+              messageTo: params.sessionCtx.OriginatingTo ?? params.sessionCtx.To,
+              messageThreadId: params.sessionCtx.MessageThreadId ?? undefined,
+              groupId: resolveGroupSessionKey(params.sessionCtx)?.id,
+              groupChannel:
+                params.sessionCtx.GroupChannel?.trim() ?? params.sessionCtx.GroupSubject?.trim(),
+              groupSpace: params.sessionCtx.GroupSpace?.trim() ?? undefined,
+              senderId: params.sessionCtx.SenderId?.trim() || undefined,
+              senderName: params.sessionCtx.SenderName?.trim() || undefined,
+              senderUsername: params.sessionCtx.SenderUsername?.trim() || undefined,
+              senderE164: params.sessionCtx.SenderE164?.trim() || undefined,
+              // Provider threading context for tool auto-injection
+              ...buildThreadingToolContext({
+                sessionCtx: params.sessionCtx,
+                config: params.followupRun.run.config,
+                hasRepliedRef: params.opts?.hasRepliedRef,
+              }),
+              sessionFile: params.followupRun.run.sessionFile,
+              workspaceDir: params.followupRun.run.workspaceDir,
+              agentDir: params.followupRun.run.agentDir,
               config: params.followupRun.run.config,
-              hasRepliedRef: params.opts?.hasRepliedRef,
-            }),
-            sessionFile: params.followupRun.run.sessionFile,
-            workspaceDir: params.followupRun.run.workspaceDir,
-            agentDir: params.followupRun.run.agentDir,
-            config: params.followupRun.run.config,
-            skillsSnapshot: params.followupRun.run.skillsSnapshot,
-            prompt: params.commandBody,
-            extraSystemPrompt: params.followupRun.run.extraSystemPrompt,
-            ownerNumbers: params.followupRun.run.ownerNumbers,
-            enforceFinalTag: resolveEnforceFinalTag(params.followupRun.run, provider),
-            provider,
-            model,
-            authProfileId,
-            authProfileIdSource: authProfileId
-              ? params.followupRun.run.authProfileIdSource
-              : undefined,
-            thinkLevel: params.followupRun.run.thinkLevel,
-            verboseLevel: params.followupRun.run.verboseLevel,
-            reasoningLevel: params.followupRun.run.reasoningLevel,
-            execOverrides: params.followupRun.run.execOverrides,
-            toolResultFormat: (() => {
-              const channel = resolveMessageChannel(
-                params.sessionCtx.Surface,
-                params.sessionCtx.Provider,
-              );
-              if (!channel) {
-                return "markdown";
-              }
-              return isMarkdownCapableMessageChannel(channel) ? "markdown" : "plain";
-            })(),
-            bashElevated: params.followupRun.run.bashElevated,
-            timeoutMs: params.followupRun.run.timeoutMs,
-            runId,
-            images: params.opts?.images,
-            abortSignal: params.opts?.abortSignal,
-            blockReplyBreak: params.resolvedBlockStreamingBreak,
-            blockReplyChunking: params.blockReplyChunking,
-            onPartialReply: allowPartialStream
-              ? async (payload) => {
-                  const textForTyping = await handlePartialForTyping(payload);
-                  if (!params.opts?.onPartialReply || textForTyping === undefined) {
-                    return;
-                  }
-                  await params.opts.onPartialReply({
-                    text: textForTyping,
-                    mediaUrls: payload.mediaUrls,
-                  });
+              skillsSnapshot: params.followupRun.run.skillsSnapshot,
+              prompt: params.commandBody,
+              extraSystemPrompt: enrichedExtraSystemPrompt,
+              ownerNumbers: params.followupRun.run.ownerNumbers,
+              enforceFinalTag: resolveEnforceFinalTag(params.followupRun.run, provider),
+              provider,
+              model,
+              authProfileId,
+              authProfileIdSource: authProfileId
+                ? params.followupRun.run.authProfileIdSource
+                : undefined,
+              thinkLevel: params.followupRun.run.thinkLevel,
+              verboseLevel: params.followupRun.run.verboseLevel,
+              reasoningLevel: params.followupRun.run.reasoningLevel,
+              execOverrides: params.followupRun.run.execOverrides,
+              toolResultFormat: (() => {
+                const channel = resolveMessageChannel(
+                  params.sessionCtx.Surface,
+                  params.sessionCtx.Provider,
+                );
+                if (!channel) {
+                  return "markdown";
                 }
-              : undefined,
-            onAssistantMessageStart: async () => {
-              await params.typingSignals.signalMessageStart();
-            },
-            onReasoningStream:
-              params.typingSignals.shouldStartOnReasoning || params.opts?.onReasoningStream
+                return isMarkdownCapableMessageChannel(channel) ? "markdown" : "plain";
+              })(),
+              bashElevated: params.followupRun.run.bashElevated,
+              timeoutMs: params.followupRun.run.timeoutMs,
+              runId,
+              images: params.opts?.images,
+              abortSignal: params.opts?.abortSignal,
+              blockReplyBreak: params.resolvedBlockStreamingBreak,
+              blockReplyChunking: params.blockReplyChunking,
+              onPartialReply: allowPartialStream
                 ? async (payload) => {
-                    await params.typingSignals.signalReasoningDelta();
-                    await params.opts?.onReasoningStream?.({
-                      text: payload.text,
-                      mediaUrls: payload.mediaUrls,
-                    });
-                  }
-                : undefined,
-            onAgentEvent: async (evt) => {
-              // Trigger typing when tools start executing.
-              // Must await to ensure typing indicator starts before tool summaries are emitted.
-              if (evt.stream === "tool") {
-                const phase = typeof evt.data.phase === "string" ? evt.data.phase : "";
-                if (phase === "start" || phase === "update") {
-                  await params.typingSignals.signalToolStart();
-                }
-              }
-              // Track auto-compaction completion
-              if (evt.stream === "compaction") {
-                const phase = typeof evt.data.phase === "string" ? evt.data.phase : "";
-                const willRetry = Boolean(evt.data.willRetry);
-                if (phase === "end" && !willRetry) {
-                  autoCompactionCompleted = true;
-                }
-              }
-            },
-            // Always pass onBlockReply so flushBlockReplyBuffer works before tool execution,
-            // even when regular block streaming is disabled. The handler sends directly
-            // via opts.onBlockReply when the pipeline isn't available.
-            onBlockReply: params.opts?.onBlockReply
-              ? async (payload) => {
-                  const { text, skip } = normalizeStreamingText(payload);
-                  const hasPayloadMedia = (payload.mediaUrls?.length ?? 0) > 0;
-                  if (skip && !hasPayloadMedia) {
-                    return;
-                  }
-                  const currentMessageId =
-                    params.sessionCtx.MessageSidFull ?? params.sessionCtx.MessageSid;
-                  const taggedPayload = applyReplyTagsToPayload(
-                    {
-                      text,
-                      mediaUrls: payload.mediaUrls,
-                      mediaUrl: payload.mediaUrls?.[0],
-                      replyToId: payload.replyToId,
-                      replyToTag: payload.replyToTag,
-                      replyToCurrent: payload.replyToCurrent,
-                    },
-                    currentMessageId,
-                  );
-                  // Let through payloads with audioAsVoice flag even if empty (need to track it)
-                  if (!isRenderablePayload(taggedPayload) && !payload.audioAsVoice) {
-                    return;
-                  }
-                  const parsed = parseReplyDirectives(taggedPayload.text ?? "", {
-                    currentMessageId,
-                    silentToken: SILENT_REPLY_TOKEN,
-                  });
-                  const cleaned = parsed.text || undefined;
-                  const hasRenderableMedia =
-                    Boolean(taggedPayload.mediaUrl) || (taggedPayload.mediaUrls?.length ?? 0) > 0;
-                  // Skip empty payloads unless they have audioAsVoice flag (need to track it)
-                  if (
-                    !cleaned &&
-                    !hasRenderableMedia &&
-                    !payload.audioAsVoice &&
-                    !parsed.audioAsVoice
-                  ) {
-                    return;
-                  }
-                  if (parsed.isSilent && !hasRenderableMedia) {
-                    return;
-                  }
-
-                  const blockPayload: ReplyPayload = params.applyReplyToMode({
-                    ...taggedPayload,
-                    text: cleaned,
-                    audioAsVoice: Boolean(parsed.audioAsVoice || payload.audioAsVoice),
-                    replyToId: taggedPayload.replyToId ?? parsed.replyToId,
-                    replyToTag: taggedPayload.replyToTag || parsed.replyToTag,
-                    replyToCurrent: taggedPayload.replyToCurrent || parsed.replyToCurrent,
-                  });
-
-                  void params.typingSignals
-                    .signalTextDelta(cleaned ?? taggedPayload.text)
-                    .catch((err) => {
-                      logVerbose(`block reply typing signal failed: ${String(err)}`);
-                    });
-
-                  // Use pipeline if available (block streaming enabled), otherwise send directly
-                  if (params.blockStreamingEnabled && params.blockReplyPipeline) {
-                    params.blockReplyPipeline.enqueue(blockPayload);
-                  } else if (params.blockStreamingEnabled) {
-                    // Send directly when flushing before tool execution (no pipeline but streaming enabled).
-                    // Track sent key to avoid duplicate in final payloads.
-                    directlySentBlockKeys.add(createBlockReplyPayloadKey(blockPayload));
-                    await params.opts?.onBlockReply?.(blockPayload);
-                  }
-                  // When streaming is disabled entirely, blocks are accumulated in final text instead.
-                }
-              : undefined,
-            onBlockReplyFlush:
-              params.blockStreamingEnabled && blockReplyPipeline
-                ? async () => {
-                    await blockReplyPipeline.flush({ force: true });
-                  }
-                : undefined,
-            shouldEmitToolResult: params.shouldEmitToolResult,
-            shouldEmitToolOutput: params.shouldEmitToolOutput,
-            onToolResult: onToolResult
-              ? (payload) => {
-                  // `subscribeEmbeddedPiSession` may invoke tool callbacks without awaiting them.
-                  // If a tool callback starts typing after the run finalized, we can end up with
-                  // a typing loop that never sees a matching markRunComplete(). Track and drain.
-                  const task = (async () => {
-                    const { text, skip } = normalizeStreamingText(payload);
-                    if (skip) {
+                    const textForTyping = await handlePartialForTyping(payload);
+                    if (!params.opts?.onPartialReply || textForTyping === undefined) {
                       return;
                     }
-                    await params.typingSignals.signalTextDelta(text);
-                    await onToolResult({
-                      text,
+                    await params.opts.onPartialReply({
+                      text: textForTyping,
                       mediaUrls: payload.mediaUrls,
                     });
-                  })()
-                    .catch((err) => {
-                      logVerbose(`tool result delivery failed: ${String(err)}`);
-                    })
-                    .finally(() => {
-                      params.pendingToolTasks.delete(task);
-                    });
-                  params.pendingToolTasks.add(task);
+                  }
+                : undefined,
+              onAssistantMessageStart: async () => {
+                await params.typingSignals.signalMessageStart();
+              },
+              onReasoningStream:
+                params.typingSignals.shouldStartOnReasoning || params.opts?.onReasoningStream
+                  ? async (payload) => {
+                      await params.typingSignals.signalReasoningDelta();
+                      await params.opts?.onReasoningStream?.({
+                        text: payload.text,
+                        mediaUrls: payload.mediaUrls,
+                      });
+                    }
+                  : undefined,
+              onAgentEvent: async (evt) => {
+                // Trigger typing when tools start executing.
+                // Must await to ensure typing indicator starts before tool summaries are emitted.
+                if (evt.stream === "tool") {
+                  const phase = typeof evt.data.phase === "string" ? evt.data.phase : "";
+                  if (phase === "start" || phase === "update") {
+                    await params.typingSignals.signalToolStart();
+                  }
                 }
-              : undefined,
-          });
-        },
+                // Track auto-compaction completion
+                if (evt.stream === "compaction") {
+                  const phase = typeof evt.data.phase === "string" ? evt.data.phase : "";
+                  const willRetry = Boolean(evt.data.willRetry);
+                  if (phase === "end" && !willRetry) {
+                    autoCompactionCompleted = true;
+                  }
+                }
+              },
+              // Always pass onBlockReply so flushBlockReplyBuffer works before tool execution,
+              // even when regular block streaming is disabled. The handler sends directly
+              // via opts.onBlockReply when the pipeline isn't available.
+              onBlockReply: params.opts?.onBlockReply
+                ? async (payload) => {
+                    const { text, skip } = normalizeStreamingText(payload);
+                    const hasPayloadMedia = (payload.mediaUrls?.length ?? 0) > 0;
+                    if (skip && !hasPayloadMedia) {
+                      return;
+                    }
+                    const currentMessageId =
+                      params.sessionCtx.MessageSidFull ?? params.sessionCtx.MessageSid;
+                    const taggedPayload = applyReplyTagsToPayload(
+                      {
+                        text,
+                        mediaUrls: payload.mediaUrls,
+                        mediaUrl: payload.mediaUrls?.[0],
+                        replyToId: payload.replyToId,
+                        replyToTag: payload.replyToTag,
+                        replyToCurrent: payload.replyToCurrent,
+                      },
+                      currentMessageId,
+                    );
+                    // Let through payloads with audioAsVoice flag even if empty (need to track it)
+                    if (!isRenderablePayload(taggedPayload) && !payload.audioAsVoice) {
+                      return;
+                    }
+                    const parsed = parseReplyDirectives(taggedPayload.text ?? "", {
+                      currentMessageId,
+                      silentToken: SILENT_REPLY_TOKEN,
+                    });
+                    const cleaned = parsed.text || undefined;
+                    const hasRenderableMedia =
+                      Boolean(taggedPayload.mediaUrl) || (taggedPayload.mediaUrls?.length ?? 0) > 0;
+                    // Skip empty payloads unless they have audioAsVoice flag (need to track it)
+                    if (
+                      !cleaned &&
+                      !hasRenderableMedia &&
+                      !payload.audioAsVoice &&
+                      !parsed.audioAsVoice
+                    ) {
+                      return;
+                    }
+                    if (parsed.isSilent && !hasRenderableMedia) {
+                      return;
+                    }
+
+                    const blockPayload: ReplyPayload = params.applyReplyToMode({
+                      ...taggedPayload,
+                      text: cleaned,
+                      audioAsVoice: Boolean(parsed.audioAsVoice || payload.audioAsVoice),
+                      replyToId: taggedPayload.replyToId ?? parsed.replyToId,
+                      replyToTag: taggedPayload.replyToTag || parsed.replyToTag,
+                      replyToCurrent: taggedPayload.replyToCurrent || parsed.replyToCurrent,
+                    });
+
+                    void params.typingSignals
+                      .signalTextDelta(cleaned ?? taggedPayload.text)
+                      .catch((err) => {
+                        logVerbose(`block reply typing signal failed: ${String(err)}`);
+                      });
+
+                    // Use pipeline if available (block streaming enabled), otherwise send directly
+                    if (params.blockStreamingEnabled && params.blockReplyPipeline) {
+                      params.blockReplyPipeline.enqueue(blockPayload);
+                    } else if (params.blockStreamingEnabled) {
+                      // Send directly when flushing before tool execution (no pipeline but streaming enabled).
+                      // Track sent key to avoid duplicate in final payloads.
+                      directlySentBlockKeys.add(createBlockReplyPayloadKey(blockPayload));
+                      await params.opts?.onBlockReply?.(blockPayload);
+                    }
+                    // When streaming is disabled entirely, blocks are accumulated in final text instead.
+                  }
+                : undefined,
+              onBlockReplyFlush:
+                params.blockStreamingEnabled && blockReplyPipeline
+                  ? async () => {
+                      await blockReplyPipeline.flush({ force: true });
+                    }
+                  : undefined,
+              shouldEmitToolResult: params.shouldEmitToolResult,
+              shouldEmitToolOutput: params.shouldEmitToolOutput,
+              onToolResult: onToolResult
+                ? (payload) => {
+                    // `subscribeEmbeddedPiSession` may invoke tool callbacks without awaiting them.
+                    // If a tool callback starts typing after the run finalized, we can end up with
+                    // a typing loop that never sees a matching markRunComplete(). Track and drain.
+                    const task = (async () => {
+                      const { text, skip } = normalizeStreamingText(payload);
+                      if (skip) {
+                        return;
+                      }
+                      await params.typingSignals.signalTextDelta(text);
+                      await onToolResult({
+                        text,
+                        mediaUrls: payload.mediaUrls,
+                      });
+                    })()
+                      .catch((err) => {
+                        logVerbose(`tool result delivery failed: ${String(err)}`);
+                      })
+                      .finally(() => {
+                        params.pendingToolTasks.delete(task);
+                      });
+                    params.pendingToolTasks.add(task);
+                  }
+                : undefined,
+            });
+          };
+        })(),
       });
       runResult = fallbackResult.result;
       fallbackProvider = fallbackResult.provider;

@@ -10,8 +10,11 @@
 
 import type { OpenClawConfig } from "../../config/config.js";
 import type { OrchestrationResult, ResponseHints } from "../../integrations/orchestrator.js";
+import type { ContentItem } from "../../learning/recommendations.js";
+import type { OllamaModelInfo } from "../../providers/ollama/dynamic-model-switch.js";
 import type { TemplateContext } from "../templating.js";
 import { processMessage as orchestrateMessage } from "../../integrations/orchestrator.js";
+import { getTopInterests } from "../../learning/preference-engine.js";
 
 /**
  * Configuration for the orchestrator integration.
@@ -55,6 +58,58 @@ function resolveOrchestratorIntegrationConfig(
 }
 
 /**
+ * Resolve Ollama model info from the OpenClaw config.
+ * Extracts model definitions from the providers config and converts
+ * them to the OllamaModelInfo shape the orchestrator expects.
+ */
+function resolveOllamaModelsFromConfig(cfg: OpenClawConfig | undefined): OllamaModelInfo[] {
+  const providers = (cfg as Record<string, unknown> | undefined)?.models as
+    | Record<string, unknown>
+    | undefined;
+  const providerMap = providers?.providers as Record<string, unknown> | undefined;
+  const ollama = providerMap?.ollama as { models?: Array<Record<string, unknown>> } | undefined;
+  if (!ollama?.models || ollama.models.length === 0) {
+    return [];
+  }
+  return ollama.models.map((m) => {
+    let id = "unknown";
+    if (typeof m.id === "string") {
+      id = m.id;
+    } else if (typeof m.name === "string") {
+      id = m.name;
+    }
+    return {
+      name: id,
+      size: 0,
+      parameterSize: undefined,
+      family: undefined,
+      isReasoning:
+        id.toLowerCase().includes("r1") ||
+        id.toLowerCase().includes("reasoning") ||
+        m.reasoning === true,
+    };
+  });
+}
+
+/**
+ * Build a content catalog from user interests for recommendation generation.
+ * Uses the learning module's tracked interests to create content items
+ * the orchestrator can recommend against.
+ */
+function buildContentCatalog(userId: string): ContentItem[] {
+  const interests = getTopInterests(userId, 10);
+  if (interests.length === 0) {
+    return [];
+  }
+  return interests.map((topic) => ({
+    id: `interest-${topic}`,
+    title: topic,
+    summary: `Content related to ${topic}`,
+    topics: [topic],
+  }));
+}
+
+/**
  * Process a user message through the orchestrator pipeline.
  * Returns integration results that can be applied to response generation.
  *
@@ -76,12 +131,16 @@ export function integrateOrchestratorForMessage(
   }
 
   try {
+    const userId = sessionCtx.SenderId ?? "unknown";
+    const ollamaModels = resolveOllamaModelsFromConfig(cfg);
+    const contentCatalog = integrationCfg.enableLearning ? buildContentCatalog(userId) : undefined;
+
     const orchestrationResult = orchestrateMessage(userMessage, {
-      userId: sessionCtx.UserId ?? "unknown",
+      userId,
       sessionKey,
       channel: sessionCtx.OriginatingChannel ?? sessionCtx.Provider,
-      ollamaModels: undefined, // TODO: pass when available
-      contentCatalog: undefined, // TODO: wire learning system
+      ollamaModels: ollamaModels.length > 0 ? ollamaModels : undefined,
+      contentCatalog: contentCatalog && contentCatalog.length > 0 ? contentCatalog : undefined,
     });
 
     const hints = orchestrationResult.responseHints;
