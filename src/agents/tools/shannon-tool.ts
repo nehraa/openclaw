@@ -11,14 +11,10 @@
  */
 
 import { Type } from "@sinclair/typebox";
-import { execFile } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { promisify } from "node:util";
 import { stringEnum } from "../schema/typebox.js";
 import { type AnyAgentTool, jsonResult, readStringParam } from "./common.js";
-
-const execFileAsync = promisify(execFile);
 
 const SHANNON_ACTIONS = [
   "analyze_file",
@@ -32,7 +28,8 @@ const ShannonToolSchema = Type.Object({
   path: Type.String({ description: "Absolute path to file or directory to analyze." }),
   language: Type.Optional(
     Type.String({
-      description: "Programming language hint (e.g. 'typescript', 'python'). Auto-detected if omitted.",
+      description:
+        "Programming language hint (e.g. 'typescript', 'python'). Auto-detected if omitted.",
     }),
   ),
   max_depth: Type.Optional(
@@ -46,7 +43,9 @@ const ShannonToolSchema = Type.Object({
 
 /** Compute Shannon entropy of a string. */
 function shannonEntropy(text: string): number {
-  if (text.length === 0) return 0;
+  if (text.length === 0) {
+    return 0;
+  }
   const freq = new Map<string, number>();
   for (const ch of text) {
     freq.set(ch, (freq.get(ch) ?? 0) + 1);
@@ -130,16 +129,25 @@ function detectLanguage(filePath: string): string {
 }
 
 function qualityLabel(entropy: number): string {
-  if (entropy < 3.0) return "low-complexity";
-  if (entropy < 4.5) return "moderate-complexity";
-  if (entropy < 5.5) return "typical-code";
-  if (entropy < 6.5) return "dense-code";
+  if (entropy < 3.0) {
+    return "low-complexity";
+  }
+  if (entropy < 4.5) {
+    return "moderate-complexity";
+  }
+  if (entropy < 5.5) {
+    return "typical-code";
+  }
+  if (entropy < 6.5) {
+    return "dense-code";
+  }
   return "very-dense";
 }
 
 export function createShannonTool(): AnyAgentTool {
   const tool: AnyAgentTool = {
     name: "shannon",
+    label: "Shannon Code Analysis",
     description: [
       "Analyze source code using Shannon entropy and information theory metrics.",
       "Actions: analyze_file (single file metrics), analyze_directory (batch analysis),",
@@ -147,8 +155,10 @@ export function createShannonTool(): AnyAgentTool {
       "Returns entropy, complexity, vocabulary density, and quality indicators.",
     ].join(" "),
     parameters: ShannonToolSchema,
-    execute: async (params: Record<string, unknown>) => {
-      const action = readStringParam(params, "action", { required: true }) as (typeof SHANNON_ACTIONS)[number];
+    execute: async (_toolCallId, params: Record<string, unknown>) => {
+      const action = readStringParam(params, "action", {
+        required: true,
+      }) as (typeof SHANNON_ACTIONS)[number];
       const targetPath = readStringParam(params, "path", { required: true });
 
       try {
@@ -186,7 +196,9 @@ export function createShannonTool(): AnyAgentTool {
             }> = [];
 
             function walk(dir: string, depth: number) {
-              if (depth > maxDepth) return;
+              if (depth > maxDepth) {
+                return;
+              }
               let entries: fs.Dirent[];
               try {
                 entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -194,13 +206,17 @@ export function createShannonTool(): AnyAgentTool {
                 return;
               }
               for (const entry of entries) {
-                if (entry.name.startsWith(".") || entry.name === "node_modules") continue;
+                if (entry.name.startsWith(".") || entry.name === "node_modules") {
+                  continue;
+                }
                 const full = path.join(dir, entry.name);
                 if (entry.isDirectory()) {
                   walk(full, depth + 1);
                 } else if (entry.isFile()) {
                   const lang = detectLanguage(full);
-                  if (lang === "unknown") continue;
+                  if (lang === "unknown") {
+                    continue;
+                  }
                   try {
                     const content = fs.readFileSync(full, "utf-8");
                     const metrics = analyzeCode(content);
@@ -222,7 +238,8 @@ export function createShannonTool(): AnyAgentTool {
 
             const avgEntropy =
               results.length > 0
-                ? Math.round((results.reduce((s, r) => s + r.entropy, 0) / results.length) * 1000) / 1000
+                ? Math.round((results.reduce((s, r) => s + r.entropy, 0) / results.length) * 1000) /
+                  1000
                 : 0;
             const totalCodeLines = results.reduce((s, r) => s + r.codeLines, 0);
 
@@ -254,7 +271,7 @@ export function createShannonTool(): AnyAgentTool {
             // Find hotspots (high entropy lines)
             const hotspots = lineEntropies
               .filter((le) => le.entropy > 4.5 && le.length > 20)
-              .sort((a, b) => b.entropy - a.entropy)
+              .toSorted((a, b) => b.entropy - a.entropy)
               .slice(0, 10);
 
             const overall = shannonEntropy(content);
@@ -268,7 +285,8 @@ export function createShannonTool(): AnyAgentTool {
               hotspots,
               entropyDistribution: {
                 low: lineEntropies.filter((le) => le.entropy < 3.0).length,
-                moderate: lineEntropies.filter((le) => le.entropy >= 3.0 && le.entropy < 4.5).length,
+                moderate: lineEntropies.filter((le) => le.entropy >= 3.0 && le.entropy < 4.5)
+                  .length,
                 high: lineEntropies.filter((le) => le.entropy >= 4.5).length,
               },
             });
@@ -302,7 +320,9 @@ export function createShannonTool(): AnyAgentTool {
             let totalLines = 0;
 
             function summarize(dir: string, depth: number) {
-              if (depth > 3) return;
+              if (depth > 3) {
+                return;
+              }
               let entries: fs.Dirent[];
               try {
                 entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -310,7 +330,9 @@ export function createShannonTool(): AnyAgentTool {
                 return;
               }
               for (const entry of entries) {
-                if (entry.name.startsWith(".") || entry.name === "node_modules") continue;
+                if (entry.name.startsWith(".") || entry.name === "node_modules") {
+                  continue;
+                }
                 const full = path.join(dir, entry.name);
                 if (entry.isDirectory()) {
                   summarize(full, depth + 1);
@@ -344,7 +366,7 @@ export function createShannonTool(): AnyAgentTool {
           }
 
           default:
-            return jsonResult({ error: `Unknown action: ${action}` });
+            return jsonResult({ error: `Unknown action: ${String(action)}` });
         }
       } catch (err) {
         return jsonResult({

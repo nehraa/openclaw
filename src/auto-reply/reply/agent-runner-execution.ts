@@ -35,11 +35,11 @@ import { stripHeartbeatToken } from "../heartbeat.js";
 import { isSilentReplyText, SILENT_REPLY_TOKEN } from "../tokens.js";
 import { buildThreadingToolContext, resolveEnforceFinalTag } from "./agent-runner-utils.js";
 import { createBlockReplyPayloadKey, type BlockReplyPipeline } from "./block-reply-pipeline.js";
-import { parseReplyDirectives } from "./reply-directives.js";
 import {
   integrateOrchestratorForMessage,
   applyOrchestratorHints,
 } from "./orchestrator-integration.js";
+import { parseReplyDirectives } from "./reply-directives.js";
 import { applyReplyTagsToPayload, isRenderablePayload } from "./reply-payloads.js";
 
 export type AgentRunLoopResult =
@@ -167,12 +167,15 @@ export async function runAgentTurnWithFallback(params: {
 
           // Wire orchestrator (emotional context + learning + personalization)
           // into the system prompt so responses reflect user emotional state and preferences.
-          const orchestration = integrateOrchestratorForMessage(
-            params.commandBody,
-            params.sessionKey ?? params.followupRun.run.sessionKey,
-            params.followupRun.run.config,
-            params.sessionCtx,
-          );
+          const resolvedSessionKey = params.sessionKey ?? params.followupRun.run.sessionKey;
+          const orchestration = resolvedSessionKey
+            ? integrateOrchestratorForMessage(
+                params.commandBody,
+                resolvedSessionKey,
+                params.followupRun.run.config,
+                params.sessionCtx,
+              )
+            : undefined;
           const enrichedExtraSystemPrompt = orchestration
             ? applyOrchestratorHints(
                 params.followupRun.run.extraSystemPrompt ?? "",
@@ -207,7 +210,8 @@ export async function runAgentTurnWithFallback(params: {
                   thinkLevel: params.followupRun.run.thinkLevel,
                   timeoutMs: params.followupRun.run.timeoutMs,
                   runId,
-                  extraSystemPrompt: enrichedExtraSystemPrompt ?? params.followupRun.run.extraSystemPrompt,
+                  extraSystemPrompt:
+                    enrichedExtraSystemPrompt ?? params.followupRun.run.extraSystemPrompt,
                   ownerNumbers: params.followupRun.run.ownerNumbers,
                   cliSessionId,
                   images: params.opts?.images,

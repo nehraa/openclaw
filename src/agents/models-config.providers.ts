@@ -432,20 +432,20 @@ function buildBitNetProvider(): ProviderConfig {
       {
         id: "BitNet-b1.58-2B-4T",
         name: "BitNet b1.58 2B 4T",
+        reasoning: false,
         input: ["text"],
         cost: BITNET_DEFAULT_COST,
         contextWindow: BITNET_DEFAULT_CONTEXT_WINDOW,
         maxTokens: BITNET_DEFAULT_MAX_TOKENS,
-        params: { streaming: false },
       },
       {
         id: "Llama3-8B-1.58-100B-tokens",
         name: "Llama3 8B BitNet 1.58",
+        reasoning: false,
         input: ["text"],
         cost: BITNET_DEFAULT_COST,
         contextWindow: BITNET_DEFAULT_CONTEXT_WINDOW,
         maxTokens: BITNET_DEFAULT_MAX_TOKENS,
-        params: { streaming: false },
       },
     ],
   };

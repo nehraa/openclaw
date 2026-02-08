@@ -77,7 +77,7 @@ export function integrateOrchestratorForMessage(
 
   try {
     const orchestrationResult = orchestrateMessage(userMessage, {
-      userId: sessionCtx.UserId ?? "unknown",
+      userId: sessionCtx.SenderId ?? "unknown",
       sessionKey,
       channel: sessionCtx.OriginatingChannel ?? sessionCtx.Provider,
       ollamaModels: undefined, // TODO: pass when available

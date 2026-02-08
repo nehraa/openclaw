@@ -24,7 +24,9 @@ const N8N_ACTIONS = [
 
 const N8nToolSchema = Type.Object({
   action: stringEnum(N8N_ACTIONS),
-  workflow_id: Type.Optional(Type.String({ description: "Workflow ID (for get/activate/deactivate/execute/delete)." })),
+  workflow_id: Type.Optional(
+    Type.String({ description: "Workflow ID (for get/activate/deactivate/execute/delete)." }),
+  ),
   workflow_json: Type.Optional(
     Type.String({
       description:
@@ -32,7 +34,9 @@ const N8nToolSchema = Type.Object({
     }),
   ),
   name: Type.Optional(Type.String({ description: "Filter or name for the workflow." })),
-  limit: Type.Optional(Type.Number({ description: "Max number of results to return.", minimum: 1, maximum: 100 })),
+  limit: Type.Optional(
+    Type.Number({ description: "Max number of results to return.", minimum: 1, maximum: 100 }),
+  ),
 });
 
 type N8nConfig = {
@@ -41,11 +45,14 @@ type N8nConfig = {
 };
 
 function resolveN8nConfig(cfg: OpenClawConfig | undefined): N8nConfig | undefined {
-  const n8nCfg = (cfg as any)?.tools?.n8n;
-  if (!n8nCfg?.baseUrl || !n8nCfg?.apiKey) {
+  const n8nCfg = (cfg as Record<string, unknown> | undefined)?.tools as
+    | Record<string, unknown>
+    | undefined;
+  const n8n = n8nCfg?.n8n as Record<string, string> | undefined;
+  if (!n8n?.baseUrl || !n8n?.apiKey) {
     return undefined;
   }
-  return { baseUrl: n8nCfg.baseUrl.replace(/\/+$/, ""), apiKey: n8nCfg.apiKey };
+  return { baseUrl: n8n.baseUrl.replace(/\/+$/, ""), apiKey: n8n.apiKey };
 }
 
 async function n8nFetch(
@@ -94,7 +101,8 @@ const BUILTIN_TEMPLATES: Array<{ name: string; description: string; category: st
   },
   {
     name: "AI Chatbot Webhook",
-    description: "Accepts chat messages via webhook, processes them with an AI node, and returns a response.",
+    description:
+      "Accepts chat messages via webhook, processes them with an AI node, and returns a response.",
     category: "ai",
   },
   {
@@ -104,7 +112,8 @@ const BUILTIN_TEMPLATES: Array<{ name: string; description: string; category: st
   },
   {
     name: "Error Alert Pipeline",
-    description: "Monitors an error tracking webhook and sends alerts to Slack/email when critical errors occur.",
+    description:
+      "Monitors an error tracking webhook and sends alerts to Slack/email when critical errors occur.",
     category: "monitoring",
   },
   {
@@ -117,6 +126,7 @@ const BUILTIN_TEMPLATES: Array<{ name: string; description: string; category: st
 export function createN8nTool(options?: { config?: OpenClawConfig }): AnyAgentTool {
   const tool: AnyAgentTool = {
     name: "n8n",
+    label: "n8n Automation",
     description: [
       "Create, manage, and execute n8n automation workflows.",
       "Actions: list_workflows, get_workflow, create_workflow, activate_workflow,",
@@ -126,8 +136,10 @@ export function createN8nTool(options?: { config?: OpenClawConfig }): AnyAgentTo
       "Use list_templates to see built-in starter templates.",
     ].join(" "),
     parameters: N8nToolSchema,
-    execute: async (params: Record<string, unknown>) => {
-      const action = readStringParam(params, "action", { required: true }) as (typeof N8N_ACTIONS)[number];
+    execute: async (_toolCallId, params: Record<string, unknown>) => {
+      const action = readStringParam(params, "action", {
+        required: true,
+      }) as (typeof N8N_ACTIONS)[number];
 
       // list_templates doesn't require n8n connectivity
       if (action === "list_templates") {
@@ -202,7 +214,7 @@ export function createN8nTool(options?: { config?: OpenClawConfig }): AnyAgentTo
             return jsonResult(data);
           }
           default:
-            return jsonResult({ error: `Unknown action: ${action}` });
+            return jsonResult({ error: `Unknown action: ${String(action)}` });
         }
       } catch (err) {
         return jsonResult({
