@@ -172,17 +172,25 @@ export function createShannonTool(options?: { sandboxRoot?: string }): AnyAgentT
       }) as (typeof SHANNON_ACTIONS)[number];
       const rawPath = readStringParam(params, "path", { required: true });
 
-      // Reject absolute paths and path traversal attempts for sandbox safety
-      if (path.isAbsolute(rawPath) || rawPath.includes("..")) {
+      // Reject absolute paths for sandbox safety
+      if (path.isAbsolute(rawPath)) {
         return jsonResult({
-          error:
-            "Absolute paths and '..' traversal are not allowed. Use a path relative to the workspace root.",
+          error: "Absolute paths are not allowed. Use a path relative to the workspace root.",
         });
       }
 
-      // Resolve against the sandbox/workspace root
-      const root = options?.sandboxRoot ?? process.cwd();
+      // Resolve against the sandbox/workspace root and verify it stays within
+      const root = path.resolve(options?.sandboxRoot ?? process.cwd());
       const targetPath = path.resolve(root, rawPath);
+      const normalizedTarget = path.normalize(targetPath);
+
+      // Ensure the resolved path doesn't escape the sandbox root
+      if (!normalizedTarget.startsWith(root + path.sep) && normalizedTarget !== root) {
+        return jsonResult({
+          error:
+            "Path traversal is not allowed. The resolved path must stay within the workspace root.",
+        });
+      }
 
       try {
         switch (action) {

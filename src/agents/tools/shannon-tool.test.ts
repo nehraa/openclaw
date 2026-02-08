@@ -58,18 +58,20 @@ export { hello };
     });
     const content = result.content[0];
     const parsed = JSON.parse((content as { text: string }).text);
-    expect(parsed.error).toContain("not allowed");
+    expect(parsed.error).toContain("Absolute paths");
   });
 
   it("rejects path traversal", async () => {
-    const tool = createShannonTool();
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "shannon-test-"));
+    const tool = createShannonTool({ sandboxRoot: tmpDir });
     const result = await tool.execute("test-call-id", {
       action: "analyze_file",
       path: "../../../etc/passwd",
     });
     const content = result.content[0];
     const parsed = JSON.parse((content as { text: string }).text);
-    expect(parsed.error).toContain("not allowed");
+    expect(parsed.error).toContain("traversal");
+    fs.rmSync(tmpDir, { recursive: true });
   });
 
   it("generates entropy report with hotspots", async () => {
