@@ -35,6 +35,22 @@ Choose your path:
 - **[Voice Features Quick Start](https://docs.openclaw.ai/start/voice-quickstart)** - Natural voice & TTS setup
 - **[Getting Started](https://docs.openclaw.ai/start/getting-started)** - Traditional CLI setup
 
+### One-Command Installers
+
+```bash
+# macOS App (native menu bar + voice wake)
+./scripts/setup-mac-app.sh
+
+# Docker (containerized gateway)
+./docker-setup.sh
+
+# Voice Features (interactive configurator)
+./scripts/setup-voice.sh
+
+# CLI (traditional)
+openclaw onboard --install-daemon
+```
+
 Preferred setup: run the onboarding wizard (`openclaw onboard`). Works on **macOS, Linux, and Windows (via WSL2)**.
 
 **Subscriptions (OAuth):**
