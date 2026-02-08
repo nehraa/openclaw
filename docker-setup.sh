@@ -177,38 +177,124 @@ docker build \
   -f "$ROOT_DIR/Dockerfile" \
   "$ROOT_DIR"
 
-echo ""
+cat <<'BANNER'
+
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║   🦞 OpenClaw Docker Setup                                    ║
+║                                                               ║
+║   This wizard will:                                           ║
+║   1. Build the Docker image                                   ║
+║   2. Run interactive onboarding                               ║
+║   3. Start the gateway service                                ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+BANNER
+
 echo "==> Onboarding (interactive)"
-echo "When prompted:"
-echo "  - Gateway bind: lan"
-echo "  - Gateway auth: token"
-echo "  - Gateway token: $OPENCLAW_GATEWAY_TOKEN"
-echo "  - Tailscale exposure: Off"
-echo "  - Install Gateway daemon: No"
 echo ""
+echo "📝 Quick answers for the wizard:"
+echo "   ┌─────────────────────────────────────────────────────┐"
+echo "   │ Gateway bind:          lan                          │"
+echo "   │ Gateway auth:          token                        │"
+echo "   │ Gateway token:         (auto-generated below)       │"
+echo "   │ Tailscale exposure:    Off                          │"
+echo "   │ Install daemon:        No                           │"
+echo "   └─────────────────────────────────────────────────────┘"
+echo ""
+echo "🔑 Your gateway token: $OPENCLAW_GATEWAY_TOKEN"
+echo "   (saved to .env - keep it secure!)"
+echo ""
+echo "Press Enter to start onboarding..."
+read -r
+
 docker compose "${COMPOSE_ARGS[@]}" run --rm openclaw-cli onboard --no-install-daemon
 
-echo ""
-echo "==> Provider setup (optional)"
-echo "WhatsApp (QR):"
-echo "  ${COMPOSE_HINT} run --rm openclaw-cli channels login"
-echo "Telegram (bot token):"
-echo "  ${COMPOSE_HINT} run --rm openclaw-cli channels add --channel telegram --token <token>"
-echo "Discord (bot token):"
-echo "  ${COMPOSE_HINT} run --rm openclaw-cli channels add --channel discord --token <token>"
-echo "Docs: https://docs.openclaw.ai/channels"
+cat <<'ONBOARDING_COMPLETE'
 
-echo ""
+╔═══════════════════════════════════════════════════════════════╗
+║   ✅ Onboarding Complete!                                     ║
+╚═══════════════════════════════════════════════════════════════╝
+
+ONBOARDING_COMPLETE
+
 echo "==> Starting gateway"
 docker compose "${COMPOSE_ARGS[@]}" up -d openclaw-gateway
 
 echo ""
-echo "Gateway running with host port mapping."
-echo "Access from tailnet devices via the host's tailnet IP."
-echo "Config: $OPENCLAW_CONFIG_DIR"
-echo "Workspace: $OPENCLAW_WORKSPACE_DIR"
-echo "Token: $OPENCLAW_GATEWAY_TOKEN"
-echo ""
-echo "Commands:"
-echo "  ${COMPOSE_HINT} logs -f openclaw-gateway"
-echo "  ${COMPOSE_HINT} exec openclaw-gateway node dist/index.js health --token \"$OPENCLAW_GATEWAY_TOKEN\""
+echo "⏳ Waiting for gateway to start..."
+sleep 3
+
+cat <<SUCCESS
+
+╔═══════════════════════════════════════════════════════════════╗
+║   🎉 OpenClaw is Running!                                     ║
+╚═══════════════════════════════════════════════════════════════╝
+
+📍 Access Points:
+   Web UI:     http://127.0.0.1:18789/
+   Token:      $OPENCLAW_GATEWAY_TOKEN
+
+📂 Storage:
+   Config:     $OPENCLAW_CONFIG_DIR
+   Workspace:  $OPENCLAW_WORKSPACE_DIR
+
+📞 Optional: Add Messaging Channels
+
+   WhatsApp (QR code login):
+     ${COMPOSE_HINT} run --rm openclaw-cli channels login
+
+   Telegram (get bot token from @BotFather):
+     ${COMPOSE_HINT} run --rm openclaw-cli channels add --channel telegram --token YOUR_BOT_TOKEN
+
+   Discord (get bot token from Discord Developer Portal):
+     ${COMPOSE_HINT} run --rm openclaw-cli channels add --channel discord --token YOUR_BOT_TOKEN
+
+   Slack (get token from Slack App settings):
+     ${COMPOSE_HINT} run --rm openclaw-cli channels add --channel slack --token xoxb-YOUR-TOKEN
+
+   📚 Full guide: https://docs.openclaw.ai/channels
+
+🎙️  Optional: Enable Natural Voice
+
+   Edit ~/.openclaw/settings/config.json and add:
+
+   {
+     "messages": {
+       "tts": {
+         "provider": "elevenlabs",
+         "auto": "always",
+         "elevenlabs": {
+           "apiKey": "YOUR_ELEVENLABS_KEY",
+           "voiceId": "pMsXgVXv3BLzUgSXRplE"
+         }
+       }
+     }
+   }
+
+   Then: ${COMPOSE_HINT} restart openclaw-gateway
+
+   📚 Voice guide: https://docs.openclaw.ai/start/voice-quickstart
+
+🔧 Useful Commands:
+
+   View logs:
+     ${COMPOSE_HINT} logs -f openclaw-gateway
+
+   Check health:
+     ${COMPOSE_HINT} exec openclaw-gateway node dist/index.js health --token "$OPENCLAW_GATEWAY_TOKEN"
+
+   Send test message:
+     ${COMPOSE_HINT} run --rm openclaw-cli agent --message "Hello from Docker!" --thinking low
+
+   Stop gateway:
+     ${COMPOSE_HINT} down
+
+   Restart gateway:
+     ${COMPOSE_HINT} restart openclaw-gateway
+
+📖 Documentation: https://docs.openclaw.ai/start/docker-quickstart
+💬 Support: https://discord.gg/clawd
+
+SUCCESS
