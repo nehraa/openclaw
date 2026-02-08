@@ -429,7 +429,7 @@ const PUBLIC_API_CATALOG: PublicApiEntry[] = [
   },
   {
     name: "IP-API",
-    description: "IP geolocation",
+    description: "IP geolocation (⚠️ HTTP only, use HTTPS alternatives for sensitive data)",
     category: "Geocoding",
     auth: "No",
     https: false,

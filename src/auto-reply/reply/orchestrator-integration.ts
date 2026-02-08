@@ -72,7 +72,12 @@ function resolveOllamaModelsFromConfig(cfg: OpenClawConfig | undefined): OllamaM
     return [];
   }
   return ollama.models.map((m) => {
-    const id = typeof m.id === "string" ? m.id : typeof m.name === "string" ? m.name : "unknown";
+    let id = "unknown";
+    if (typeof m.id === "string") {
+      id = m.id;
+    } else if (typeof m.name === "string") {
+      id = m.name;
+    }
     return {
       name: id,
       size: 0,
