@@ -80,6 +80,16 @@ const OLLAMA_DEFAULT_COST = {
   cacheWrite: 0,
 };
 
+const BITNET_BASE_URL = "http://127.0.0.1:8080/v1";
+const BITNET_DEFAULT_CONTEXT_WINDOW = 4096;
+const BITNET_DEFAULT_MAX_TOKENS = 2048;
+const BITNET_DEFAULT_COST = {
+  input: 0,
+  output: 0,
+  cacheRead: 0,
+  cacheWrite: 0,
+};
+
 export const QIANFAN_BASE_URL = "https://qianfan.baidubce.com/v2";
 export const QIANFAN_DEFAULT_MODEL_ID = "deepseek-v3.2";
 const QIANFAN_DEFAULT_CONTEXT_WINDOW = 98304;
@@ -414,6 +424,33 @@ async function buildOllamaProvider(): Promise<ProviderConfig> {
   };
 }
 
+function buildBitNetProvider(): ProviderConfig {
+  return {
+    baseUrl: BITNET_BASE_URL,
+    api: "openai-completions",
+    models: [
+      {
+        id: "BitNet-b1.58-2B-4T",
+        name: "BitNet b1.58 2B 4T",
+        input: ["text"],
+        cost: BITNET_DEFAULT_COST,
+        contextWindow: BITNET_DEFAULT_CONTEXT_WINDOW,
+        maxTokens: BITNET_DEFAULT_MAX_TOKENS,
+        params: { streaming: false },
+      },
+      {
+        id: "Llama3-8B-1.58-100B-tokens",
+        name: "Llama3 8B BitNet 1.58",
+        input: ["text"],
+        cost: BITNET_DEFAULT_COST,
+        contextWindow: BITNET_DEFAULT_CONTEXT_WINDOW,
+        maxTokens: BITNET_DEFAULT_MAX_TOKENS,
+        params: { streaming: false },
+      },
+    ],
+  };
+}
+
 export function buildQianfanProvider(): ProviderConfig {
   return {
     baseUrl: QIANFAN_BASE_URL,
@@ -541,6 +578,14 @@ export async function resolveImplicitProviders(params: {
     resolveApiKeyFromProfiles({ provider: "qianfan", store: authStore });
   if (qianfanKey) {
     providers.qianfan = { ...buildQianfanProvider(), apiKey: qianfanKey };
+  }
+
+  // BitNet provider - local 1-bit LLM, add if explicitly configured
+  const bitnetKey =
+    resolveEnvApiKeyVarName("bitnet") ??
+    resolveApiKeyFromProfiles({ provider: "bitnet", store: authStore });
+  if (bitnetKey) {
+    providers.bitnet = { ...buildBitNetProvider(), apiKey: bitnetKey };
   }
 
   return providers;

@@ -10,12 +10,14 @@ import { createCronTool } from "./tools/cron-tool.js";
 import { createGatewayTool } from "./tools/gateway-tool.js";
 import { createImageTool } from "./tools/image-tool.js";
 import { createMessageTool } from "./tools/message-tool.js";
+import { createN8nTool } from "./tools/n8n-tool.js";
 import { createNodesTool } from "./tools/nodes-tool.js";
 import { createSessionStatusTool } from "./tools/session-status-tool.js";
 import { createSessionsHistoryTool } from "./tools/sessions-history-tool.js";
 import { createSessionsListTool } from "./tools/sessions-list-tool.js";
 import { createSessionsSendTool } from "./tools/sessions-send-tool.js";
 import { createSessionsSpawnTool } from "./tools/sessions-spawn-tool.js";
+import { createShannonTool } from "./tools/shannon-tool.js";
 import { createTtsTool } from "./tools/tts-tool.js";
 import { createWebFetchTool, createWebSearchTool } from "./tools/web-tools.js";
 
@@ -146,6 +148,8 @@ export function createOpenClawTools(options?: {
     ...(webSearchTool ? [webSearchTool] : []),
     ...(webFetchTool ? [webFetchTool] : []),
     ...(imageTool ? [imageTool] : []),
+    createN8nTool({ config: options?.config }),
+    createShannonTool(),
   ];
 
   const pluginTools = resolvePluginTools({

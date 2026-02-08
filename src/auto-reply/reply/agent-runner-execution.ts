@@ -36,6 +36,10 @@ import { isSilentReplyText, SILENT_REPLY_TOKEN } from "../tokens.js";
 import { buildThreadingToolContext, resolveEnforceFinalTag } from "./agent-runner-utils.js";
 import { createBlockReplyPayloadKey, type BlockReplyPipeline } from "./block-reply-pipeline.js";
 import { parseReplyDirectives } from "./reply-directives.js";
+import {
+  integrateOrchestratorForMessage,
+  applyOrchestratorHints,
+} from "./orchestrator-integration.js";
 import { applyReplyTagsToPayload, isRenderablePayload } from "./reply-payloads.js";
 
 export type AgentRunLoopResult =
@@ -161,6 +165,21 @@ export async function runAgentTurnWithFallback(params: {
             thinkLevel: params.followupRun.run.thinkLevel,
           });
 
+          // Wire orchestrator (emotional context + learning + personalization)
+          // into the system prompt so responses reflect user emotional state and preferences.
+          const orchestration = integrateOrchestratorForMessage(
+            params.commandBody,
+            params.sessionKey ?? params.followupRun.run.sessionKey,
+            params.followupRun.run.config,
+            params.sessionCtx,
+          );
+          const enrichedExtraSystemPrompt = orchestration
+            ? applyOrchestratorHints(
+                params.followupRun.run.extraSystemPrompt ?? "",
+                orchestration.responseHints,
+              )
+            : params.followupRun.run.extraSystemPrompt;
+
           if (isCliProvider(provider, params.followupRun.run.config)) {
             const startedAt = Date.now();
             emitAgentEvent({
@@ -188,7 +207,7 @@ export async function runAgentTurnWithFallback(params: {
                   thinkLevel: params.followupRun.run.thinkLevel,
                   timeoutMs: params.followupRun.run.timeoutMs,
                   runId,
-                  extraSystemPrompt: params.followupRun.run.extraSystemPrompt,
+                  extraSystemPrompt: enrichedExtraSystemPrompt ?? params.followupRun.run.extraSystemPrompt,
                   ownerNumbers: params.followupRun.run.ownerNumbers,
                   cliSessionId,
                   images: params.opts?.images,
@@ -281,7 +300,7 @@ export async function runAgentTurnWithFallback(params: {
             config: params.followupRun.run.config,
             skillsSnapshot: params.followupRun.run.skillsSnapshot,
             prompt: params.commandBody,
-            extraSystemPrompt: params.followupRun.run.extraSystemPrompt,
+            extraSystemPrompt: enrichedExtraSystemPrompt,
             ownerNumbers: params.followupRun.run.ownerNumbers,
             enforceFinalTag: resolveEnforceFinalTag(params.followupRun.run, provider),
             provider,
