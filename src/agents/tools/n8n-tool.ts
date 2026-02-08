@@ -2,13 +2,17 @@
  * n8n automation tool – lets the agent create, list, run, and manage
  * n8n workflows.  Communicates with a running n8n instance via its REST API.
  *
- * The n8n base URL and API key are read from `config.tools.n8n`.
+ * The n8n base URL and API key are read from `config.tools.n8n` or
+ * from the environment variables N8N_BASE_URL and N8N_API_KEY.
  */
 
 import { Type } from "@sinclair/typebox";
 import type { OpenClawConfig } from "../../config/config.js";
 import { stringEnum } from "../schema/typebox.js";
 import { type AnyAgentTool, jsonResult, readStringParam } from "./common.js";
+
+/** Default timeout for n8n API requests (30 seconds). */
+const N8N_FETCH_TIMEOUT_MS = 30_000;
 
 const N8N_ACTIONS = [
   "list_workflows",
@@ -33,7 +37,6 @@ const N8nToolSchema = Type.Object({
         "Full n8n workflow JSON as a string. Used by create_workflow to define the workflow.",
     }),
   ),
-  name: Type.Optional(Type.String({ description: "Filter or name for the workflow." })),
   limit: Type.Optional(
     Type.Number({ description: "Max number of results to return.", minimum: 1, maximum: 100 }),
   ),
@@ -44,15 +47,22 @@ type N8nConfig = {
   apiKey: string;
 };
 
+/**
+ * Resolve n8n configuration from the OpenClaw config or environment variables.
+ * Checks config.tools.n8n first, then falls back to N8N_BASE_URL / N8N_API_KEY env vars.
+ */
 function resolveN8nConfig(cfg: OpenClawConfig | undefined): N8nConfig | undefined {
   const n8nCfg = (cfg as Record<string, unknown> | undefined)?.tools as
     | Record<string, unknown>
     | undefined;
   const n8n = n8nCfg?.n8n as Record<string, string> | undefined;
-  if (!n8n?.baseUrl || !n8n?.apiKey) {
+
+  const baseUrl = n8n?.baseUrl ?? process.env.N8N_BASE_URL;
+  const apiKey = n8n?.apiKey ?? process.env.N8N_API_KEY;
+  if (!baseUrl || !apiKey) {
     return undefined;
   }
-  return { baseUrl: n8n.baseUrl.replace(/\/+$/, ""), apiKey: n8n.apiKey };
+  return { baseUrl: baseUrl.replace(/\/+$/, ""), apiKey };
 }
 
 async function n8nFetch(
@@ -69,6 +79,7 @@ async function n8nFetch(
       Accept: "application/json",
     },
     body: opts?.body ? JSON.stringify(opts.body) : undefined,
+    signal: AbortSignal.timeout(N8N_FETCH_TIMEOUT_MS),
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
@@ -149,7 +160,9 @@ export function createN8nTool(options?: { config?: OpenClawConfig }): AnyAgentTo
       const cfg = resolveN8nConfig(options?.config);
       if (!cfg) {
         return jsonResult({
-          error: "n8n is not configured. Set tools.n8n.baseUrl and tools.n8n.apiKey in config.",
+          error:
+            "n8n is not configured. Set tools.n8n.baseUrl and tools.n8n.apiKey in config, " +
+            "or set N8N_BASE_URL and N8N_API_KEY environment variables.",
         });
       }
 

@@ -8,9 +8,19 @@ import {
 
 describe("bitnet-provider", () => {
   it("creates default connection config", () => {
-    const config = createBitNetConnection();
-    expect(config.baseUrl).toBe("http://127.0.0.1:8080");
-    expect(config.timeoutMs).toBe(10000);
+    const previousBitnetHost = process.env.BITNET_HOST;
+    delete process.env.BITNET_HOST;
+    try {
+      const config = createBitNetConnection();
+      expect(config.baseUrl).toBe("http://127.0.0.1:8080");
+      expect(config.timeoutMs).toBe(10000);
+    } finally {
+      if (previousBitnetHost === undefined) {
+        delete process.env.BITNET_HOST;
+      } else {
+        process.env.BITNET_HOST = previousBitnetHost;
+      }
+    }
   });
 
   it("respects custom connection options", () => {

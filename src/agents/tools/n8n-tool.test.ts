@@ -30,23 +30,49 @@ describe("n8n-tool", () => {
   });
 
   it("returns error when n8n is not configured", async () => {
-    const tool = createN8nTool();
-    const result = await tool.execute("test-call-id", { action: "list_workflows" });
-    const content = result.content[0];
-    expect(content.type).toBe("text");
-    const parsed = JSON.parse((content as { text: string }).text);
-    expect(parsed.error).toContain("not configured");
+    const prevUrl = process.env.N8N_BASE_URL;
+    const prevKey = process.env.N8N_API_KEY;
+    delete process.env.N8N_BASE_URL;
+    delete process.env.N8N_API_KEY;
+    try {
+      const tool = createN8nTool();
+      const result = await tool.execute("test-call-id", { action: "list_workflows" });
+      const content = result.content[0];
+      expect(content.type).toBe("text");
+      const parsed = JSON.parse((content as { text: string }).text);
+      expect(parsed.error).toContain("not configured");
+    } finally {
+      if (prevUrl !== undefined) {
+        process.env.N8N_BASE_URL = prevUrl;
+      }
+      if (prevKey !== undefined) {
+        process.env.N8N_API_KEY = prevKey;
+      }
+    }
   });
 
   it("returns error for get_workflow without workflow_id", async () => {
-    const tool = createN8nTool({
-      config: {
-        tools: { n8n: { baseUrl: "http://localhost:5678", apiKey: "test-key" } },
-      } as unknown as import("../../config/config.js").OpenClawConfig,
-    });
-    const result = await tool.execute("test-call-id", { action: "get_workflow" });
-    const content = result.content[0];
-    const parsed = JSON.parse((content as { text: string }).text);
-    expect(parsed.error).toBeDefined();
+    const prevUrl = process.env.N8N_BASE_URL;
+    const prevKey = process.env.N8N_API_KEY;
+    process.env.N8N_BASE_URL = "http://localhost:5678";
+    process.env.N8N_API_KEY = "test-key";
+    try {
+      const tool = createN8nTool();
+      const result = await tool.execute("test-call-id", { action: "get_workflow" });
+      const content = result.content[0];
+      const parsed = JSON.parse((content as { text: string }).text);
+      expect(parsed.error).toBeDefined();
+    } finally {
+      if (prevUrl === undefined) {
+        delete process.env.N8N_BASE_URL;
+      } else {
+        process.env.N8N_BASE_URL = prevUrl;
+      }
+      if (prevKey === undefined) {
+        delete process.env.N8N_API_KEY;
+      } else {
+        process.env.N8N_API_KEY = prevKey;
+      }
+    }
   });
 });

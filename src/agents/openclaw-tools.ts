@@ -153,7 +153,7 @@ export function createOpenClawTools(options?: {
     ...(webFetchTool ? [webFetchTool] : []),
     ...(imageTool ? [imageTool] : []),
     createN8nTool({ config: options?.config }),
-    createShannonTool(),
+    createShannonTool({ sandboxRoot: options?.sandboxRoot ?? options?.workspaceDir }),
     createSelfUpdateTool(),
     createLearningTool({ senderId: options?.agentAccountId }),
     createProactiveTool({ senderId: options?.agentAccountId }),

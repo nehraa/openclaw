@@ -551,6 +551,15 @@ export const ToolsSchema = z
       })
       .strict()
       .optional(),
+    n8n: z
+      .object({
+        /** n8n instance base URL (e.g. http://localhost:5678). */
+        baseUrl: z.string().optional(),
+        /** n8n API key for authentication. */
+        apiKey: z.string().optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict()
   .superRefine((value, ctx) => {

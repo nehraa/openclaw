@@ -8,6 +8,8 @@
  *
  * The agent can use this tool to analyze files, directories, or repositories
  * for code complexity and quality metrics.
+ *
+ * Paths are resolved relative to the workspace/sandbox root for security.
  */
 
 import { Type } from "@sinclair/typebox";
@@ -30,7 +32,10 @@ const SHANNON_ACTIONS = [
 
 const ShannonToolSchema = Type.Object({
   action: stringEnum(SHANNON_ACTIONS),
-  path: Type.String({ description: "Absolute path to file or directory to analyze." }),
+  path: Type.String({
+    description:
+      "Path to file or directory to analyze, relative to the workspace/sandbox root (absolute paths are rejected).",
+  }),
   language: Type.Optional(
     Type.String({
       description:
@@ -149,7 +154,7 @@ function qualityLabel(entropy: number): string {
   return "very-dense";
 }
 
-export function createShannonTool(): AnyAgentTool {
+export function createShannonTool(options?: { sandboxRoot?: string }): AnyAgentTool {
   const tool: AnyAgentTool = {
     name: "shannon",
     label: "Shannon Code Analysis",
@@ -158,13 +163,26 @@ export function createShannonTool(): AnyAgentTool {
       "Actions: analyze_file (single file metrics), analyze_directory (batch analysis),",
       "entropy_report (detailed entropy breakdown), complexity_summary (quick overview).",
       "Returns entropy, complexity, vocabulary density, and quality indicators.",
+      "Paths are relative to the workspace root.",
     ].join(" "),
     parameters: ShannonToolSchema,
     execute: async (_toolCallId, params: Record<string, unknown>) => {
       const action = readStringParam(params, "action", {
         required: true,
       }) as (typeof SHANNON_ACTIONS)[number];
-      const targetPath = readStringParam(params, "path", { required: true });
+      const rawPath = readStringParam(params, "path", { required: true });
+
+      // Reject absolute paths and path traversal attempts for sandbox safety
+      if (path.isAbsolute(rawPath) || rawPath.includes("..")) {
+        return jsonResult({
+          error:
+            "Absolute paths and '..' traversal are not allowed. Use a path relative to the workspace root.",
+        });
+      }
+
+      // Resolve against the sandbox/workspace root
+      const root = options?.sandboxRoot ?? process.cwd();
+      const targetPath = path.resolve(root, rawPath);
 
       try {
         switch (action) {
@@ -206,7 +224,7 @@ export function createShannonTool(): AnyAgentTool {
             }> = [];
 
             function walk(dir: string, depth: number) {
-              if (depth > maxDepth) {
+              if (depth > maxDepth || results.length >= MAX_FILES_IN_REPORT) {
                 return;
               }
               let entries: fs.Dirent[];
@@ -216,6 +234,9 @@ export function createShannonTool(): AnyAgentTool {
                 return;
               }
               for (const entry of entries) {
+                if (results.length >= MAX_FILES_IN_REPORT) {
+                  return;
+                }
                 if (entry.name.startsWith(".") || entry.name === "node_modules") {
                   continue;
                 }
@@ -228,6 +249,10 @@ export function createShannonTool(): AnyAgentTool {
                     continue;
                   }
                   try {
+                    const stat = fs.statSync(full);
+                    if (stat.size > MAX_FILE_SIZE_BYTES) {
+                      continue;
+                    }
                     const content = fs.readFileSync(full, "utf-8");
                     const metrics = analyzeCode(content);
                     results.push({
@@ -341,7 +366,7 @@ export function createShannonTool(): AnyAgentTool {
             let totalLines = 0;
 
             function summarize(dir: string, depth: number) {
-              if (depth > 3) {
+              if (depth > 3 || fileCount >= MAX_FILES_IN_REPORT) {
                 return;
               }
               let entries: fs.Dirent[];
@@ -351,6 +376,9 @@ export function createShannonTool(): AnyAgentTool {
                 return;
               }
               for (const entry of entries) {
+                if (fileCount >= MAX_FILES_IN_REPORT) {
+                  return;
+                }
                 if (entry.name.startsWith(".") || entry.name === "node_modules") {
                   continue;
                 }
@@ -359,6 +387,10 @@ export function createShannonTool(): AnyAgentTool {
                   summarize(full, depth + 1);
                 } else if (entry.isFile() && detectLanguage(full) !== "unknown") {
                   try {
+                    const stat = fs.statSync(full);
+                    if (stat.size > MAX_FILE_SIZE_BYTES) {
+                      continue;
+                    }
                     const content = fs.readFileSync(full, "utf-8");
                     const metrics = analyzeCode(content);
                     totalEntropy += metrics.entropy;

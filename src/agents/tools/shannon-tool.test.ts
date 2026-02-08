@@ -19,9 +19,9 @@ describe("shannon-tool", () => {
 
   it("analyzes a file and returns metrics", async () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "shannon-test-"));
-    const testFile = path.join(tmpDir, "test.ts");
+    const testFile = "test.ts";
     fs.writeFileSync(
-      testFile,
+      path.join(tmpDir, testFile),
       `
 function hello() {
   console.log("Hello, world!");
@@ -32,7 +32,7 @@ export { hello };
 `.trim(),
     );
 
-    const tool = createShannonTool();
+    const tool = createShannonTool({ sandboxRoot: tmpDir });
     const result = await tool.execute("test-call-id", {
       action: "analyze_file",
       path: testFile,
@@ -40,7 +40,6 @@ export { hello };
     const content = result.content[0];
     expect(content.type).toBe("text");
     const parsed = JSON.parse((content as { text: string }).text);
-    expect(parsed.file).toBe(testFile);
     expect(parsed.language).toBe("typescript");
     expect(parsed.metrics).toBeDefined();
     expect(parsed.metrics.entropy).toBeGreaterThan(0);
@@ -48,26 +47,36 @@ export { hello };
     expect(parsed.metrics.codeLines).toBeGreaterThan(0);
     expect(parsed.quality).toBeDefined();
 
-    // cleanup
     fs.rmSync(tmpDir, { recursive: true });
   });
 
-  it("returns error for non-existent file", async () => {
+  it("rejects absolute paths", async () => {
     const tool = createShannonTool();
     const result = await tool.execute("test-call-id", {
       action: "analyze_file",
-      path: "/nonexistent/file.ts",
+      path: "/etc/passwd",
     });
     const content = result.content[0];
     const parsed = JSON.parse((content as { text: string }).text);
-    expect(parsed.error).toContain("not found");
+    expect(parsed.error).toContain("not allowed");
+  });
+
+  it("rejects path traversal", async () => {
+    const tool = createShannonTool();
+    const result = await tool.execute("test-call-id", {
+      action: "analyze_file",
+      path: "../../../etc/passwd",
+    });
+    const content = result.content[0];
+    const parsed = JSON.parse((content as { text: string }).text);
+    expect(parsed.error).toContain("not allowed");
   });
 
   it("generates entropy report with hotspots", async () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "shannon-test-"));
-    const testFile = path.join(tmpDir, "complex.ts");
+    const testFile = "complex.ts";
     fs.writeFileSync(
-      testFile,
+      path.join(tmpDir, testFile),
       `
 import { something } from "./module";
 const x = { a: 1, b: 2, c: 3, d: 4, e: "hello world foo bar baz" };
@@ -79,7 +88,7 @@ export default processData;
 `.trim(),
     );
 
-    const tool = createShannonTool();
+    const tool = createShannonTool({ sandboxRoot: tmpDir });
     const result = await tool.execute("test-call-id", {
       action: "entropy_report",
       path: testFile,
@@ -98,10 +107,10 @@ export default processData;
     fs.writeFileSync(path.join(tmpDir, "a.ts"), 'const a = "hello";');
     fs.writeFileSync(path.join(tmpDir, "b.py"), 'print("hello")');
 
-    const tool = createShannonTool();
+    const tool = createShannonTool({ sandboxRoot: tmpDir });
     const result = await tool.execute("test-call-id", {
       action: "analyze_directory",
-      path: tmpDir,
+      path: ".",
     });
     const content = result.content[0];
     const parsed = JSON.parse((content as { text: string }).text);

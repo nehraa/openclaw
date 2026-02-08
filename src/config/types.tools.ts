@@ -449,4 +449,11 @@ export type ToolsConfig = {
       deny?: string[];
     };
   };
+  /** n8n automation tool configuration. */
+  n8n?: {
+    /** n8n instance base URL (e.g. http://localhost:5678). */
+    baseUrl?: string;
+    /** n8n API key for authentication. */
+    apiKey?: string;
+  };
 };
