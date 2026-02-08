@@ -16,6 +16,11 @@ import path from "node:path";
 import { stringEnum } from "../schema/typebox.js";
 import { type AnyAgentTool, jsonResult, readStringParam } from "./common.js";
 
+/** Maximum file size (10 MB) to prevent memory exhaustion on huge files. */
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+/** Maximum number of files included in directory analysis output. */
+const MAX_FILES_IN_REPORT = 50;
+
 const SHANNON_ACTIONS = [
   "analyze_file",
   "analyze_directory",
@@ -171,6 +176,11 @@ export function createShannonTool(): AnyAgentTool {
             if (!stat.isFile()) {
               return jsonResult({ error: `Not a file: ${targetPath}` });
             }
+            if (stat.size > MAX_FILE_SIZE_BYTES) {
+              return jsonResult({
+                error: `File too large (${stat.size} bytes, max ${MAX_FILE_SIZE_BYTES})`,
+              });
+            }
             const content = fs.readFileSync(targetPath, "utf-8");
             const language = (params.language as string) ?? detectLanguage(targetPath);
             const metrics = analyzeCode(content);
@@ -249,13 +259,19 @@ export function createShannonTool(): AnyAgentTool {
               averageEntropy: avgEntropy,
               totalCodeLines,
               overallQuality: qualityLabel(avgEntropy),
-              files: results.slice(0, 50), // cap output
+              files: results.slice(0, MAX_FILES_IN_REPORT),
             });
           }
 
           case "entropy_report": {
             if (!fs.existsSync(targetPath)) {
               return jsonResult({ error: `File not found: ${targetPath}` });
+            }
+            const stat = fs.statSync(targetPath);
+            if (stat.size > MAX_FILE_SIZE_BYTES) {
+              return jsonResult({
+                error: `File too large (${stat.size} bytes, max ${MAX_FILE_SIZE_BYTES})`,
+              });
             }
             const content = fs.readFileSync(targetPath, "utf-8");
             const language = (params.language as string) ?? detectLanguage(targetPath);
@@ -298,6 +314,11 @@ export function createShannonTool(): AnyAgentTool {
             }
             const stat = fs.statSync(targetPath);
             if (stat.isFile()) {
+              if (stat.size > MAX_FILE_SIZE_BYTES) {
+                return jsonResult({
+                  error: `File too large (${stat.size} bytes, max ${MAX_FILE_SIZE_BYTES})`,
+                });
+              }
               const content = fs.readFileSync(targetPath, "utf-8");
               const metrics = analyzeCode(content);
               return jsonResult({
