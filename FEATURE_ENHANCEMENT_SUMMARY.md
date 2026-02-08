@@ -17,6 +17,7 @@ After thorough exploration, I discovered that **OpenClaw already has all three f
 **Location:** `apps/macos/`
 **Technology:** SwiftUI native app
 **Features:**
+
 - 🦞 Menu bar integration (lobster icon in top bar)
 - 🎙️ Voice wake words ("Hey Claw")
 - ⌨️ Push-to-talk hotkeys
@@ -32,6 +33,7 @@ After thorough exploration, I discovered that **OpenClaw already has all three f
 
 **Files:** `Dockerfile`, `docker-compose.yml`, `docker-setup.sh`
 **Features:**
+
 - 🐳 Production-ready containerization
 - 🔒 Security hardening (non-root user)
 - 💾 Persistent config and workspace volumes
@@ -45,6 +47,7 @@ After thorough exploration, I discovered that **OpenClaw already has all three f
 ### 3. ✅ Natural Voice Features
 
 **Integration Points:**
+
 - **ElevenLabs** - Most natural, human-like voices (29+ languages)
 - **OpenAI TTS** - High quality, reliable voices
 - **Edge TTS** - Free option
@@ -121,6 +124,7 @@ Since the features already existed, I focused on **discoverability and ease of u
 ### README Updates
 
 Updated the main README.md to prominently feature:
+
 - Quick start guides section
 - One-command installer examples
 - Links to all four new documentation pages
@@ -129,6 +133,7 @@ Updated the main README.md to prominently feature:
 ## Impact
 
 ### Before
+
 - Features existed but were buried in docs
 - No clear entry point for new users
 - Docker setup was bare-bones
@@ -136,6 +141,7 @@ Updated the main README.md to prominently feature:
 - macOS app building required knowledge of Swift/Xcode scripts
 
 ### After
+
 - ✅ Four comprehensive quick-start guides
 - ✅ Three one-command installer scripts
 - ✅ Interactive voice configuration wizard
@@ -146,6 +152,7 @@ Updated the main README.md to prominently feature:
 ## User Experience Flow
 
 ### Path 1: macOS Native
+
 ```bash
 ./scripts/setup-mac-app.sh
 # Launch app from menu bar
@@ -154,6 +161,7 @@ Updated the main README.md to prominently feature:
 ```
 
 ### Path 2: Docker
+
 ```bash
 ./docker-setup.sh
 # Follow prompts (auto-configured)
@@ -162,6 +170,7 @@ Updated the main README.md to prominently feature:
 ```
 
 ### Path 3: Voice Setup
+
 ```bash
 ./scripts/setup-voice.sh
 # Choose provider (ElevenLabs/OpenAI/Edge)
@@ -170,7 +179,9 @@ Updated the main README.md to prominently feature:
 ```
 
 ### Path 4: Ultimate (All Features)
+
 Follow the [Ultimate Quick Start guide](https://docs.openclaw.ai/start/ultimate-quickstart) to set up:
+
 - macOS native app (local)
 - Docker backend (server/VPS)
 - Natural voice (ElevenLabs)
@@ -180,6 +191,7 @@ Follow the [Ultimate Quick Start guide](https://docs.openclaw.ai/start/ultimate-
 ## Technical Details
 
 ### Architecture
+
 - **macOS App:** SwiftUI → XPC → Gateway (IPC)
 - **Docker:** Node.js container → Gateway service → Persistent volumes
 - **Voice:** TTS provider API → Audio file → Channel delivery or local playback
@@ -187,26 +199,27 @@ Follow the [Ultimate Quick Start guide](https://docs.openclaw.ai/start/ultimate-
 
 ### Voice Providers Comparison
 
-| Provider | Quality | Cost | Setup | Languages |
-|----------|---------|------|-------|-----------|
-| ElevenLabs | ⭐⭐⭐⭐⭐ | ~$5-22/mo | Medium | 29+ |
-| OpenAI | ⭐⭐⭐⭐ | Pay-per-use | Easy | Multiple |
-| Edge TTS | ⭐⭐⭐ | Free | Easy | 100+ |
+| Provider   | Quality    | Cost        | Setup  | Languages |
+| ---------- | ---------- | ----------- | ------ | --------- |
+| ElevenLabs | ⭐⭐⭐⭐⭐ | ~$5-22/mo   | Medium | 29+       |
+| OpenAI     | ⭐⭐⭐⭐   | Pay-per-use | Easy   | Multiple  |
+| Edge TTS   | ⭐⭐⭐     | Free        | Easy   | 100+      |
 
 ### Supported Platforms
 
-| Feature | macOS | iOS | Android | Docker | Web |
-|---------|-------|-----|---------|--------|-----|
-| GUI App | ✅ | ✅ | ✅ | ❌ | ✅ (Web UI) |
-| Menu Bar | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Voice Wake | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Natural TTS | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Docker | ✅ | ❌ | ❌ | ✅ | ✅ |
-| Voice Calls | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Feature     | macOS | iOS | Android | Docker | Web         |
+| ----------- | ----- | --- | ------- | ------ | ----------- |
+| GUI App     | ✅    | ✅  | ✅      | ❌     | ✅ (Web UI) |
+| Menu Bar    | ✅    | ❌  | ❌      | ❌     | ❌          |
+| Voice Wake  | ✅    | ✅  | ✅      | ❌     | ❌          |
+| Natural TTS | ✅    | ✅  | ✅      | ✅     | ✅          |
+| Docker      | ✅    | ❌  | ❌      | ✅     | ✅          |
+| Voice Calls | ✅    | ✅  | ✅      | ✅     | ❌          |
 
 ## Files Modified/Created
 
 ### Created (8 files):
+
 1. `docs/start/macos-app-quickstart.md`
 2. `docs/start/docker-quickstart.md`
 3. `docs/start/voice-quickstart.md`
@@ -216,6 +229,7 @@ Follow the [Ultimate Quick Start guide](https://docs.openclaw.ai/start/ultimate-
 7. This summary document
 
 ### Modified (2 files):
+
 1. `README.md` - Added quick start guides section
 2. `docker-setup.sh` - Enhanced UX and output
 
@@ -224,6 +238,7 @@ Follow the [Ultimate Quick Start guide](https://docs.openclaw.ai/start/ultimate-
 Before merging, test:
 
 1. **macOS App Script**
+
    ```bash
    ./scripts/setup-mac-app.sh
    # Verify app builds and launches
@@ -231,6 +246,7 @@ Before merging, test:
    ```
 
 2. **Docker Setup**
+
    ```bash
    ./docker-setup.sh
    # Verify onboarding completes
@@ -239,6 +255,7 @@ Before merging, test:
    ```
 
 3. **Voice Setup**
+
    ```bash
    ./scripts/setup-voice.sh
    # Test all three providers

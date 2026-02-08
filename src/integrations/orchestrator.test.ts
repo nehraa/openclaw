@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { processMessage } from "./orchestrator.js";
+import type { ContentItem } from "../learning/recommendations.js";
+import type { OllamaModelInfo } from "../providers/ollama/dynamic-model-switch.js";
 import { clearAllEmotionalContexts } from "../emotional-context/context-tracker.js";
 import { clearAllChatLogs, configureLearning } from "../learning/chat-logger.js";
 import { clearAllPreferences } from "../learning/preference-engine.js";
-import { clearAllSubscriptions, subscribe } from "../proactive/subscriptions.js";
-import { clearAllNotifications, configureProactive } from "../proactive/notification-dispatcher.js";
 import { resetRecommendationCounter } from "../learning/recommendations.js";
-import type { OllamaModelInfo } from "../providers/ollama/dynamic-model-switch.js";
-import type { ContentItem } from "../learning/recommendations.js";
+import { clearAllNotifications, configureProactive } from "../proactive/notification-dispatcher.js";
+import { clearAllSubscriptions, subscribe } from "../proactive/subscriptions.js";
+import { processMessage } from "./orchestrator.js";
 
 afterEach(() => {
   clearAllEmotionalContexts();
@@ -16,8 +16,19 @@ afterEach(() => {
   clearAllSubscriptions();
   clearAllNotifications();
   resetRecommendationCounter();
-  configureLearning({ enabled: true, privacyLevel: "full", trackTopics: true, maxInteractionsPerUser: 500, enableRecommendations: true });
-  configureProactive({ enabled: true, defaultMinRelevance: 0.3, maxDailyNotifications: 10, availableChannels: ["in-app"] });
+  configureLearning({
+    enabled: true,
+    privacyLevel: "full",
+    trackTopics: true,
+    maxInteractionsPerUser: 500,
+    enableRecommendations: true,
+  });
+  configureProactive({
+    enabled: true,
+    defaultMinRelevance: 0.3,
+    maxDailyNotifications: 10,
+    availableChannels: ["in-app"],
+  });
 });
 
 const sampleModels: OllamaModelInfo[] = [
@@ -27,9 +38,27 @@ const sampleModels: OllamaModelInfo[] = [
 ];
 
 const sampleCatalog: ContentItem[] = [
-  { id: "1", title: "AI in Healthcare", summary: "New advances in medical AI", topics: ["ai", "healthcare"], url: "https://example.com/1" },
-  { id: "2", title: "TypeScript 6.0", summary: "New TS features", topics: ["typescript", "programming"], url: "https://example.com/2" },
-  { id: "3", title: "Climate Change Report", summary: "Latest findings", topics: ["climate", "science"], url: "https://example.com/3" },
+  {
+    id: "1",
+    title: "AI in Healthcare",
+    summary: "New advances in medical AI",
+    topics: ["ai", "healthcare"],
+    url: "https://example.com/1",
+  },
+  {
+    id: "2",
+    title: "TypeScript 6.0",
+    summary: "New TS features",
+    topics: ["typescript", "programming"],
+    url: "https://example.com/2",
+  },
+  {
+    id: "3",
+    title: "Climate Change Report",
+    summary: "Latest findings",
+    topics: ["climate", "science"],
+    url: "https://example.com/3",
+  },
 ];
 
 describe("processMessage orchestration", () => {
@@ -48,19 +77,25 @@ describe("processMessage orchestration", () => {
     const simple = processMessage("hello", { userId: "user1", sessionKey: "s1" });
     expect(simple.taskComplexity).toBe("simple");
 
-    const complex = processMessage("Please explain the internals of V8 JavaScript engine and how JIT compilation works in detail", {
-      userId: "user2",
-      sessionKey: "s2",
-    });
+    const complex = processMessage(
+      "Please explain the internals of V8 JavaScript engine and how JIT compilation works in detail",
+      {
+        userId: "user2",
+        sessionKey: "s2",
+      },
+    );
     expect(["complex", "moderate"]).toContain(complex.taskComplexity);
   });
 
   it("should recommend Ollama models based on complexity", () => {
-    const result = processMessage("Prove that the set of primes is infinite using mathematical induction", {
-      userId: "user1",
-      sessionKey: "s1",
-      ollamaModels: sampleModels,
-    });
+    const result = processMessage(
+      "Prove that the set of primes is infinite using mathematical induction",
+      {
+        userId: "user1",
+        sessionKey: "s1",
+        ollamaModels: sampleModels,
+      },
+    );
     expect(result.modelRecommendation).toBeDefined();
     expect(result.modelRecommendation!.modelId).toBe("deepseek-r1:latest");
     expect(result.modelRecommendation!.complexity).toBe("reasoning");

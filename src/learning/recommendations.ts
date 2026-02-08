@@ -5,8 +5,8 @@
  * by matching topic interests against a content catalog.
  */
 
-import { getPreferences } from "./preference-engine.js";
 import type { Recommendation } from "./types.js";
+import { getPreferences } from "./preference-engine.js";
 
 /** Represents a piece of content available for recommendation. */
 export type ContentItem = {
@@ -76,7 +76,7 @@ export function generateRecommendations(
   }
 
   return scored
-    .sort((a, b) => b.score - a.score)
+    .toSorted((a, b) => b.score - a.score)
     .slice(0, limit)
     .map(({ item, score, matched }) => ({
       id: generateRecommendationId(),

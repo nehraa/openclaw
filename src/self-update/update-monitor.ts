@@ -5,7 +5,14 @@
  * and application, with safety checks at each stage.
  */
 
-import type { SafetyCheck, SelfUpdateConfig, TestResult, UpdateCategory, UpdateProposal, UpdateStatus } from "./types.js";
+import type {
+  SafetyCheck,
+  SelfUpdateConfig,
+  TestResult,
+  UpdateCategory,
+  UpdateProposal,
+  UpdateStatus,
+} from "./types.js";
 
 const DEFAULT_CONFIG: SelfUpdateConfig = {
   enabled: true,
@@ -160,9 +167,7 @@ export function runSafetyCheck(proposalId: string): SafetyCheck | undefined {
   checks.push({
     name: "impact_risk_ratio",
     passed: riskRatioOk,
-    details: riskRatioOk
-      ? "Impact justifies the risk level"
-      : "Risk exceeds expected impact",
+    details: riskRatioOk ? "Impact justifies the risk level" : "Risk exceeds expected impact",
   });
 
   // Check 3: Test results (if available)
@@ -215,7 +220,10 @@ export function getProposal(proposalId: string): UpdateProposal | undefined {
 /**
  * List proposals, optionally filtered by status.
  */
-export function listProposals(filter?: { status?: UpdateStatus; category?: UpdateCategory }): UpdateProposal[] {
+export function listProposals(filter?: {
+  status?: UpdateStatus;
+  category?: UpdateCategory;
+}): UpdateProposal[] {
   let result = Array.from(proposals.values());
 
   if (filter?.status) {
@@ -226,7 +234,7 @@ export function listProposals(filter?: { status?: UpdateStatus; category?: Updat
   }
 
   return result
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    .toSorted((a, b) => b.updatedAt.localeCompare(a.updatedAt))
     .map((p) => structuredClone(p));
 }
 

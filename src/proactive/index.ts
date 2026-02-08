@@ -18,9 +18,4 @@ export {
   unsubscribe,
   updateSubscription,
 } from "./subscriptions.js";
-export type {
-  Notification,
-  NotificationChannel,
-  ProactiveConfig,
-  Subscription,
-} from "./types.js";
+export type { Notification, NotificationChannel, ProactiveConfig, Subscription } from "./types.js";

@@ -125,7 +125,29 @@ const SENTIMENT_LEXICON: Record<string, number> = {
 };
 
 /** Negation words that flip sentiment polarity. */
-const NEGATION_WORDS = new Set(["not", "no", "never", "neither", "nobody", "nothing", "nowhere", "nor", "cannot", "can't", "don't", "doesn't", "didn't", "won't", "wouldn't", "shouldn't", "couldn't", "isn't", "aren't", "wasn't", "weren't"]);
+const NEGATION_WORDS = new Set([
+  "not",
+  "no",
+  "never",
+  "neither",
+  "nobody",
+  "nothing",
+  "nowhere",
+  "nor",
+  "cannot",
+  "can't",
+  "don't",
+  "doesn't",
+  "didn't",
+  "won't",
+  "wouldn't",
+  "shouldn't",
+  "couldn't",
+  "isn't",
+  "aren't",
+  "wasn't",
+  "weren't",
+]);
 
 /** Intensifier words that amplify sentiment/emotion scores. */
 const INTENSIFIERS: Record<string, number> = {
@@ -172,8 +194,7 @@ export function analyzeEmotion(text: string): EmotionAnalysis {
 
     // Check for negation in the previous two tokens
     const isNegated =
-      (i > 0 && NEGATION_WORDS.has(tokens[i - 1])) ||
-      (i > 1 && NEGATION_WORDS.has(tokens[i - 2]));
+      (i > 0 && NEGATION_WORDS.has(tokens[i - 1])) || (i > 1 && NEGATION_WORDS.has(tokens[i - 2]));
 
     // Check for intensifier in the previous token
     const intensifier = i > 0 ? (INTENSIFIERS[tokens[i - 1]] ?? 1.0) : 1.0;
@@ -203,16 +224,14 @@ export function analyzeEmotion(text: string): EmotionAnalysis {
       label,
       score: Math.max(0, Math.min(1, Math.abs(score))),
     }))
-    .sort((a, b) => b.score - a.score);
+    .toSorted((a, b) => b.score - a.score);
 
   // Determine dominant emotion
   const dominant: EmotionLabel = emotions.length > 0 ? emotions[0].label : "neutral";
 
   // Calculate overall sentiment
   const sentimentScore =
-    sentimentCount > 0
-      ? Math.max(-1, Math.min(1, sentimentTotal / sentimentCount))
-      : 0;
+    sentimentCount > 0 ? Math.max(-1, Math.min(1, sentimentTotal / sentimentCount)) : 0;
 
   const sentiment: Sentiment =
     sentimentScore > 0.1 ? "positive" : sentimentScore < -0.1 ? "negative" : "neutral";

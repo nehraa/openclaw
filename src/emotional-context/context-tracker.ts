@@ -6,7 +6,6 @@
  * to provide conversational emotional awareness.
  */
 
-import { analyzeEmotion } from "./analyzer.js";
 import type {
   EmotionalContext,
   EmotionalContextConfig,
@@ -14,6 +13,7 @@ import type {
   EmotionLabel,
   Sentiment,
 } from "./types.js";
+import { analyzeEmotion } from "./analyzer.js";
 
 const DEFAULT_CONFIG: EmotionalContextConfig = {
   enabled: true,

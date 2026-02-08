@@ -180,6 +180,61 @@ describe("runWithModelFallback", () => {
     }
   });
 
+  it("attempts provider when its profiles are in cooldown but env/config auth exists", async () => {
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-auth-"));
+    const provider = `primary-cool-${crypto.randomUUID()}`;
+    const profileIdPrimary = `${provider}:default`;
+
+    const store: AuthProfileStore = {
+      version: AUTH_STORE_VERSION,
+      profiles: {
+        [profileIdPrimary]: { type: "api_key", provider, key: "key-p" },
+        ["ollama:default"]: { type: "api_key", provider: "ollama", key: "stale" },
+      },
+      usageStats: {
+        [profileIdPrimary]: { cooldownUntil: Date.now() + 60_000 },
+        ["ollama:default"]: { cooldownUntil: Date.now() + 60_000 },
+      },
+    };
+
+    saveAuthProfileStore(store, tempDir);
+
+    // Provide an alternative auth path via env var so Ollama should still be tried
+    process.env.OLLAMA_API_KEY = "env-ollama-key";
+
+    const cfg = makeCfg({
+      agents: {
+        defaults: { model: { primary: `${provider}/m1`, fallbacks: [] } },
+      },
+      models: { providers: { ollama: { models: [{ id: "ollama/llama3.3" }] } } },
+    } as unknown as OpenClawConfig);
+
+    const calls: Array<[string, string]> = [];
+    const run = vi.fn().mockImplementation(async (prov, model) => {
+      calls.push([prov, model]);
+      if (prov === "ollama") return "ok";
+      throw new Error(`unexpected provider: ${prov}/${model}`);
+    });
+
+    try {
+      const res = await runWithModelFallback({
+        cfg,
+        provider,
+        model: "m1",
+        agentDir: tempDir,
+        run,
+      });
+      expect(res.result).toBe("ok");
+      expect(calls).toEqual([["ollama", "ollama/llama3.3"]]);
+      expect(res.attempts.some((a) => a.provider === provider && a.reason === "rate_limit")).toBe(
+        true,
+      );
+    } finally {
+      delete process.env.OLLAMA_API_KEY;
+      await fs.rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it("does not skip when any profile is available", async () => {
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-auth-"));
     const provider = `cooldown-mixed-${crypto.randomUUID()}`;
@@ -238,6 +293,64 @@ describe("runWithModelFallback", () => {
       expect(result.result).toBe("ok");
       expect(run.mock.calls).toEqual([[provider, "m1"]]);
       expect(result.attempts).toEqual([]);
+    } finally {
+      await fs.rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("tries configured providers as last-resort fallback", async () => {
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-auth-"));
+    const provider = `primary-cool-${crypto.randomUUID()}`;
+    const profileIdPrimary = `${provider}:default`;
+
+    const store: AuthProfileStore = {
+      version: AUTH_STORE_VERSION,
+      profiles: {
+        [profileIdPrimary]: { type: "api_key", provider, key: "key-p" },
+        ["ollama:default"]: { type: "api_key", provider: "ollama", key: "ok" },
+      },
+      usageStats: {
+        [profileIdPrimary]: { cooldownUntil: Date.now() + 60_000 },
+      },
+    };
+
+    saveAuthProfileStore(store, tempDir);
+
+    const cfg = makeCfg({
+      agents: {
+        defaults: {
+          model: { primary: `${provider}/m1`, fallbacks: [] },
+        },
+      },
+      models: {
+        providers: {
+          ollama: { models: [{ id: "ollama/llama3.3" }] },
+        },
+      },
+    } as unknown as OpenClawConfig);
+
+    const calls: Array<[string, string]> = [];
+    const run = vi.fn().mockImplementation(async (prov, model) => {
+      calls.push([prov, model]);
+      if (prov === "ollama") return "ok";
+      throw new Error(`unexpected provider: ${prov}/${model}`);
+    });
+
+    try {
+      const res = await runWithModelFallback({
+        cfg,
+        provider,
+        model: "m1",
+        agentDir: tempDir,
+        run,
+      });
+      expect(res.result).toBe("ok");
+      // primary provider is skipped when all its profiles are in cooldown —
+      // the implementation should try the configured `ollama` provider instead.
+      expect(calls).toEqual([["ollama", "ollama/llama3.3"]]);
+      expect(res.attempts.some((a) => a.provider === provider && a.reason === "rate_limit")).toBe(
+        true,
+      );
     } finally {
       await fs.rm(tempDir, { recursive: true, force: true });
     }

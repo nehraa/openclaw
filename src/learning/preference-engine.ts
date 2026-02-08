@@ -89,7 +89,7 @@ export function getTopInterests(userId: string, limit = 5): string[] {
   }
 
   return Object.entries(prefs.topicInterests)
-    .sort(([, a], [, b]) => b - a)
+    .toSorted(([, a], [, b]) => b - a)
     .slice(0, limit)
     .map(([topic]) => topic);
 }

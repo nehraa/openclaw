@@ -24,11 +24,11 @@ Transform OpenClaw into a voice-powered assistant with natural, human-like speec
 
 ### 1. Choose Your Voice Provider
 
-| Provider | Quality | Cost | Setup |
-|----------|---------|------|-------|
-| **ElevenLabs** | ⭐⭐⭐⭐⭐ Extremely natural | ~$5-22/mo | Medium |
-| **OpenAI** | ⭐⭐⭐⭐ Very good | Pay-per-use | Easy |
-| **Edge TTS** | ⭐⭐⭐ Good enough | Free | Easy |
+| Provider       | Quality                      | Cost        | Setup  |
+| -------------- | ---------------------------- | ----------- | ------ |
+| **ElevenLabs** | ⭐⭐⭐⭐⭐ Extremely natural | ~$5-22/mo   | Medium |
+| **OpenAI**     | ⭐⭐⭐⭐ Very good           | Pay-per-use | Easy   |
+| **Edge TTS**   | ⭐⭐⭐ Good enough           | Free        | Easy   |
 
 ### 2. Configure Your Chosen Provider
 
@@ -224,6 +224,7 @@ Activate OpenClaw hands-free with a wake phrase.
     ```bash
     openclaw config set voiceWake.triggers '["Hey Claw","OpenClaw"]'
     ```
+
   </Tab>
 </Tabs>
 
@@ -233,12 +234,12 @@ Fine-tune wake word behavior:
 
 ```json5
 {
-  "voiceWake": {
-    "triggers": ["Hey Claw"],
-    "sensitivity": 0.5,      // 0.0-1.0: Higher = more sensitive
-    "timeout": 5000,         // ms: How long to listen after wake
-    "beepOnActivation": true // Play sound when activated
-  }
+  voiceWake: {
+    triggers: ["Hey Claw"],
+    sensitivity: 0.5, // 0.0-1.0: Higher = more sensitive
+    timeout: 5000, // ms: How long to listen after wake
+    beepOnActivation: true, // Play sound when activated
+  },
 }
 ```
 
@@ -304,6 +305,7 @@ openclaw plugins install @openclaw/voice-call
       }
     }
     ```
+
   </Tab>
   <Tab title="Telnyx">
     1. Sign up at [Telnyx.com](https://telnyx.com/)
@@ -328,6 +330,7 @@ openclaw plugins install @openclaw/voice-call
       }
     }
     ```
+
   </Tab>
 </Tabs>
 
@@ -349,22 +352,24 @@ Control when voice responses are generated:
 
 ```json5
 {
-  "messages": {
-    "tts": {
-      "auto": "always",  // Options: off, always, inbound, tagged
-      "mode": "final"    // Options: final, all
-    }
-  }
+  messages: {
+    tts: {
+      auto: "always", // Options: off, always, inbound, tagged
+      mode: "final", // Options: final, all
+    },
+  },
 }
 ```
 
 **Auto Modes:**
+
 - `off` - Never generate voice (manual only)
 - `always` - Generate voice for all responses
 - `inbound` - Only when replying to voice messages
 - `tagged` - Only when message includes `[[tts:...]]` tags
 
 **Mode:**
+
 - `final` - Only speak the final answer (recommended)
 - `all` - Speak all intermediate steps too
 
@@ -374,40 +379,40 @@ Control when voice responses are generated:
 
 ```json5
 {
-  "messages": {
-    "tts": {
-      "elevenlabs": {
-        "voiceSettings": {
+  messages: {
+    tts: {
+      elevenlabs: {
+        voiceSettings: {
           // Voice consistency (0.0 = varied, 1.0 = consistent)
-          "stability": 0.5,
-          
+          stability: 0.5,
+
           // How closely to match the original voice
-          "similarityBoost": 0.75,
-          
+          similarityBoost: 0.75,
+
           // Amplify speaking style (0.0 = neutral, 1.0 = exaggerated)
-          "style": 0.0,
-          
+          style: 0.0,
+
           // Speaking speed (0.25 = slow, 4.0 = very fast)
-          "speed": 1.0,
-          
+          speed: 1.0,
+
           // Enhance clarity
-          "useSpeakerBoost": true
+          useSpeakerBoost: true,
         },
-        
+
         // Multilingual model (supports 29+ languages)
-        "modelId": "eleven_multilingual_v2",
-        
+        modelId: "eleven_multilingual_v2",
+
         // Optional: Consistent voice across sessions
-        "seed": 12345,
-        
+        seed: 12345,
+
         // Text normalization (auto, on, off)
-        "applyTextNormalization": "auto",
-        
+        applyTextNormalization: "auto",
+
         // Force specific language
-        "languageCode": "en"
-      }
-    }
-  }
+        languageCode: "en",
+      },
+    },
+  },
 }
 ```
 
@@ -417,28 +422,28 @@ Different voices for different channels:
 
 ```json5
 {
-  "messages": {
-    "tts": {
-      "provider": "elevenlabs",
-      "auto": "always"
-    }
-  },
-  "channels": {
-    "telegram": {
-      "tts": {
-        "elevenlabs": {
-          "voiceId": "pMsXgVXv3BLzUgSXRplE" // Rachel for Telegram
-        }
-      }
+  messages: {
+    tts: {
+      provider: "elevenlabs",
+      auto: "always",
     },
-    "discord": {
-      "tts": {
-        "elevenlabs": {
-          "voiceId": "ErXwobaYiN019PkySvjV" // Antoni for Discord
-        }
-      }
-    }
-  }
+  },
+  channels: {
+    telegram: {
+      tts: {
+        elevenlabs: {
+          voiceId: "pMsXgVXv3BLzUgSXRplE", // Rachel for Telegram
+        },
+      },
+    },
+    discord: {
+      tts: {
+        elevenlabs: {
+          voiceId: "ErXwobaYiN019PkySvjV", // Antoni for Discord
+        },
+      },
+    },
+  },
 }
 ```
 
@@ -447,7 +452,7 @@ Different voices for different channels:
 Embed voice commands in responses:
 
 ```
-[[tts:provider=elevenlabs voiceId=different-voice-id]] 
+[[tts:provider=elevenlabs voiceId=different-voice-id]]
 This text will use a different voice.
 [[tts:speed=1.2]]
 This will be spoken faster.
@@ -466,16 +471,16 @@ OpenClaw automatically transcribes voice notes from:
 
 ```json5
 {
-  "tools": {
-    "media": {
-      "audio": {
-        "transcription": {
-          "provider": "openai", // or "anthropic"
-          "autoTranscribe": true
-        }
-      }
-    }
-  }
+  tools: {
+    media: {
+      audio: {
+        transcription: {
+          provider: "openai", // or "anthropic"
+          autoTranscribe: true,
+        },
+      },
+    },
+  },
 }
 ```
 
@@ -484,6 +489,7 @@ OpenClaw automatically transcribes voice notes from:
 ### ElevenLabs Languages
 
 Supports 29+ languages including:
+
 - English (US, UK, AU, etc.)
 - Spanish, French, German
 - Italian, Portuguese, Polish
@@ -491,17 +497,19 @@ Supports 29+ languages including:
 - Chinese, Korean, and more
 
 Set with `languageCode`:
+
 ```json5
 {
-  "elevenlabs": {
-    "languageCode": "es" // Spanish
-  }
+  elevenlabs: {
+    languageCode: "es", // Spanish
+  },
 }
 ```
 
 ### Edge TTS Languages
 
 List available voices for your language:
+
 ```bash
 npx edge-tts --list-voices | grep "es-ES"  # Spanish
 npx edge-tts --list-voices | grep "fr-FR"  # French
@@ -513,17 +521,20 @@ npx edge-tts --list-voices | grep "ja-JP"  # Japanese
 ### No Audio Output
 
 1. **Check TTS configuration:**
+
    ```bash
    openclaw config get messages.tts
    ```
 
 2. **Verify API key:**
+
    ```bash
    # ElevenLabs
    openclaw config get messages.tts.elevenlabs.apiKey
    ```
 
 3. **Test TTS directly:**
+
    ```bash
    openclaw agent --message "Testing voice output" --thinking low
    ```
@@ -540,16 +551,18 @@ npx edge-tts --list-voices | grep "ja-JP"  # Japanese
    - Enable for OpenClaw
 
 2. **Verify configuration:**
+
    ```bash
    openclaw config get voiceWake
    ```
 
 3. **Adjust sensitivity:**
+
    ```json5
    {
-     "voiceWake": {
-       "sensitivity": 0.7  // Try higher if not triggering
-     }
+     voiceWake: {
+       sensitivity: 0.7, // Try higher if not triggering
+     },
    }
    ```
 
@@ -565,10 +578,11 @@ npx edge-tts --list-voices | grep "ja-JP"  # Japanese
    - OpenAI: Try `nova` or `alloy`
 
 2. **Adjust voice settings (ElevenLabs):**
+
    ```json5
    {
-     "stability": 0.3,      // More expressive
-     "similarityBoost": 0.8 // More consistent
+     stability: 0.3, // More expressive
+     similarityBoost: 0.8, // More consistent
    }
    ```
 
@@ -579,9 +593,10 @@ npx edge-tts --list-voices | grep "ja-JP"  # Japanese
 ### API Costs Too High
 
 1. **Use auto mode wisely:**
+
    ```json5
    {
-     "auto": "inbound"  // Only reply with voice to voice messages
+     auto: "inbound", // Only reply with voice to voice messages
    }
    ```
 
@@ -592,21 +607,21 @@ npx edge-tts --list-voices | grep "ja-JP"  # Japanese
 3. **Limit text length:**
    ```json5
    {
-     "maxTextLength": 500  // Truncate long responses
+     maxTextLength: 500, // Truncate long responses
    }
    ```
 
 ## Voice Feature Matrix
 
-| Feature | macOS | iOS | Android | Docker | Web |
-|---------|-------|-----|---------|--------|-----|
-| TTS (ElevenLabs) | ✅ | ✅ | ✅ | ✅ | ✅ |
-| TTS (OpenAI) | ✅ | ✅ | ✅ | ✅ | ✅ |
-| TTS (Edge) | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Voice Wake | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Push-to-Talk | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Voice Calls | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Voice Notes | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Feature          | macOS | iOS | Android | Docker | Web |
+| ---------------- | ----- | --- | ------- | ------ | --- |
+| TTS (ElevenLabs) | ✅    | ✅  | ✅      | ✅     | ✅  |
+| TTS (OpenAI)     | ✅    | ✅  | ✅      | ✅     | ✅  |
+| TTS (Edge)       | ✅    | ✅  | ✅      | ✅     | ✅  |
+| Voice Wake       | ✅    | ✅  | ✅      | ❌     | ❌  |
+| Push-to-Talk     | ✅    | ✅  | ✅      | ❌     | ❌  |
+| Voice Calls      | ✅    | ✅  | ✅      | ✅     | ❌  |
+| Voice Notes      | ✅    | ✅  | ✅      | ✅     | ✅  |
 
 ## Next Steps
 

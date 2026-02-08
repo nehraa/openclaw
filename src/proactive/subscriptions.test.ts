@@ -92,6 +92,6 @@ describe("getActiveSubscriptions", () => {
     subscribe("user3");
     const active = getActiveSubscriptions();
     expect(active).toHaveLength(2);
-    expect(active.map((s) => s.userId).sort()).toEqual(["user1", "user3"]);
+    expect(active.map((s) => s.userId).toSorted()).toEqual(["user1", "user3"]);
   });
 });

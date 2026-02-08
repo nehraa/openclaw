@@ -6,12 +6,12 @@
  * and integration with the existing Copilot token management.
  */
 
+import { listProfilesForProvider } from "../../agents/auth-profiles/profiles.js";
+import { ensureAuthProfileStore } from "../../agents/auth-profiles/store.js";
 import {
   DEFAULT_COPILOT_API_BASE_URL,
   resolveCopilotApiToken,
 } from "../../providers/github-copilot-token.js";
-import { ensureAuthProfileStore } from "../../agents/auth-profiles/store.js";
-import { listProfilesForProvider } from "../../agents/auth-profiles/profiles.js";
 
 /** Configuration for Copilot code assistance. */
 export type CopilotAssistConfig = {
@@ -81,8 +81,7 @@ export async function checkCopilotStatus(agentDir?: string): Promise<CopilotStat
       return {
         authenticated: false,
         baseUrl: DEFAULT_COPILOT_API_BASE_URL,
-        error:
-          "No GitHub token found. Run 'openclaw config auth github-copilot' to authenticate.",
+        error: "No GitHub token found. Run 'openclaw config auth github-copilot' to authenticate.",
       };
     }
 
@@ -336,12 +335,14 @@ export function parseCodeSuggestions(response: string): CodeSuggestion[] {
  * Extract the first code block from a response, or the full text if no blocks found.
  * Useful for getting a single generated code result.
  */
-export function extractPrimaryCode(response: string): { code: string; language?: string } | undefined {
+export function extractPrimaryCode(
+  response: string,
+): { code: string; language?: string } | undefined {
   const suggestions = parseCodeSuggestions(response);
   if (suggestions.length === 0) {
     return undefined;
   }
   // Return the longest code block (most likely the main implementation)
-  const primary = suggestions.sort((a, b) => b.text.length - a.text.length)[0];
+  const primary = suggestions.toSorted((a, b) => b.text.length - a.text.length)[0];
   return { code: primary.text, language: primary.language };
 }

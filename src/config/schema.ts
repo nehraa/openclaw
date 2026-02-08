@@ -277,6 +277,17 @@ const FIELD_LABELS: Record<string, string> = {
   "memory.qmd.limits.maxInjectedChars": "QMD Max Injected Chars",
   "memory.qmd.limits.timeoutMs": "QMD Search Timeout (ms)",
   "memory.qmd.scope": "QMD Surface Scope",
+  "learning.enabled": "Enable Learning System",
+  "learning.privacyLevel": "Learning Privacy Level",
+  "learning.maxInteractionsPerUser": "Max Interactions Per User",
+  "learning.trackTopics": "Track Topic Preferences",
+  "learning.enableRecommendations": "Enable Content Recommendations",
+  "emotionalContext.enabled": "Enable Emotional Context Tracking",
+  "emotionalContext.historyWindowSize": "Emotional Context Window Size",
+  "proactive.enabled": "Enable Proactive Notifications",
+  "proactive.defaultMinRelevance": "Default Min Relevance Threshold",
+  "proactive.maxDailyNotifications": "Max Daily Notifications",
+  "proactive.availableChannels": "Available Notification Channels",
   "auth.profiles": "Auth Profiles",
   "auth.order": "Auth Profile Order",
   "auth.cooldowns.billingBackoffHours": "Billing Backoff (hours)",
@@ -612,6 +623,29 @@ const FIELD_HELP: Record<string, string> = {
     "Session/channel scope for QMD recall (same syntax as session.sendPolicy; default: direct-only).",
   "agents.defaults.memorySearch.cache.maxEntries":
     "Optional cap on cached embeddings (best-effort).",
+  // Beta Features - Learning System
+  learning: "Personal learning system configuration (beta feature).",
+  "learning.enabled":
+    "Enable the personal learning system to track user preferences and interactions.",
+  "learning.privacyLevel":
+    'Privacy level for data retention ("off", "minimal", "standard", "full").',
+  "learning.maxInteractionsPerUser":
+    "Maximum number of chat interactions to retain per user for learning.",
+  "learning.trackTopics": "Whether to detect and track topic preferences from conversations.",
+  "learning.enableRecommendations": "Enable generation of personalized content recommendations.",
+  // Beta Features - Emotional Context
+  emotionalContext: "Emotional context tracking system configuration (beta feature).",
+  "emotionalContext.enabled": "Enable emotion detection and sentiment analysis for conversations.",
+  "emotionalContext.historyWindowSize":
+    "Number of recent emotion analyses to keep in the rolling window.",
+  // Beta Features - Proactive Communication
+  proactive: "Proactive notification system configuration (beta feature).",
+  "proactive.enabled": "Enable proactive notifications when interesting content is discovered.",
+  "proactive.defaultMinRelevance":
+    "Default minimum relevance threshold (0-1) for triggering notifications.",
+  "proactive.maxDailyNotifications": "Maximum number of proactive notifications per user per day.",
+  "proactive.availableChannels":
+    'Available notification delivery channels (e.g., ["email", "webhook", "in-app"]).',
   "agents.defaults.memorySearch.sync.onSearch":
     "Lazy sync: schedule a reindex on search after changes.",
   "agents.defaults.memorySearch.sync.watch": "Watch memory files for changes (chokidar).",

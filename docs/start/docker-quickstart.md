@@ -81,17 +81,20 @@ The script will generate and save a secure token in `.env`.
 After setup completes:
 
 1. **Open the Control UI**:
+
    ```
    http://127.0.0.1:18789/
    ```
 
 2. **Get your access token**:
+
    ```bash
    # The token is in .env
    cat .env | grep OPENCLAW_GATEWAY_TOKEN
    ```
 
 3. **Or get a fresh dashboard link**:
+
    ```bash
    docker compose run --rm openclaw-cli dashboard --no-open
    ```
@@ -190,20 +193,21 @@ Add to `~/.openclaw/settings/config.json`:
 
 ```json5
 {
-  "messages": {
-    "tts": {
-      "provider": "elevenlabs",
-      "auto": "always",
-      "elevenlabs": {
-        "apiKey": "your-elevenlabs-api-key",
-        "voiceId": "pMsXgVXv3BLzUgSXRplE"
-      }
-    }
-  }
+  messages: {
+    tts: {
+      provider: "elevenlabs",
+      auto: "always",
+      elevenlabs: {
+        apiKey: "your-elevenlabs-api-key",
+        voiceId: "pMsXgVXv3BLzUgSXRplE",
+      },
+    },
+  },
 }
 ```
 
 Then restart:
+
 ```bash
 docker compose restart openclaw-gateway
 ```
@@ -317,7 +321,7 @@ cd openclaw
 server {
     listen 80;
     server_name openclaw.yourdomain.com;
-    
+
     location / {
         proxy_pass http://127.0.0.1:18789;
         proxy_http_version 1.1;
@@ -369,12 +373,14 @@ docker system df
 ### Can't Connect from Other Devices
 
 1. **Check gateway bind**:
+
    ```bash
    docker compose run --rm openclaw-cli config get gateway.bind
    # Should be "lan" for network access
    ```
 
 2. **Check firewall**:
+
    ```bash
    # On Linux
    sudo ufw status
@@ -398,7 +404,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2.0'
+          cpus: "2.0"
           memory: 4G
         reservations:
           memory: 2G

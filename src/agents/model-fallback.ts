@@ -12,6 +12,7 @@ import {
   isFailoverError,
   isTimeoutError,
 } from "./failover-error.js";
+import { resolveEnvApiKey, getCustomProviderApiKey } from "./model-auth.js";
 import {
   buildConfiguredAllowlistKeys,
   buildModelAliasIndex,
@@ -201,6 +202,33 @@ function resolveFallbackCandidates(params: {
     addCandidate({ provider: primary.provider, model: primary.model }, false);
   }
 
+  // Append configured providers (first-defined model) as a **last-resort**
+  // cross-provider fallback. This enables cases where the configured
+  // primary and its model-level fallbacks are unavailable (or in cooldown)
+  // but another configured provider (for example, `models.providers.ollama`)
+  // is available and should be attempted.
+  //
+  // This is intentionally conservative: we only add providers that expose
+  // an explicit `models` array in `models.providers` and we respect the
+  // configured allowlist. Providers already present in `candidates` are
+  // not duplicated.
+  if (params.cfg?.models?.providers) {
+    for (const [prov, provCfg] of Object.entries(params.cfg.models.providers)) {
+      try {
+        const modelsArr = (provCfg as any)?.models;
+        if (!modelsArr || !Array.isArray(modelsArr) || modelsArr.length === 0) continue;
+        const id = String(modelsArr[0].id ?? modelsArr[0].model ?? "").trim();
+        if (!id) continue;
+        // skip providers already added
+        if ([...seen].some((k) => k.startsWith(`${prov}/`))) continue;
+        addCandidate({ provider: prov, model: id }, true);
+      } catch {
+        // defensive: ignore malformed provider config
+        continue;
+      }
+    }
+  }
+
   return candidates;
 }
 
@@ -247,15 +275,34 @@ export async function runWithModelFallback<T>(params: {
       });
       const isAnyProfileAvailable = profileIds.some((id) => !isProfileInCooldown(authStore, id));
 
+      // If profiles exist but are all in cooldown, only skip the provider when
+      // there is no alternative auth source (env var or models.json apiKey).
+      // This allows providers like `ollama` to be attempted when a configured
+      // API key or environment variable is available even if a profile exists
+      // in the auth store and is currently rate-limited.
       if (profileIds.length > 0 && !isAnyProfileAvailable) {
-        // All profiles for this provider are in cooldown; skip without attempting
+        const hasEnvKeyOrConfiguredKey =
+          Boolean(resolveEnvApiKey(candidate.provider)?.apiKey) ||
+          Boolean(getCustomProviderApiKey(params.cfg, candidate.provider));
+        if (!hasEnvKeyOrConfiguredKey) {
+          // All profiles for this provider are in cooldown; skip without attempting
+          attempts.push({
+            provider: candidate.provider,
+            model: candidate.model,
+            error: `Provider ${candidate.provider} is in cooldown (all profiles unavailable)`,
+            reason: "rate_limit",
+          });
+          continue;
+        }
+
+        // Profiles are in cooldown but an alternative auth source exists — record
+        // the cooldown reason for observability and proceed to attempt the provider.
         attempts.push({
           provider: candidate.provider,
           model: candidate.model,
-          error: `Provider ${candidate.provider} is in cooldown (all profiles unavailable)`,
+          error: `Provider ${candidate.provider} has profiles in cooldown but alternative auth is available; attempting`,
           reason: "rate_limit",
         });
-        continue;
       }
     }
     try {

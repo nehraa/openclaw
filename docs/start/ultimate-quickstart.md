@@ -76,16 +76,16 @@ Click the menu bar icon and follow the onboarding:
 
 ```json5
 {
-  "messages": {
-    "tts": {
-      "provider": "elevenlabs",
-      "auto": "always",
-      "elevenlabs": {
-        "apiKey": "YOUR_ELEVENLABS_KEY",
-        "voiceId": "pMsXgVXv3BLzUgSXRplE"  // Rachel - warm & natural
-      }
-    }
-  }
+  messages: {
+    tts: {
+      provider: "elevenlabs",
+      auto: "always",
+      elevenlabs: {
+        apiKey: "YOUR_ELEVENLABS_KEY",
+        voiceId: "pMsXgVXv3BLzUgSXRplE", // Rachel - warm & natural
+      },
+    },
+  },
 }
 ```
 
@@ -100,6 +100,7 @@ Click the menu bar icon and follow the onboarding:
 </Check>
 
 **What you have now:**
+
 - ✅ macOS menu bar app
 - ✅ Human-like voice responses
 - ✅ Voice wake words ("Hey Claw")
@@ -142,6 +143,7 @@ cd openclaw
 ```
 
 When prompted:
+
 - Gateway bind: **lan**
 - Gateway auth: **token**
 - Install daemon: **No** (Docker handles it)
@@ -164,20 +166,21 @@ Edit `~/.openclaw/settings/config.json`:
 
 ```json5
 {
-  "messages": {
-    "tts": {
-      "provider": "elevenlabs",
-      "auto": "always",
-      "elevenlabs": {
-        "apiKey": "YOUR_ELEVENLABS_KEY",
-        "voiceId": "pMsXgVXv3BLzUgSXRplE"
-      }
-    }
-  }
+  messages: {
+    tts: {
+      provider: "elevenlabs",
+      auto: "always",
+      elevenlabs: {
+        apiKey: "YOUR_ELEVENLABS_KEY",
+        voiceId: "pMsXgVXv3BLzUgSXRplE",
+      },
+    },
+  },
 }
 ```
 
 Restart the gateway:
+
 ```bash
 docker compose restart openclaw-gateway
 ```
@@ -187,6 +190,7 @@ docker compose restart openclaw-gateway
 </Check>
 
 **What you have now:**
+
 - ✅ Containerized gateway
 - ✅ Web UI access
 - ✅ Human-like voice responses
@@ -249,25 +253,27 @@ On your server, edit `~/.openclaw/settings/config.json`:
 
 ```json5
 {
-  "messages": {
-    "tts": {
-      "provider": "elevenlabs",
-      "auto": "always",
-      "elevenlabs": {
-        "apiKey": "YOUR_ELEVENLABS_KEY",
-        "voiceId": "pMsXgVXv3BLzUgSXRplE"
-      }
-    }
-  }
+  messages: {
+    tts: {
+      provider: "elevenlabs",
+      auto: "always",
+      elevenlabs: {
+        apiKey: "YOUR_ELEVENLABS_KEY",
+        voiceId: "pMsXgVXv3BLzUgSXRplE",
+      },
+    },
+  },
 }
 ```
 
 Restart Docker gateway:
+
 ```bash
 docker compose restart openclaw-gateway
 ```
 
 On your Mac:
+
 1. OpenClaw menu bar → **Settings** → **Voice Wake**
 2. Enable "Voice Wake"
 3. Say "Hey Claw" + your command!
@@ -281,6 +287,7 @@ On your Mac:
 </Check>
 
 **Benefits of this setup:**
+
 - ✅ Best of both worlds
 - ✅ Reliable 24/7 backend
 - ✅ Native macOS experience
@@ -292,17 +299,17 @@ On your Mac:
 
 ## Feature Comparison
 
-| Feature | macOS App | Docker | Ultimate |
-|---------|-----------|--------|----------|
-| Menu Bar Access | ✅ | ❌ | ✅ |
-| Voice Wake Words | ✅ | ❌ | ✅ |
-| Push-to-Talk | ✅ | ❌ | ✅ |
-| Natural Voice (TTS) | ✅ | ✅ | ✅ |
-| 24/7 Operation | ⚠️ | ✅ | ✅ |
-| WhatsApp/Telegram | ⚠️ | ✅ | ✅ |
-| Voice Calls | ✅ | ✅ | ✅ |
-| Canvas Mode | ✅ | ❌ | ✅ |
-| Easy Updates | ⚠️ | ✅ | ✅ |
+| Feature             | macOS App | Docker | Ultimate |
+| ------------------- | --------- | ------ | -------- |
+| Menu Bar Access     | ✅        | ❌     | ✅       |
+| Voice Wake Words    | ✅        | ❌     | ✅       |
+| Push-to-Talk        | ✅        | ❌     | ✅       |
+| Natural Voice (TTS) | ✅        | ✅     | ✅       |
+| 24/7 Operation      | ⚠️        | ✅     | ✅       |
+| WhatsApp/Telegram   | ⚠️        | ✅     | ✅       |
+| Voice Calls         | ✅        | ✅     | ✅       |
+| Canvas Mode         | ✅        | ❌     | ✅       |
+| Easy Updates        | ⚠️        | ✅     | ✅       |
 
 ---
 
@@ -312,20 +319,21 @@ On your Mac:
 
 ```json5
 {
-  "messages": {
-    "tts": {
-      "provider": "elevenlabs",
-      "auto": "always",
-      "elevenlabs": {
-        "apiKey": "YOUR_KEY",
-        "voiceId": "pMsXgVXv3BLzUgSXRplE"  // Rachel
-      }
-    }
-  }
+  messages: {
+    tts: {
+      provider: "elevenlabs",
+      auto: "always",
+      elevenlabs: {
+        apiKey: "YOUR_KEY",
+        voiceId: "pMsXgVXv3BLzUgSXRplE", // Rachel
+      },
+    },
+  },
 }
 ```
 
 **Popular Voices:**
+
 - `pMsXgVXv3BLzUgSXRplE` - Rachel (warm, American)
 - `ErXwobaYiN019PkySvjV` - Antoni (male, clear)
 - `EXAVITQu4vr4xnSDxMaL` - Bella (young, energetic)
@@ -334,15 +342,15 @@ On your Mac:
 
 ```json5
 {
-  "messages": {
-    "tts": {
-      "provider": "openai",
-      "auto": "always",
-      "openai": {
-        "voice": "nova"  // alloy, echo, fable, onyx, nova, shimmer
-      }
-    }
-  }
+  messages: {
+    tts: {
+      provider: "openai",
+      auto: "always",
+      openai: {
+        voice: "nova", // alloy, echo, fable, onyx, nova, shimmer
+      },
+    },
+  },
 }
 ```
 
@@ -350,16 +358,16 @@ On your Mac:
 
 ```json5
 {
-  "messages": {
-    "tts": {
-      "provider": "edge",
-      "auto": "always",
-      "edge": {
-        "enabled": true,
-        "voice": "en-US-MichelleNeural"
-      }
-    }
-  }
+  messages: {
+    tts: {
+      provider: "edge",
+      auto: "always",
+      edge: {
+        enabled: true,
+        voice: "en-US-MichelleNeural",
+      },
+    },
+  },
 }
 ```
 
@@ -387,6 +395,7 @@ openclaw agent --message "Write a haiku about lobsters" --thinking low
 # Open: http://127.0.0.1:18789/
 # Type your message in the chat interface
 ```
+
 </CodeGroup>
 
 ---

@@ -67,27 +67,28 @@ For the most natural, human-like voice:
 
 ```json5
 {
-  "messages": {
-    "tts": {
-      "provider": "elevenlabs",
-      "auto": "always",
-      "elevenlabs": {
-        "apiKey": "your-elevenlabs-api-key",
-        "voiceId": "pMsXgVXv3BLzUgSXRplE", // Rachel voice
-        "modelId": "eleven_multilingual_v2",
-        "voiceSettings": {
-          "stability": 0.5,
-          "similarityBoost": 0.75,
-          "style": 0.0,
-          "speed": 1.0
-        }
-      }
-    }
-  }
+  messages: {
+    tts: {
+      provider: "elevenlabs",
+      auto: "always",
+      elevenlabs: {
+        apiKey: "your-elevenlabs-api-key",
+        voiceId: "pMsXgVXv3BLzUgSXRplE", // Rachel voice
+        modelId: "eleven_multilingual_v2",
+        voiceSettings: {
+          stability: 0.5,
+          similarityBoost: 0.75,
+          style: 0.0,
+          speed: 1.0,
+        },
+      },
+    },
+  },
 }
 ```
 
 **Popular ElevenLabs Voices:**
+
 - `pMsXgVXv3BLzUgSXRplE` - Rachel (warm, conversational)
 - `21m00Tcm4TlvDq8ikWAM` - Rachel (alternative)
 - `EXAVITQu4vr4xnSDxMaL` - Bella (young, upbeat)
@@ -100,16 +101,16 @@ For a simpler setup with good quality:
 
 ```json5
 {
-  "messages": {
-    "tts": {
-      "provider": "openai",
-      "auto": "always",
-      "openai": {
-        "voice": "nova", // alloy, echo, fable, onyx, nova, shimmer
-        "model": "gpt-4o-mini-tts"
-      }
-    }
-  }
+  messages: {
+    tts: {
+      provider: "openai",
+      auto: "always",
+      openai: {
+        voice: "nova", // alloy, echo, fable, onyx, nova, shimmer
+        model: "gpt-4o-mini-tts",
+      },
+    },
+  },
 }
 ```
 
@@ -119,16 +120,16 @@ No API key required, but less natural:
 
 ```json5
 {
-  "messages": {
-    "tts": {
-      "provider": "edge",
-      "auto": "always",
-      "edge": {
-        "enabled": true,
-        "voice": "en-US-MichelleNeural"
-      }
-    }
-  }
+  messages: {
+    tts: {
+      provider: "edge",
+      auto: "always",
+      edge: {
+        enabled: true,
+        voice: "en-US-MichelleNeural",
+      },
+    },
+  },
 }
 ```
 
@@ -172,11 +173,13 @@ Once voice is configured, try:
 ### Voice Not Working
 
 1. **Check Microphone Permissions**
+
    ```bash
    # Grant permissions in System Settings → Privacy & Security → Microphone
    ```
 
 2. **Verify TTS Configuration**
+
    ```bash
    openclaw config get messages.tts
    ```
@@ -188,6 +191,7 @@ Once voice is configured, try:
 ### Gateway Connection Issues
 
 1. **Check Gateway Status**
+
    ```bash
    openclaw gateway status
    ```
@@ -204,6 +208,7 @@ Once voice is configured, try:
 ### App Not Appearing in Menu Bar
 
 1. **Check if Running**
+
    ```bash
    ps aux | grep OpenClaw
    ```
@@ -221,18 +226,18 @@ Fine-tune ElevenLabs voice characteristics:
 
 ```json5
 {
-  "messages": {
-    "tts": {
-      "elevenlabs": {
-        "voiceSettings": {
-          "stability": 0.5,        // 0.0-1.0: Lower = more expressive
-          "similarityBoost": 0.75, // 0.0-1.0: Voice consistency
-          "style": 0.0,            // 0.0-1.0: Style exaggeration
-          "speed": 1.0             // 0.25-4.0: Speaking speed
-        }
-      }
-    }
-  }
+  messages: {
+    tts: {
+      elevenlabs: {
+        voiceSettings: {
+          stability: 0.5, // 0.0-1.0: Lower = more expressive
+          similarityBoost: 0.75, // 0.0-1.0: Voice consistency
+          style: 0.0, // 0.0-1.0: Style exaggeration
+          speed: 1.0, // 0.25-4.0: Speaking speed
+        },
+      },
+    },
+  },
 }
 ```
 
@@ -240,11 +245,11 @@ Fine-tune ElevenLabs voice characteristics:
 
 ```json5
 {
-  "voiceWake": {
-    "triggers": ["Hey Claw", "OpenClaw", "Lobster"],
-    "sensitivity": 0.5,  // 0.0-1.0
-    "timeout": 5000      // ms to wait after wake word
-  }
+  voiceWake: {
+    triggers: ["Hey Claw", "OpenClaw", "Lobster"],
+    sensitivity: 0.5, // 0.0-1.0
+    timeout: 5000, // ms to wait after wake word
+  },
 }
 ```
 

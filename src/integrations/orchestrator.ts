@@ -10,23 +10,27 @@
  * - Ollama model selection adapts based on task complexity
  */
 
-import { analyzeEmotion } from "../emotional-context/analyzer.js";
-import { processMessage as processEmotionalMessage, getEmotionalContext } from "../emotional-context/context-tracker.js";
 import type { EmotionalContext, EmotionAnalysis } from "../emotional-context/types.js";
-
-import { logInteraction, extractTopics } from "../learning/chat-logger.js";
-import { updatePreferences, getPreferences, getTopInterests } from "../learning/preference-engine.js";
-import { generateRecommendations } from "../learning/recommendations.js";
 import type { ContentItem } from "../learning/recommendations.js";
 import type { UserPreferences, Recommendation } from "../learning/types.js";
-
-import { isSubscribed, getSubscription } from "../proactive/subscriptions.js";
+import type { Notification } from "../proactive/types.js";
+import type {
+  OllamaModelInfo,
+  ModelSwitchResult,
+  TaskComplexity,
+} from "../providers/ollama/dynamic-model-switch.js";
+import { analyzeEmotion } from "../emotional-context/analyzer.js";
+import { processMessage as processEmotionalMessage } from "../emotional-context/context-tracker.js";
+import { logInteraction, extractTopics } from "../learning/chat-logger.js";
+import { updatePreferences, getTopInterests } from "../learning/preference-engine.js";
+import { generateRecommendations } from "../learning/recommendations.js";
 import { filterCatalog } from "../proactive/content-filter.js";
 import { createNotification } from "../proactive/notification-dispatcher.js";
-import type { Notification } from "../proactive/types.js";
-
-import { classifyTaskComplexity, selectModelForTask } from "../providers/ollama/dynamic-model-switch.js";
-import type { OllamaModelInfo, ModelSwitchResult, TaskComplexity } from "../providers/ollama/dynamic-model-switch.js";
+import { isSubscribed, getSubscription } from "../proactive/subscriptions.js";
+import {
+  classifyTaskComplexity,
+  selectModelForTask,
+} from "../providers/ollama/dynamic-model-switch.js";
 
 /** Full result from processing a message through all subsystems. */
 export type OrchestrationResult = {
@@ -82,10 +86,7 @@ export type OrchestratorConfig = {
  * Runs emotional analysis, updates learning, checks for proactive content,
  * classifies task complexity, and generates response hints — all in one call.
  */
-export function processMessage(
-  input: string,
-  config: OrchestratorConfig,
-): OrchestrationResult {
+export function processMessage(input: string, config: OrchestratorConfig): OrchestrationResult {
   const { userId, sessionKey, ollamaModels, contentCatalog, channel } = config;
 
   // 1. Emotional analysis
@@ -94,9 +95,10 @@ export function processMessage(
 
   // 2. Task complexity classification + model selection
   const taskComplexity = classifyTaskComplexity(input);
-  const modelRecommendation = ollamaModels && ollamaModels.length > 0
-    ? selectModelForTask(ollamaModels, taskComplexity)
-    : undefined;
+  const modelRecommendation =
+    ollamaModels && ollamaModels.length > 0
+      ? selectModelForTask(ollamaModels, taskComplexity)
+      : undefined;
 
   // 3. Log interaction (output is empty here; call recordResponse() after generating a response)
   const topics = extractTopics(input);
@@ -107,9 +109,7 @@ export function processMessage(
   const topInterests = getTopInterests(userId, 5);
 
   // 5. Generate recommendations from content catalog
-  const recommendations = contentCatalog
-    ? generateRecommendations(userId, contentCatalog, 3)
-    : [];
+  const recommendations = contentCatalog ? generateRecommendations(userId, contentCatalog, 3) : [];
 
   // 6. Proactive notifications
   const notifications: Notification[] = [];

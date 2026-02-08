@@ -37,9 +37,10 @@ export function filterContent(
   let totalRelevance = 0;
 
   // Check against subscription topic filters
-  const filterTopics = subscription.topicFilters.length > 0
-    ? subscription.topicFilters
-    : Object.keys(topicInterests ?? {});
+  const filterTopics =
+    subscription.topicFilters.length > 0
+      ? subscription.topicFilters
+      : Object.keys(topicInterests ?? {});
 
   // Normalize topicInterests keys to lowercase for consistent lookup
   const normalizedInterests: Record<string, number> | undefined = topicInterests
@@ -66,9 +67,8 @@ export function filterContent(
   }
 
   // Normalize relevance
-  const relevance = filterTopics.length > 0
-    ? Math.min(1, totalRelevance / Math.max(1, filterTopics.length))
-    : 0;
+  const relevance =
+    filterTopics.length > 0 ? Math.min(1, totalRelevance / Math.max(1, filterTopics.length)) : 0;
 
   const matched = relevance >= subscription.minRelevance && matchedTopics.length > 0;
 
@@ -94,5 +94,5 @@ export function filterCatalog(
       result: filterContent(item, subscription, topicInterests),
     }))
     .filter(({ result }) => result.matched)
-    .sort((a, b) => b.result.relevance - a.result.relevance);
+    .toSorted((a, b) => b.result.relevance - a.result.relevance);
 }

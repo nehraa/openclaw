@@ -15,10 +15,7 @@ export {
   getTopInterests,
   updatePreferences,
 } from "./preference-engine.js";
-export {
-  generateRecommendations,
-  resetRecommendationCounter,
-} from "./recommendations.js";
+export { generateRecommendations, resetRecommendationCounter } from "./recommendations.js";
 export type {
   ChatInteraction,
   LearningConfig,

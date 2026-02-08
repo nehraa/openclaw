@@ -136,7 +136,7 @@ export function selectModelForTask(
   }
 
   // Sort models by size (ascending)
-  const sorted = [...models].sort((a, b) => a.size - b.size);
+  const sorted = [...models].toSorted((a, b) => a.size - b.size);
   const reasoningModels = sorted.filter((m) => m.isReasoning);
 
   switch (complexity) {

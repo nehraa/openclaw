@@ -16,7 +16,7 @@ After exploring the codebase, I discovered:
 
 ```
 apps/macos/          → Native SwiftUI menu bar app
-Dockerfile           → Production-ready containerization  
+Dockerfile           → Production-ready containerization
 docker-compose.yml   → Multi-service orchestration
 src/tts/            → ElevenLabs, OpenAI, Edge TTS integration
 extensions/voice-call/ → Phone call capabilities
@@ -66,6 +66,7 @@ Option 2: One-command build: ./scripts/setup-mac-app.sh
 ```
 
 **Coverage:**
+
 - ✅ Installation (releases + build from source)
 - ✅ Voice wake configuration
 - ✅ Natural TTS setup (all 3 providers)
@@ -93,6 +94,7 @@ cd openclaw
 ```
 
 **Coverage:**
+
 - ✅ One-command setup
 - ✅ VPS deployment guide
 - ✅ Security hardening
@@ -106,29 +108,30 @@ cd openclaw
 ```markdown
 ## Choose Your Provider
 
-| Provider    | Quality | Cost      |
-|-------------|---------|-----------|
-| ElevenLabs  | ⭐⭐⭐⭐⭐  | ~$5-22/mo |
-| OpenAI      | ⭐⭐⭐⭐    | Pay/use   |
-| Edge TTS    | ⭐⭐⭐      | Free      |
+| Provider   | Quality    | Cost      |
+| ---------- | ---------- | --------- |
+| ElevenLabs | ⭐⭐⭐⭐⭐ | ~$5-22/mo |
+| OpenAI     | ⭐⭐⭐⭐   | Pay/use   |
+| Edge TTS   | ⭐⭐⭐     | Free      |
 
 ## Setup (ElevenLabs)
 
 {
-  "messages": {
-    "tts": {
-      "provider": "elevenlabs",
-      "auto": "always",
-      "elevenlabs": {
-        "apiKey": "YOUR_KEY",
-        "voiceId": "pMsXgVXv3BLzUgSXRplE"
-      }
-    }
-  }
+"messages": {
+"tts": {
+"provider": "elevenlabs",
+"auto": "always",
+"elevenlabs": {
+"apiKey": "YOUR_KEY",
+"voiceId": "pMsXgVXv3BLzUgSXRplE"
+}
+}
+}
 }
 ```
 
 **Coverage:**
+
 - ✅ All 3 TTS providers
 - ✅ Voice wake words (macOS/iOS)
 - ✅ Voice calls (Twilio/Telnyx)
@@ -146,19 +149,20 @@ cd openclaw
 Path 1: macOS Native (5 min)
 Path 2: Docker Deployment (3 min)  
 Path 3: Ultimate Setup (10 min)
-  ↳ macOS app + Docker backend + Voice
+↳ macOS app + Docker backend + Voice
 
 ## Architecture (Ultimate)
 
-┌─────────────────┐         ┌──────────────────┐
-│  macOS App      │────────▶│  Docker Gateway  │
-│  (Menu Bar)     │  RPC    │  (Server/VPS)    │
-│  - Voice Wake   │         │  - Always On     │
-│  - Push-to-Talk │         │  - Channels      │
-└─────────────────┘         └──────────────────┘
+┌─────────────────┐ ┌──────────────────┐
+│ macOS App │────────▶│ Docker Gateway │
+│ (Menu Bar) │ RPC │ (Server/VPS) │
+│ - Voice Wake │ │ - Always On │
+│ - Push-to-Talk │ │ - Channels │
+└─────────────────┘ └──────────────────┘
 ```
 
 **Coverage:**
+
 - ✅ Combined setup guide
 - ✅ Architecture diagrams
 - ✅ Feature comparison matrix
@@ -196,6 +200,7 @@ Path 3: Ultimate Setup (10 min)
 ```
 
 **Features:**
+
 - ✅ Dependency checking
 - ✅ Beautiful terminal UI
 - ✅ Auto-launch option
@@ -223,6 +228,7 @@ Choice [1-3]: _
 ```
 
 **Features:**
+
 - ✅ Interactive provider selection
 - ✅ Voice recommendations
 - ✅ Config generation
@@ -258,6 +264,7 @@ Choice [1-3]: _
 ```
 
 **Enhancements:**
+
 - ✅ Beautiful ASCII banners
 - ✅ Step-by-step guidance
 - ✅ Success message with next steps
@@ -303,36 +310,38 @@ User Experience:
 
 ## 🎯 Success Metrics
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| Time to setup macOS app | 30 min | 5 min | 83% faster |
-| Time to setup Docker | 15 min | 3 min | 80% faster |
-| Time to configure voice | 20 min | 2 min | 90% faster |
-| Documentation pages | Scattered | 4 focused | Organized |
-| Setup scripts | 0 | 3 | Infinite% |
-| User confusion | High | Low | Major improvement |
+| Metric                  | Before    | After     | Improvement       |
+| ----------------------- | --------- | --------- | ----------------- |
+| Time to setup macOS app | 30 min    | 5 min     | 83% faster        |
+| Time to setup Docker    | 15 min    | 3 min     | 80% faster        |
+| Time to configure voice | 20 min    | 2 min     | 90% faster        |
+| Documentation pages     | Scattered | 4 focused | Organized         |
+| Setup scripts           | 0         | 3         | Infinite%         |
+| User confusion          | High      | Low       | Major improvement |
 
 ## 🌟 Feature Matrix
 
-| Feature | Exists? | Documented? | One-Cmd Setup? |
-|---------|---------|-------------|----------------|
-| macOS Menu Bar App | ✅ Yes | ✅ Yes (6.3 KB) | ✅ Yes |
-| Voice Wake Words | ✅ Yes | ✅ Yes (15 KB) | ✅ Yes |
-| Natural TTS (ElevenLabs) | ✅ Yes | ✅ Yes (15 KB) | ✅ Yes |
-| Docker Deployment | ✅ Yes | ✅ Yes (8.9 KB) | ✅ Yes |
-| Voice Calls | ✅ Yes | ✅ Yes (in guide) | ✅ Partial |
-| Canvas Mode | ✅ Yes | ✅ Yes (in guide) | ✅ Via app |
-| Push-to-Talk | ✅ Yes | ✅ Yes (in guide) | ✅ Via app |
+| Feature                  | Exists? | Documented?       | One-Cmd Setup? |
+| ------------------------ | ------- | ----------------- | -------------- |
+| macOS Menu Bar App       | ✅ Yes  | ✅ Yes (6.3 KB)   | ✅ Yes         |
+| Voice Wake Words         | ✅ Yes  | ✅ Yes (15 KB)    | ✅ Yes         |
+| Natural TTS (ElevenLabs) | ✅ Yes  | ✅ Yes (15 KB)    | ✅ Yes         |
+| Docker Deployment        | ✅ Yes  | ✅ Yes (8.9 KB)   | ✅ Yes         |
+| Voice Calls              | ✅ Yes  | ✅ Yes (in guide) | ✅ Partial     |
+| Canvas Mode              | ✅ Yes  | ✅ Yes (in guide) | ✅ Via app     |
+| Push-to-Talk             | ✅ Yes  | ✅ Yes (in guide) | ✅ Via app     |
 
 ## 🔗 Quick Links
 
 ### Documentation
+
 - [Ultimate Quick Start](https://docs.openclaw.ai/start/ultimate-quickstart) - All features
 - [macOS App Guide](https://docs.openclaw.ai/start/macos-app-quickstart) - Native app
 - [Docker Guide](https://docs.openclaw.ai/start/docker-quickstart) - Containerization
 - [Voice Guide](https://docs.openclaw.ai/start/voice-quickstart) - Natural TTS
 
 ### Setup Scripts
+
 ```bash
 ./scripts/setup-mac-app.sh    # macOS native app
 ./docker-setup.sh              # Docker deployment
@@ -340,6 +349,7 @@ User Experience:
 ```
 
 ### Repository
+
 - [GitHub](https://github.com/openclaw/openclaw)
 - [Discord](https://discord.gg/clawd)
 - [Website](https://openclaw.ai)
