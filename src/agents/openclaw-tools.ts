@@ -37,6 +37,12 @@ import { createQdrantTool } from "./tools/qdrant-tool.js";
 import { createOllamaToolsTool } from "./tools/ollama-tools-tool.js";
 import { createPromptfooTool } from "./tools/promptfoo-tool.js";
 import { createvLLMTool } from "./tools/vllm-tool.js";
+import { createMetaGPTTool } from "./tools/metagpt-tool.js";
+import { createTabbyTool } from "./tools/tabby-tool.js";
+import { createSWEAgentTool } from "./tools/swe-agent-tool.js";
+import { createTGITool } from "./tools/tgi-tool.js";
+import { createHaystackTool } from "./tools/haystack-tool.js";
+import { createPiperTool } from "./tools/piper-tts-tool.js";
 
 export function createOpenClawTools(options?: {
   sandboxBrowserBridgeUrl?: string;
@@ -184,6 +190,12 @@ export function createOpenClawTools(options?: {
     createOllamaToolsTool({ config: options?.config }),
     createPromptfooTool({ config: options?.config }),
     createvLLMTool({ config: options?.config }),
+    createMetaGPTTool({ config: options?.config }),
+    createTabbyTool({ config: options?.config }),
+    createSWEAgentTool({ config: options?.config }),
+    createTGITool({ config: options?.config }),
+    createHaystackTool({ config: options?.config }),
+    createPiperTool({ config: options?.config }),
   ];
 
   const pluginTools = resolvePluginTools({
