@@ -37,9 +37,13 @@ export const TOOL_GROUPS: Record<string, string[]> = {
   // Nodes + device tools
   "group:nodes": ["nodes"],
   // AI Agent Orchestration
-  "group:ai-orchestration": ["langchain", "crewai", "litellm"],
+  "group:ai-orchestration": ["langchain", "crewai", "autogen", "litellm"],
   // RAG and Knowledge Management
-  "group:rag": ["llamaindex", "chromadb"],
+  "group:rag": ["llamaindex", "chromadb", "qdrant"],
+  // Coding Agents
+  "group:coding-agents": ["continue"],
+  // Multimedia AI
+  "group:multimedia": ["whisper", "diffusers"],
   // All OpenClaw native tools (excludes provider plugins).
   "group:openclaw": [
     "browser",
@@ -67,9 +71,14 @@ export const TOOL_GROUPS: Record<string, string[]> = {
     "public_apis",
     "langchain",
     "crewai",
+    "autogen",
     "litellm",
     "llamaindex",
     "chromadb",
+    "qdrant",
+    "continue",
+    "whisper",
+    "diffusers",
   ],
 };
 

@@ -29,6 +29,11 @@ import { createCrewAITool } from "./tools/crewai-tool.js";
 import { createLiteLLMTool } from "./tools/litellm-tool.js";
 import { createLlamaIndexTool } from "./tools/llamaindex-tool.js";
 import { createChromaDBTool } from "./tools/chromadb-tool.js";
+import { createAutoGenTool } from "./tools/autogen-tool.js";
+import { createContinueTool } from "./tools/continue-tool.js";
+import { createWhisperTool } from "./tools/whisper-tool.js";
+import { createDiffusersTool } from "./tools/diffusers-tool.js";
+import { createQdrantTool } from "./tools/qdrant-tool.js";
 
 export function createOpenClawTools(options?: {
   sandboxBrowserBridgeUrl?: string;
@@ -165,9 +170,14 @@ export function createOpenClawTools(options?: {
     createPublicApisTool(),
     createLangChainTool({ config: options?.config }),
     createCrewAITool({ config: options?.config }),
+    createAutoGenTool({ config: options?.config }),
     createLiteLLMTool({ config: options?.config }),
     createLlamaIndexTool({ config: options?.config }),
     createChromaDBTool({ config: options?.config }),
+    createQdrantTool({ config: options?.config }),
+    createContinueTool({ config: options?.config }),
+    createWhisperTool({ config: options?.config }),
+    createDiffusersTool({ config: options?.config }),
   ];
 
   const pluginTools = resolvePluginTools({
