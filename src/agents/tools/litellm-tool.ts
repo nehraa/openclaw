@@ -137,8 +137,6 @@ export function createLiteLLMTool(options?: { config?: OpenClawConfig }): AnyAge
       const apiKey = readStringParam(params, "api_key");
       const baseUrl = readStringParam(params, "base_url");
       const fallbackModelsStr = readStringParam(params, "fallback_models");
-      const maxTokens = params.max_tokens as number | undefined;
-      const temperature = params.temperature as number | undefined;
 
       try {
         switch (action) {
@@ -186,7 +184,7 @@ export function createLiteLLMTool(options?: { config?: OpenClawConfig }): AnyAge
                 error: "model and messages are required for create_chat_completion",
               });
             }
-            const messages = JSON.parse(messagesStr);
+            JSON.parse(messagesStr);
             const usage = usageStats.get(model) ?? {
               totalTokens: 0,
               totalCost: 0,

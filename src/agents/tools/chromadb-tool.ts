@@ -139,7 +139,6 @@ export function createChromaDBTool(options?: { config?: OpenClawConfig }): AnyAg
       const queryTextsStr = readStringParam(params, "query_texts");
       const nResults = (params.n_results as number | undefined) ?? 5;
       const whereStr = readStringParam(params, "where");
-      const whereDocumentStr = readStringParam(params, "where_document");
 
       try {
         switch (action) {

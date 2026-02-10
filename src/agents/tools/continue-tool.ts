@@ -116,7 +116,6 @@ export function createContinueTool(options?: { config?: OpenClawConfig }): AnyAg
       const model = readStringParam(params, "model") ?? currentModel;
       const language = readStringParam(params, "language");
       const contextFilesStr = readStringParam(params, "context_files");
-      const maxTokens = (params.max_tokens as number | undefined) ?? 2000;
 
       try {
         switch (action) {

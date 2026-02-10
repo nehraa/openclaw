@@ -138,7 +138,6 @@ export function createPromptfooTool(options?: { config?: OpenClawConfig }): AnyA
       const testInput = readStringParam(params, "test_input");
       const expectedOutput = readStringParam(params, "expected_output");
       const model = readStringParam(params, "model") ?? config.defaultModel;
-      const criteriaStr = readStringParam(params, "criteria");
       const redteamStrategiesStr = readStringParam(params, "redteam_strategies");
       const outputFormat = readStringParam(params, "output_format") ?? "json";
 

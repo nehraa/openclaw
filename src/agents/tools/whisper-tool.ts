@@ -113,7 +113,6 @@ export function createWhisperTool(options?: { config?: OpenClawConfig }): AnyAge
       const audioUrl = readStringParam(params, "audio_url");
       const model = readStringParam(params, "model") ?? currentModel;
       const language = readStringParam(params, "language") ?? "auto";
-      const task = readStringParam(params, "task") ?? "transcribe";
       const timestamp = (params.timestamp as boolean | undefined) ?? true;
       const outputFormat = readStringParam(params, "output_format") ?? "text";
 

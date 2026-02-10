@@ -102,8 +102,6 @@ export function createTGITool(options?: { config?: OpenClawConfig }): AnyAgentTo
       const prompt = readStringParam(params, "prompt");
       const messagesStr = readStringParam(params, "messages");
       const maxNewTokens = (params.max_new_tokens as number | undefined) ?? 512;
-      const temperature = (params.temperature as number | undefined) ?? 0.7;
-      const topP = (params.top_p as number | undefined) ?? 0.9;
       const loraAdapter = readStringParam(params, "lora_adapter");
 
       try {
@@ -135,7 +133,7 @@ export function createTGITool(options?: { config?: OpenClawConfig }): AnyAgentTo
               return jsonResult({ error: "messages is required for chat" });
             }
 
-            const messages = JSON.parse(messagesStr);
+            JSON.parse(messagesStr);
             stats.totalRequests += 1;
 
             return jsonResult({

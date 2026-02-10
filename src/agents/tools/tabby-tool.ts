@@ -97,7 +97,6 @@ export function createTabbyTool(options?: { config?: OpenClawConfig }): AnyAgent
       const model = readStringParam(params, "model") ?? currentModel;
       const repositoryPath = readStringParam(params, "repository_path");
       const query = readStringParam(params, "query");
-      const maxLength = (params.max_length as number | undefined) ?? 128;
 
       try {
         switch (action) {

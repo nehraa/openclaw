@@ -106,7 +106,6 @@ export function createSWEAgentTool(options?: { config?: OpenClawConfig }): AnyAg
       const repository = readStringParam(params, "repository") ?? config.defaultRepo;
       const fixId = readStringParam(params, "fix_id");
       const patch = readStringParam(params, "patch");
-      const autoCreatePr = (params.auto_create_pr as boolean | undefined) ?? true;
 
       try {
         switch (action) {

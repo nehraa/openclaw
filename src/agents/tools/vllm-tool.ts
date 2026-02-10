@@ -117,11 +117,7 @@ export function createvLLMTool(options?: { config?: OpenClawConfig }): AnyAgentT
       const prompt = readStringParam(params, "prompt");
       const messagesStr = readStringParam(params, "messages");
       const maxTokens = (params.max_tokens as number | undefined) ?? 2048;
-      const temperature = (params.temperature as number | undefined) ?? 0.7;
-      const topP = (params.top_p as number | undefined) ?? 0.9;
-      const topK = (params.top_k as number | undefined) ?? 50;
       const stream = (params.stream as boolean | undefined) ?? false;
-      const stopStr = readStringParam(params, "stop");
 
       try {
         switch (action) {
@@ -134,8 +130,6 @@ export function createvLLMTool(options?: { config?: OpenClawConfig }): AnyAgentT
             stats.totalTokens += maxTokens;
             stats.avgLatency = 0.05; // Simulated low latency
             stats.throughput = 1000; // Simulated high throughput
-
-            const stopSequences = stopStr ? stopStr.split(",").map((s) => s.trim()) : undefined;
 
             return jsonResult({
               success: true,
@@ -156,7 +150,7 @@ export function createvLLMTool(options?: { config?: OpenClawConfig }): AnyAgentT
               return jsonResult({ error: "messages is required for create_chat_completion" });
             }
 
-            const messages = JSON.parse(messagesStr);
+            JSON.parse(messagesStr);
             stats.totalRequests += 1;
             stats.totalTokens += maxTokens;
 
