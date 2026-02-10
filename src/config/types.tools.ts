@@ -456,4 +456,120 @@ export type ToolsConfig = {
     /** n8n API key for authentication. */
     apiKey?: string;
   };
+  /** CAMEL AI multi-agent communication configuration. */
+  camel?: {
+    enabled?: boolean;
+    modelName?: string;
+    temperature?: number;
+    maxTokens?: number;
+  };
+  /** Semantic Kernel enterprise SDK configuration. */
+  semanticKernel?: {
+    enabled?: boolean;
+    modelProvider?: string;
+    apiKey?: string;
+    telemetryEnabled?: boolean;
+  };
+  /** Langflow visual workflow builder configuration. */
+  langflow?: {
+    enabled?: boolean;
+    serverUrl?: string;
+    port?: number;
+  };
+  /** AutoGPT autonomous agent configuration. */
+  autogpt?: {
+    enabled?: boolean;
+    cloudEndpoint?: string;
+    apiKey?: string;
+  };
+  /** Cline VS Code agent configuration. */
+  cline?: {
+    enabled?: boolean;
+    requireApproval?: boolean;
+    auditEnabled?: boolean;
+  };
+  /** Roo Code speed-focused agent configuration. */
+  rooCode?: {
+    enabled?: boolean;
+    defaultRole?: string;
+    updateSpeed?: string;
+  };
+  /** OpenHands multi-agent research configuration. */
+  openhands?: {
+    enabled?: boolean;
+    maxAgents?: number;
+    benchmarkMode?: boolean;
+  };
+  /** Void Editor privacy-focused configuration. */
+  voidEditor?: {
+    enabled?: boolean;
+    apiEndpoint?: string;
+    offlineMode?: boolean;
+  };
+  /** OpenCode code generation configuration. */
+  opencode?: {
+    enabled?: boolean;
+    modelFamily?: string;
+    benchmarkEnabled?: boolean;
+  };
+  /** SuperAGI enterprise infrastructure configuration. */
+  superagi?: {
+    enabled?: boolean;
+    maxAgents?: number;
+    scalingEnabled?: boolean;
+  };
+  /** CodeGeeX multilingual assistant configuration. */
+  codegeex?: {
+    enabled?: boolean;
+    modelSize?: string;
+    languages?: string[];
+  };
+  /** GPT Pilot lead developer configuration. */
+  gptPilot?: {
+    enabled?: boolean;
+    iterativeMode?: boolean;
+    testingEnabled?: boolean;
+  };
+  /** Plandex complex tasks configuration. */
+  plandex?: {
+    enabled?: boolean;
+    terminalMode?: boolean;
+    refactorScope?: string;
+  };
+  /** Goose high-reliability agent configuration. */
+  goose?: {
+    enabled?: boolean;
+    deterministicMode?: boolean;
+    blockValidation?: boolean;
+  };
+  /** AgentGPT browser-based agent configuration. */
+  agentgpt?: {
+    enabled?: boolean;
+    webEndpoint?: string;
+    apiKey?: string;
+  };
+  /** Mentat CLI coordinator configuration. */
+  mentat?: {
+    enabled?: boolean;
+    coordinationMode?: string;
+    githubIntegration?: boolean;
+  };
+  /** AutoCodeRover bug fixing configuration. */
+  autocoderover?: {
+    enabled?: boolean;
+    analysisDepth?: string;
+    autoFix?: boolean;
+  };
+  /** AnythingLLM desktop RAG configuration. */
+  anythingllm?: {
+    enabled?: boolean;
+    serverUrl?: string;
+    offlineMode?: boolean;
+  };
+  /** Transformers.js browser inference configuration. */
+  transformersJs?: {
+    enabled?: boolean;
+    runtime?: string;
+    modelCache?: string;
+  };
 };

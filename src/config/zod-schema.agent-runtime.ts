@@ -560,6 +560,164 @@ export const ToolsSchema = z
       })
       .strict()
       .optional(),
+    // Agent Orchestration Tools
+    camel: z
+      .object({
+        enabled: z.boolean().optional(),
+        modelName: z.string().optional(),
+        temperature: z.number().optional(),
+        maxTokens: z.number().optional(),
+      })
+      .strict()
+      .optional(),
+    semanticKernel: z
+      .object({
+        enabled: z.boolean().optional(),
+        modelProvider: z.string().optional(),
+        apiKey: z.string().optional(),
+        telemetryEnabled: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
+    langflow: z
+      .object({
+        enabled: z.boolean().optional(),
+        serverUrl: z.string().optional(),
+        port: z.number().optional(),
+      })
+      .strict()
+      .optional(),
+    autogpt: z
+      .object({
+        enabled: z.boolean().optional(),
+        cloudEndpoint: z.string().optional(),
+        apiKey: z.string().optional(),
+      })
+      .strict()
+      .optional(),
+    // Coding Agent Tools
+    cline: z
+      .object({
+        enabled: z.boolean().optional(),
+        requireApproval: z.boolean().optional(),
+        auditEnabled: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
+    rooCode: z
+      .object({
+        enabled: z.boolean().optional(),
+        defaultRole: z.string().optional(),
+        updateSpeed: z.string().optional(),
+      })
+      .strict()
+      .optional(),
+    openhands: z
+      .object({
+        enabled: z.boolean().optional(),
+        maxAgents: z.number().optional(),
+        benchmarkMode: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
+    voidEditor: z
+      .object({
+        enabled: z.boolean().optional(),
+        apiEndpoint: z.string().optional(),
+        offlineMode: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
+    opencode: z
+      .object({
+        enabled: z.boolean().optional(),
+        modelFamily: z.string().optional(),
+        benchmarkEnabled: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
+    superagi: z
+      .object({
+        enabled: z.boolean().optional(),
+        maxAgents: z.number().optional(),
+        scalingEnabled: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
+    codegeex: z
+      .object({
+        enabled: z.boolean().optional(),
+        modelSize: z.string().optional(),
+        languages: z.array(z.string()).optional(),
+      })
+      .strict()
+      .optional(),
+    gptPilot: z
+      .object({
+        enabled: z.boolean().optional(),
+        iterativeMode: z.boolean().optional(),
+        testingEnabled: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
+    plandex: z
+      .object({
+        enabled: z.boolean().optional(),
+        terminalMode: z.boolean().optional(),
+        refactorScope: z.string().optional(),
+      })
+      .strict()
+      .optional(),
+    goose: z
+      .object({
+        enabled: z.boolean().optional(),
+        deterministicMode: z.boolean().optional(),
+        blockValidation: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
+    agentgpt: z
+      .object({
+        enabled: z.boolean().optional(),
+        webEndpoint: z.string().optional(),
+        apiKey: z.string().optional(),
+      })
+      .strict()
+      .optional(),
+    mentat: z
+      .object({
+        enabled: z.boolean().optional(),
+        coordinationMode: z.string().optional(),
+        githubIntegration: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
+    autocoderover: z
+      .object({
+        enabled: z.boolean().optional(),
+        analysisDepth: z.string().optional(),
+        autoFix: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
+    // RAG & Knowledge Tools
+    anythingllm: z
+      .object({
+        enabled: z.boolean().optional(),
+        serverUrl: z.string().optional(),
+        offlineMode: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
+    // Multimedia Tools
+    transformersJs: z
+      .object({
+        enabled: z.boolean().optional(),
+        runtime: z.string().optional(),
+        modelCache: z.string().optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict()
   .superRefine((value, ctx) => {

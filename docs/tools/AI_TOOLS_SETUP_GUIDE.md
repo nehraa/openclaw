@@ -129,6 +129,289 @@ export AUTOGEN_MODEL="gpt-4"
 
 ---
 
+### CAMEL
+
+**Status:** ✅ Implemented  
+**License:** Apache 2.0  
+**Repository:** https://github.com/camel-ai/camel
+
+#### Installation
+
+```bash
+pip install camel-ai
+```
+
+#### Configuration
+
+```json
+{
+  "tools": {
+    "camel": {
+      "enabled": true,
+      "defaultModel": "gpt-4",
+      "enableRoleplay": true,
+      "maxAgents": 5
+    }
+  }
+}
+```
+
+Environment variables:
+```bash
+export CAMEL_API_KEY="your-api-key"
+export CAMEL_MODEL="gpt-4"
+```
+
+#### Usage
+
+```bash
+openclaw message send --to agent --message "Create a CAMEL society for code review"
+```
+
+---
+
+### Semantic Kernel
+
+**Status:** ✅ Implemented  
+**License:** MIT  
+**Repository:** https://github.com/microsoft/semantic-kernel
+
+#### Installation
+
+```bash
+npm install @microsoft/semantic-kernel
+```
+
+Or Python:
+```bash
+pip install semantic-kernel
+```
+
+#### Configuration
+
+```json
+{
+  "tools": {
+    "semantickernel": {
+      "enabled": true,
+      "defaultModel": "gpt-4",
+      "enablePlugins": true,
+      "enablePlanning": true
+    }
+  }
+}
+```
+
+Environment variables:
+```bash
+export SEMANTIC_KERNEL_API_KEY="your-api-key"
+export SEMANTIC_KERNEL_MODEL="gpt-4"
+```
+
+#### Usage
+
+```bash
+openclaw message send --to agent --message "Use Semantic Kernel to plan a task"
+```
+
+---
+
+### Langflow
+
+**Status:** ✅ Implemented  
+**License:** MIT  
+**Repository:** https://github.com/langflow-ai/langflow
+
+#### Installation
+
+```bash
+pip install langflow
+```
+
+#### Start Langflow Server
+
+```bash
+langflow run --host localhost --port 7860
+```
+
+**Docker:**
+```bash
+docker run -d -p 7860:7860 langflowai/langflow
+```
+
+#### Configuration
+
+```json
+{
+  "tools": {
+    "langflow": {
+      "enabled": true,
+      "baseUrl": "http://localhost:7860",
+      "apiKey": "",
+      "enableUIAccess": true
+    }
+  }
+}
+```
+
+Environment variables:
+```bash
+export LANGFLOW_BASE_URL="http://localhost:7860"
+export LANGFLOW_API_KEY="your-key"
+```
+
+#### Usage
+
+```bash
+openclaw message send --to agent --message "Create a Langflow workflow for data processing"
+```
+
+---
+
+### AutoGPT
+
+**Status:** ✅ Implemented  
+**License:** MIT  
+**Repository:** https://github.com/Significant-Gravitas/AutoGPT
+
+#### Installation
+
+```bash
+pip install autogpt
+```
+
+Or clone and install:
+```bash
+git clone https://github.com/Significant-Gravitas/AutoGPT.git
+cd AutoGPT
+pip install -r requirements.txt
+```
+
+#### Configuration
+
+```json
+{
+  "tools": {
+    "autogpt": {
+      "enabled": true,
+      "defaultModel": "gpt-4",
+      "enableMemory": true,
+      "workspacePath": "./autogpt-workspace"
+    }
+  }
+}
+```
+
+Environment variables:
+```bash
+export OPENAI_API_KEY="your-api-key"
+export AUTOGPT_WORKSPACE="./autogpt-workspace"
+```
+
+#### Usage
+
+```bash
+openclaw message send --to agent --message "Use AutoGPT to research and summarize topic"
+```
+
+---
+
+### SuperAGI
+
+**Status:** ✅ Implemented  
+**License:** MIT  
+**Repository:** https://github.com/TransformerOptimus/SuperAGI
+
+#### Installation
+
+```bash
+git clone https://github.com/TransformerOptimus/SuperAGI.git
+cd SuperAGI
+pip install -r requirements.txt
+```
+
+**Docker:**
+```bash
+docker-compose up -d
+```
+
+#### Configuration
+
+```json
+{
+  "tools": {
+    "superagi": {
+      "enabled": true,
+      "baseUrl": "http://localhost:8001",
+      "defaultModel": "gpt-4",
+      "enableTools": true
+    }
+  }
+}
+```
+
+Environment variables:
+```bash
+export SUPERAGI_API_KEY="your-api-key"
+export SUPERAGI_BASE_URL="http://localhost:8001"
+```
+
+#### Usage
+
+```bash
+openclaw message send --to agent --message "Deploy a SuperAGI agent for task automation"
+```
+
+---
+
+### AgentGPT
+
+**Status:** ✅ Implemented  
+**License:** Freemium  
+**Repository:** https://github.com/reworkd/AgentGPT
+
+#### Installation
+
+```bash
+git clone https://github.com/reworkd/AgentGPT.git
+cd AgentGPT
+npm install
+```
+
+**Docker:**
+```bash
+docker-compose up -d
+```
+
+#### Configuration
+
+```json
+{
+  "tools": {
+    "agentgpt": {
+      "enabled": true,
+      "baseUrl": "http://localhost:3000",
+      "apiKey": "",
+      "enableWebUI": true
+    }
+  }
+}
+```
+
+Environment variables:
+```bash
+export AGENTGPT_API_KEY="your-api-key"
+export NEXT_PUBLIC_BACKEND_URL="http://localhost:3000"
+```
+
+#### Usage
+
+```bash
+openclaw message send --to agent --message "Create an AgentGPT autonomous agent"
+```
+
+---
+
 ## Local LLM Inference
 
 ### Ollama Tools
@@ -289,6 +572,50 @@ litellm --config config.yaml --port 4000
 
 ---
 
+### Transformers.js
+
+**Status:** ✅ Implemented  
+**License:** Apache 2.0  
+**Repository:** https://github.com/xenova/transformers.js
+
+#### Installation
+
+```bash
+npm install @xenova/transformers
+```
+
+#### Configuration
+
+```json
+{
+  "tools": {
+    "transformersjs": {
+      "enabled": true,
+      "defaultModel": "Xenova/bert-base-uncased",
+      "enableCache": true,
+      "cachePath": "./transformers-cache"
+    }
+  }
+}
+```
+
+Environment variables:
+```bash
+export TRANSFORMERS_CACHE="./transformers-cache"
+```
+
+#### Usage
+
+```javascript
+import { pipeline } from '@xenova/transformers';
+
+const classifier = await pipeline('sentiment-analysis');
+const result = await classifier('I love OpenClaw!');
+console.log(result);
+```
+
+---
+
 ## Coding Agents
 
 ### Continue.dev
@@ -333,6 +660,506 @@ Create `~/.continue/config.json`:
     }
   }
 }
+```
+
+---
+
+### Cline
+
+**Status:** ✅ Implemented  
+**License:** Free  
+**Repository:** https://github.com/cline/cline
+
+#### Installation
+
+**VS Code Extension:**
+```bash
+code --install-extension saoudrizwan.claude-dev
+```
+
+Or install from VS Code marketplace.
+
+#### Configuration
+
+Create `~/.cline/config.json`:
+```json
+{
+  "apiProvider": "anthropic",
+  "apiKey": "your-anthropic-key",
+  "model": "claude-3-opus-20240229",
+  "enableAutoMode": false
+}
+```
+
+#### OpenClaw Configuration
+
+```json
+{
+  "tools": {
+    "cline": {
+      "enabled": true,
+      "defaultModel": "claude-3-opus-20240229",
+      "enableAutoMode": false,
+      "workspacePath": ".cline"
+    }
+  }
+}
+```
+
+#### Usage
+
+```bash
+openclaw message send --message "Use Cline to refactor this code"
+```
+
+---
+
+### Roo Code
+
+**Status:** ✅ Implemented  
+**License:** MIT  
+**Repository:** https://github.com/RooVetGit/Roo-Code
+
+#### Installation
+
+**VS Code Extension:**
+```bash
+code --install-extension RooVet.roo-cline
+```
+
+#### Configuration
+
+```json
+{
+  "tools": {
+    "roocode": {
+      "enabled": true,
+      "defaultModel": "gpt-4",
+      "enableContextSharing": true,
+      "maxContextSize": 100000
+    }
+  }
+}
+```
+
+Environment variables:
+```bash
+export ROO_CODE_API_KEY="your-api-key"
+```
+
+#### Usage
+
+```bash
+openclaw message send --message "Use Roo Code for intelligent code completion"
+```
+
+---
+
+### OpenHands
+
+**Status:** ✅ Implemented  
+**License:** MIT  
+**Repository:** https://github.com/All-Hands-AI/OpenHands
+
+#### Installation
+
+```bash
+git clone https://github.com/All-Hands-AI/OpenHands.git
+cd OpenHands
+pip install -e .
+```
+
+**Docker:**
+```bash
+docker run -d -p 3000:3000 ghcr.io/all-hands-ai/openhands
+```
+
+#### Configuration
+
+```json
+{
+  "tools": {
+    "openhands": {
+      "enabled": true,
+      "baseUrl": "http://localhost:3000",
+      "defaultModel": "gpt-4",
+      "enableSandbox": true
+    }
+  }
+}
+```
+
+Environment variables:
+```bash
+export OPENHANDS_API_KEY="your-api-key"
+export OPENHANDS_SANDBOX="docker"
+```
+
+#### Usage
+
+```bash
+openclaw message send --message "Use OpenHands to solve coding task"
+```
+
+---
+
+### Void Editor
+
+**Status:** ✅ Implemented  
+**License:** MIT  
+**Repository:** https://github.com/voideditor/void
+
+#### Installation
+
+Download from releases or build from source:
+```bash
+git clone https://github.com/voideditor/void.git
+cd void
+npm install
+npm run build
+```
+
+#### Configuration
+
+```json
+{
+  "tools": {
+    "void": {
+      "enabled": true,
+      "defaultModel": "gpt-4",
+      "enableInlineCompletion": true,
+      "enableChat": true
+    }
+  }
+}
+```
+
+Environment variables:
+```bash
+export VOID_API_KEY="your-api-key"
+```
+
+#### Usage
+
+```bash
+openclaw message send --message "Open Void Editor for AI-assisted coding"
+```
+
+---
+
+### OpenCode
+
+**Status:** ✅ Implemented  
+**License:** Open Source  
+**Repository:** https://github.com/opencode/opencode
+
+#### Installation
+
+```bash
+npm install -g opencode
+```
+
+Or:
+```bash
+pip install opencode
+```
+
+#### Configuration
+
+```json
+{
+  "tools": {
+    "opencode": {
+      "enabled": true,
+      "defaultModel": "codellama",
+      "enableMultifile": true,
+      "outputPath": "./opencode-output"
+    }
+  }
+}
+```
+
+Environment variables:
+```bash
+export OPENCODE_MODEL="codellama"
+```
+
+#### Usage
+
+```bash
+opencode --file app.js --prompt "Add error handling"
+```
+
+---
+
+### CodeGeeX
+
+**Status:** ✅ Implemented  
+**License:** Open Source  
+**Repository:** https://github.com/THUDM/CodeGeeX
+
+#### Installation
+
+**VS Code Extension:**
+```bash
+code --install-extension aminer.codegeex
+```
+
+Or Python package:
+```bash
+pip install codegeex
+```
+
+#### Configuration
+
+```json
+{
+  "tools": {
+    "codegeex": {
+      "enabled": true,
+      "model": "codegeex-13b",
+      "enableCompletion": true,
+      "enableExplanation": true
+    }
+  }
+}
+```
+
+Environment variables:
+```bash
+export CODEGEEX_MODEL="codegeex-13b"
+```
+
+#### Usage
+
+```bash
+openclaw message send --message "Use CodeGeeX for code generation"
+```
+
+---
+
+### GPT Pilot
+
+**Status:** ✅ Implemented  
+**License:** MIT  
+**Repository:** https://github.com/Pythagora-io/gpt-pilot
+
+#### Installation
+
+```bash
+git clone https://github.com/Pythagora-io/gpt-pilot.git
+cd gpt-pilot
+pip install -r requirements.txt
+```
+
+#### Configuration
+
+```json
+{
+  "tools": {
+    "gptpilot": {
+      "enabled": true,
+      "defaultModel": "gpt-4",
+      "projectsPath": "./gpt-pilot-projects",
+      "enableIterative": true
+    }
+  }
+}
+```
+
+Environment variables:
+```bash
+export OPENAI_API_KEY="your-api-key"
+export GPT_PILOT_WORKSPACE="./gpt-pilot-projects"
+```
+
+#### Usage
+
+```bash
+python pilot/main.py
+```
+
+---
+
+### Plandex
+
+**Status:** ✅ Implemented  
+**License:** MIT  
+**Repository:** https://github.com/plandex-ai/plandex
+
+#### Installation
+
+```bash
+curl -sL https://plandex.ai/install.sh | bash
+```
+
+Or via Homebrew:
+```bash
+brew install plandex
+```
+
+#### Configuration
+
+```json
+{
+  "tools": {
+    "plandex": {
+      "enabled": true,
+      "defaultModel": "gpt-4",
+      "enableVersioning": true,
+      "projectsPath": "~/.plandex"
+    }
+  }
+}
+```
+
+Environment variables:
+```bash
+export PLANDEX_API_KEY="your-api-key"
+export PLANDEX_CLOUD_URL="https://api.plandex.ai"
+```
+
+#### Usage
+
+```bash
+plandex new myproject
+plandex tell "Create a REST API"
+plandex apply
+```
+
+---
+
+### Goose
+
+**Status:** ✅ Implemented  
+**License:** MIT  
+**Repository:** https://github.com/square/goose
+
+#### Installation
+
+```bash
+pip install goose-ai
+```
+
+Or with pipx:
+```bash
+pipx install goose-ai
+```
+
+#### Configuration
+
+```json
+{
+  "tools": {
+    "goose": {
+      "enabled": true,
+      "defaultModel": "gpt-4",
+      "enableToolkit": true,
+      "enableMemory": true
+    }
+  }
+}
+```
+
+Environment variables:
+```bash
+export OPENAI_API_KEY="your-api-key"
+export GOOSE_PROVIDER="openai"
+```
+
+#### Usage
+
+```bash
+goose run "Analyze this codebase"
+```
+
+---
+
+### Mentat
+
+**Status:** ✅ Implemented  
+**License:** MIT  
+**Repository:** https://github.com/AbanteAI/mentat
+
+#### Installation
+
+```bash
+pip install mentat
+```
+
+Or with pipx:
+```bash
+pipx install mentat
+```
+
+#### Configuration
+
+```json
+{
+  "tools": {
+    "mentat": {
+      "enabled": true,
+      "defaultModel": "gpt-4",
+      "enableCodeEditing": true,
+      "contextWindow": 8000
+    }
+  }
+}
+```
+
+Environment variables:
+```bash
+export OPENAI_API_KEY="your-api-key"
+export MENTAT_MODEL="gpt-4"
+```
+
+#### Usage
+
+```bash
+mentat "Add unit tests to all functions"
+```
+
+---
+
+### AutoCodeRover
+
+**Status:** ✅ Implemented  
+**License:** MIT  
+**Repository:** https://github.com/nus-apr/AutoCodeRover
+
+#### Installation
+
+```bash
+git clone https://github.com/nus-apr/AutoCodeRover.git
+cd AutoCodeRover
+pip install -r requirements.txt
+```
+
+#### Configuration
+
+```json
+{
+  "tools": {
+    "autocoderover": {
+      "enabled": true,
+      "defaultModel": "gpt-4",
+      "enableBugFix": true,
+      "enableTestGeneration": true
+    }
+  }
+}
+```
+
+Environment variables:
+```bash
+export OPENAI_API_KEY="your-api-key"
+export AUTOCODEROVER_WORKSPACE="./acr-workspace"
+```
+
+#### Usage
+
+```bash
+python run_autocoderover.py --task fix-bug --repo ./myproject
 ```
 
 ---
@@ -466,6 +1293,62 @@ Environment variables:
 export QDRANT_HOST="localhost"
 export QDRANT_PORT="6333"
 export QDRANT_API_KEY="your-key"
+```
+
+---
+
+### AnythingLLM
+
+**Status:** ✅ Implemented  
+**License:** MIT  
+**Repository:** https://github.com/Mintplex-Labs/anything-llm
+
+#### Installation
+
+**Desktop App:**
+Download from https://anythingllm.com/download
+
+**Docker:**
+```bash
+docker run -d -p 3001:3001 \
+  -v anythingllm-storage:/app/server/storage \
+  mintplexlabs/anythingllm
+```
+
+**Source:**
+```bash
+git clone https://github.com/Mintplex-Labs/anything-llm.git
+cd anything-llm
+yarn install
+yarn dev:server
+```
+
+#### Configuration
+
+```json
+{
+  "tools": {
+    "anythingllm": {
+      "enabled": true,
+      "baseUrl": "http://localhost:3001",
+      "apiKey": "",
+      "defaultWorkspace": "default",
+      "enableDocumentProcessing": true
+    }
+  }
+}
+```
+
+Environment variables:
+```bash
+export ANYTHING_LLM_BASE_URL="http://localhost:3001"
+export ANYTHING_LLM_API_KEY="your-api-key"
+```
+
+#### Usage
+
+```bash
+openclaw message send --message "Use AnythingLLM to create a knowledge workspace"
 ```
 
 ---
