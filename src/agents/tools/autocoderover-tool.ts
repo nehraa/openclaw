@@ -44,8 +44,7 @@ const AutoCodeRoverToolSchema = Type.Object({
 type AutoCodeRoverConfig = {
   enabled: boolean;
   analysisDepth?: string;
-  autoApply?: boolean;
-  requireTests?: boolean;
+  autoFix?: boolean;
 };
 
 function resolveAutoCodeRoverConfig(cfg: OpenClawConfig | undefined): AutoCodeRoverConfig {
@@ -54,11 +53,13 @@ function resolveAutoCodeRoverConfig(cfg: OpenClawConfig | undefined): AutoCodeRo
     | undefined;
   const autocoderover = toolsCfg?.autocoderover as Record<string, unknown> | undefined;
 
+  const autoFix = autocoderover?.autoFix as boolean | undefined;
+
   return {
     enabled: (autocoderover?.enabled as boolean) ?? true,
     analysisDepth: (autocoderover?.analysisDepth as string) ?? "medium",
-    autoApply: (autocoderover?.autoApply as boolean) ?? false,
-    requireTests: (autocoderover?.requireTests as boolean) ?? true,
+    // Map validated `autoFix` config into behavior control
+    autoFix: autoFix ?? false,
   };
 }
 
@@ -188,7 +189,7 @@ export function createAutoCodeRoverTool(options?: { config?: OpenClawConfig }): 
               ],
               confidence: 0.87,
               status: "generated",
-              testsRequired: config.requireTests,
+              testsRequired: true, // Fixed: always require tests for safety
             };
             fixes.set(bugId, fixData);
             bug.status = "fix_generated";
@@ -196,7 +197,7 @@ export function createAutoCodeRoverTool(options?: { config?: OpenClawConfig }): 
               success: true,
               message: "Fix generated",
               fix: fixData,
-              requires_testing: config.requireTests,
+              requires_testing: true,
               note: "Fix generation simulated (AutoCodeRover not installed)",
             });
           }
@@ -238,10 +239,11 @@ export function createAutoCodeRoverTool(options?: { config?: OpenClawConfig }): 
             if (!bug || !fix) {
               return jsonResult({ error: `Bug or fix for ${bugId} not found` });
             }
-            if (config.requireTests && fix.status !== "tested_pass") {
+            // Always check tests passed for safety
+            if (fix.status !== "tested_pass") {
               return jsonResult({ error: "Fix must pass tests before applying" });
             }
-            const autoApply = autoApplyStr === "true" || config.autoApply;
+            const autoApply = autoApplyStr === "true" || config.autoFix;
             if (!autoApply) {
               return jsonResult({
                 success: false,

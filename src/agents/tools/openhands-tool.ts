@@ -46,21 +46,19 @@ const OpenHandsToolSchema = Type.Object({
 type OpenHandsConfig = {
   enabled: boolean;
   maxAgents?: number;
-  benchmarkEnabled?: boolean;
-  collaborationMode?: string;
+  benchmarkMode?: boolean;
 };
 
 function resolveOpenHandsConfig(cfg: OpenClawConfig | undefined): OpenHandsConfig {
   const toolsCfg = (cfg as Record<string, unknown> | undefined)?.tools as
     | Record<string, unknown>
     | undefined;
-  const openHands = toolsCfg?.openHands as Record<string, unknown> | undefined;
+  const openhands = toolsCfg?.openhands as Record<string, unknown> | undefined;
 
   return {
-    enabled: (openHands?.enabled as boolean) ?? true,
-    maxAgents: (openHands?.maxAgents as number) ?? 5,
-    benchmarkEnabled: (openHands?.benchmarkEnabled as boolean) ?? true,
-    collaborationMode: (openHands?.collaborationMode as string) ?? "distributed",
+    enabled: (openhands?.enabled as boolean) ?? true,
+    maxAgents: (openhands?.maxAgents as number) ?? 5,
+    benchmarkMode: (openhands?.benchmarkMode as boolean) ?? false,
   };
 }
 
@@ -240,14 +238,14 @@ export function createOpenHandsTool(options?: { config?: OpenClawConfig }): AnyA
                 total_findings: totalFindings,
                 average_confidence: avgConfidence,
                 swe_bench_resolution_rate: 0.53,
-                collaboration_mode: config.collaborationMode,
+                collaboration_mode: "distributed", // Fixed: use hardcoded default
                 max_agents: config.maxAgents,
               },
             });
           }
 
           case "benchmark_task": {
-            if (!config.benchmarkEnabled) {
+            if (!config.benchmarkMode) {
               return jsonResult({ error: "Benchmarking is disabled in config" });
             }
             if (!benchmarkType) {
@@ -294,7 +292,7 @@ export function createOpenHandsTool(options?: { config?: OpenClawConfig }): AnyA
               agentIds: ids,
               agentTypes: collaboratingAgents.map((a) => a.type),
               startedAt: new Date().toISOString(),
-              mode: config.collaborationMode,
+              mode: "distributed", // Fixed: use hardcoded default
               expectedOutcome: "synthesized-solution",
             };
             return jsonResult({

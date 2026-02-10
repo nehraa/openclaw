@@ -41,8 +41,8 @@ const GooseToolSchema = Type.Object({
 
 type GooseConfig = {
   enabled: boolean;
-  validateOutcomes?: boolean;
-  reliabilityThreshold?: number;
+  deterministicMode?: boolean;
+  blockValidation?: boolean;
 };
 
 function resolveGooseConfig(cfg: OpenClawConfig | undefined): GooseConfig {
@@ -53,8 +53,8 @@ function resolveGooseConfig(cfg: OpenClawConfig | undefined): GooseConfig {
 
   return {
     enabled: (goose?.enabled as boolean) ?? true,
-    validateOutcomes: (goose?.validateOutcomes as boolean) ?? true,
-    reliabilityThreshold: (goose?.reliabilityThreshold as number) ?? 0.95,
+    deterministicMode: (goose?.deterministicMode as boolean) ?? true,
+    blockValidation: (goose?.blockValidation as boolean) ?? true,
   };
 }
 
@@ -83,7 +83,6 @@ export function createGooseTool(options?: { config?: OpenClawConfig }): AnyAgent
 
       const action = readStringParam(params, "action", { required: true });
       const blockId = readStringParam(params, "block_id");
-      const workflowId = readStringParam(params, "workflow_id");
       const name = readStringParam(params, "name");
       const task = readStringParam(params, "task");
       const validationRulesStr = readStringParam(params, "validation_rules");
@@ -120,7 +119,7 @@ export function createGooseTool(options?: { config?: OpenClawConfig }): AnyAgent
               success: true,
               block_id: id,
               message: `Block '${name}' created`,
-              validation_enabled: config.validateOutcomes,
+              validation_enabled: config.blockValidation,
             });
           }
 
@@ -173,7 +172,7 @@ export function createGooseTool(options?: { config?: OpenClawConfig }): AnyAgent
             if (!blockId) {
               return jsonResult({ error: "block_id is required for validate_outcome" });
             }
-            if (!config.validateOutcomes) {
+            if (!config.blockValidation) {
               return jsonResult({ error: "Outcome validation is disabled in config" });
             }
             const block = blocks.get(blockId);
@@ -248,14 +247,14 @@ export function createGooseTool(options?: { config?: OpenClawConfig }): AnyAgent
             if (!blockMetrics) {
               return jsonResult({ error: `Metrics for block ${blockId} not found` });
             }
-            const meetsThreshold =
-              (blockMetrics.reliability as number) >= (config.reliabilityThreshold ?? 0.95);
+            // Use fixed threshold since it's not in config schema
+            const meetsThreshold = (blockMetrics.reliability as number) >= 0.95;
             return jsonResult({
               success: true,
               block_id: blockId,
               metrics: blockMetrics,
               meets_threshold: meetsThreshold,
-              threshold: config.reliabilityThreshold,
+              threshold: 0.95, // Fixed: use hardcoded threshold
             });
           }
 

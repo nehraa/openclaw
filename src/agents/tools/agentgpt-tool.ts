@@ -40,9 +40,8 @@ const AgentGPTToolSchema = Type.Object({
 
 type AgentGPTConfig = {
   enabled: boolean;
-  webUrl?: string;
+  webEndpoint?: string;
   apiKey?: string;
-  defaultModel?: string;
 };
 
 function resolveAgentGPTConfig(cfg: OpenClawConfig | undefined): AgentGPTConfig {
@@ -53,10 +52,12 @@ function resolveAgentGPTConfig(cfg: OpenClawConfig | undefined): AgentGPTConfig 
 
   return {
     enabled: (agentgpt?.enabled as boolean) ?? true,
-    webUrl:
-      (agentgpt?.webUrl as string) ?? process.env.AGENTGPT_WEB_URL ?? "https://agentgpt.reworkd.ai",
+    webEndpoint:
+      (agentgpt?.webEndpoint as string) ??
+      process.env.AGENTGPT_WEB_ENDPOINT ??
+      process.env.AGENTGPT_WEB_URL ??
+      "https://agentgpt.reworkd.ai",
     apiKey: (agentgpt?.apiKey as string) ?? process.env.AGENTGPT_API_KEY,
-    defaultModel: (agentgpt?.defaultModel as string) ?? "gpt-3.5-turbo",
   };
 }
 
@@ -102,7 +103,7 @@ export function createAgentGPTTool(options?: { config?: OpenClawConfig }): AnyAg
               name,
               createdAt: new Date().toISOString(),
               status: "created",
-              model: model ?? config.defaultModel,
+              model: model ?? "gpt-3.5-turbo", // Fixed: use hardcoded default
               goal: null,
               subGoals: [],
               tasks: [],
@@ -113,7 +114,7 @@ export function createAgentGPTTool(options?: { config?: OpenClawConfig }): AnyAg
               success: true,
               agent_id: id,
               message: `Web agent '${name}' created`,
-              web_url: `${config.webUrl}/agent/${id}`,
+              web_url: `${config.webEndpoint}/agent/${id}`,
             });
           }
 

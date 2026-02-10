@@ -66,9 +66,8 @@ const TransformersToolSchema = Type.Object({
 
 type TransformersConfig = {
   enabled: boolean;
-  cacheDir?: string;
-  deviceMap?: string;
-  defaultQuantized?: boolean;
+  runtime?: string;
+  modelCache?: string;
 };
 
 /**
@@ -78,13 +77,15 @@ function resolveTransformersConfig(cfg: OpenClawConfig | undefined): Transformer
   const toolsCfg = (cfg as Record<string, unknown> | undefined)?.tools as
     | Record<string, unknown>
     | undefined;
-  const transformers = toolsCfg?.transformers as Record<string, unknown> | undefined;
+  const transformersJs = toolsCfg?.transformersJs as Record<string, unknown> | undefined;
 
   return {
-    enabled: (transformers?.enabled as boolean) ?? true,
-    cacheDir: (transformers?.cacheDir as string) ?? process.env.TRANSFORMERS_CACHE ?? "./models",
-    deviceMap: (transformers?.deviceMap as string) ?? "auto",
-    defaultQuantized: (transformers?.defaultQuantized as boolean) ?? true,
+    enabled: (transformersJs?.enabled as boolean) ?? true,
+    runtime: (transformersJs?.runtime as string) ?? "browser",
+    modelCache:
+      (transformersJs?.modelCache as string) ??
+      process.env.TRANSFORMERS_CACHE ??
+      "./.cache/transformers",
   };
 }
 
@@ -146,8 +147,7 @@ export function createTransformersJSTool(options?: { config?: OpenClawConfig }):
       const topP = (params.top_p as number | undefined) ?? 0.9;
       const numBeams = (params.num_beams as number | undefined) ?? 1;
       const confidenceThreshold = (params.confidence_threshold as number | undefined) ?? 0.5;
-      const quantized =
-        (params.quantized as boolean | undefined) ?? config.defaultQuantized ?? true;
+      const quantized = (params.quantized as boolean | undefined) ?? true; // Fixed: use hardcoded default
 
       try {
         switch (action) {
@@ -178,7 +178,7 @@ export function createTransformersJSTool(options?: { config?: OpenClawConfig }):
               model_name: modelName,
               task,
               quantized,
-              cache_dir: config.cacheDir,
+              cache_dir: config.modelCache,
               message: `Model '${modelName}' loaded for ${task}`,
               note: "Model loading simulated (Transformers.js not installed)",
             });

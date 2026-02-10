@@ -90,7 +90,6 @@ export function createCamelTool(options?: { config?: OpenClawConfig }): AnyAgent
 
       const action = readStringParam(params, "action", { required: true });
       const societyId = readStringParam(params, "society_id");
-      const agentId = readStringParam(params, "agent_id");
       const role = readStringParam(params, "role");
       const task = readStringParam(params, "task");
       const message = readStringParam(params, "message");

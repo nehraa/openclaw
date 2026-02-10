@@ -94,13 +94,11 @@ export function createLangflowTool(options?: { config?: OpenClawConfig }): AnyAg
       const action = readStringParam(params, "action", { required: true });
       const flowId = readStringParam(params, "flow_id");
       const name = readStringParam(params, "name");
-      const componentId = readStringParam(params, "component_id");
       const componentType = readStringParam(params, "component_type");
       const sourceId = readStringParam(params, "source_id");
       const targetId = readStringParam(params, "target_id");
       const input = readStringParam(params, "input");
       const configStr = readStringParam(params, "config");
-      const templateName = readStringParam(params, "template_name");
 
       try {
         switch (action) {

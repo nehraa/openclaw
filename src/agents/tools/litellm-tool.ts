@@ -159,9 +159,9 @@ export function createLiteLLMTool(options?: { config?: OpenClawConfig }): AnyAge
               model,
               completion: "Simulated completion response (LiteLLM not installed)",
               usage: {
-                prompt_tokens: (prompt.length / 4) | 0,
+                prompt_tokens: Math.floor(prompt.length / 4),
                 completion_tokens: 50,
-                total_tokens: (prompt.length / 4) | (0 + 50),
+                total_tokens: Math.floor(prompt.length / 4) + 50,
               },
             });
           }

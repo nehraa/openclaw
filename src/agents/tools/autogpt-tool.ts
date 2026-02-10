@@ -94,7 +94,6 @@ export function createAutoGPTTool(options?: { config?: OpenClawConfig }): AnyAge
       const action = readStringParam(params, "action", { required: true });
       const agentId = readStringParam(params, "agent_id");
       const name = readStringParam(params, "name");
-      const blockId = readStringParam(params, "block_id");
       const blockType = readStringParam(params, "block_type");
       const sourceBlock = readStringParam(params, "source_block");
       const targetBlock = readStringParam(params, "target_block");

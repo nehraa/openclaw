@@ -66,14 +66,25 @@ function resolveOpenCodeConfig(cfg: OpenClawConfig | undefined): OpenCodeConfig 
   const toolsCfg = (cfg as Record<string, unknown> | undefined)?.tools as
     | Record<string, unknown>
     | undefined;
-  const openCode = toolsCfg?.openCode as Record<string, unknown> | undefined;
+  // Prefer schema-aligned key `opencode`, but support legacy `openCode` for backward compatibility.
+  const openCodeCfg =
+    (toolsCfg?.opencode as Record<string, unknown> | undefined) ??
+    (toolsCfg?.openCode as Record<string, unknown> | undefined);
 
   return {
-    enabled: (openCode?.enabled as boolean) ?? true,
-    defaultModel: (openCode?.defaultModel as string) ?? "opencoder-8b",
-    defaultLanguage: (openCode?.defaultLanguage as string) ?? "python",
-    optimizationEnabled: (openCode?.optimizationEnabled as boolean) ?? true,
-    maxTokens: (openCode?.maxTokens as number) ?? 2048,
+    enabled: (openCodeCfg?.enabled as boolean) ?? true,
+    // Prefer explicit defaultModel; fall back to schema field modelFamily; then use hardcoded default.
+    defaultModel:
+      (openCodeCfg?.defaultModel as string) ??
+      (openCodeCfg?.modelFamily as string) ??
+      "opencoder-8b",
+    defaultLanguage: (openCodeCfg?.defaultLanguage as string) ?? "python",
+    // Prefer optimizationEnabled; fall back to schema field benchmarkEnabled; then use hardcoded default.
+    optimizationEnabled:
+      (openCodeCfg?.optimizationEnabled as boolean) ??
+      (openCodeCfg?.benchmarkEnabled as boolean) ??
+      true,
+    maxTokens: (openCodeCfg?.maxTokens as number) ?? 2048,
   };
 }
 
