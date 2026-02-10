@@ -24,6 +24,11 @@ import { createSessionsSpawnTool } from "./tools/sessions-spawn-tool.js";
 import { createShannonTool } from "./tools/shannon-tool.js";
 import { createTtsTool } from "./tools/tts-tool.js";
 import { createWebFetchTool, createWebSearchTool } from "./tools/web-tools.js";
+import { createLangChainTool } from "./tools/langchain-tool.js";
+import { createCrewAITool } from "./tools/crewai-tool.js";
+import { createLiteLLMTool } from "./tools/litellm-tool.js";
+import { createLlamaIndexTool } from "./tools/llamaindex-tool.js";
+import { createChromaDBTool } from "./tools/chromadb-tool.js";
 
 export function createOpenClawTools(options?: {
   sandboxBrowserBridgeUrl?: string;
@@ -158,6 +163,11 @@ export function createOpenClawTools(options?: {
     createLearningTool({ senderId: options?.agentAccountId }),
     createProactiveTool({ senderId: options?.agentAccountId }),
     createPublicApisTool(),
+    createLangChainTool({ config: options?.config }),
+    createCrewAITool({ config: options?.config }),
+    createLiteLLMTool({ config: options?.config }),
+    createLlamaIndexTool({ config: options?.config }),
+    createChromaDBTool({ config: options?.config }),
   ];
 
   const pluginTools = resolvePluginTools({
