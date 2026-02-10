@@ -34,6 +34,9 @@ import { createContinueTool } from "./tools/continue-tool.js";
 import { createWhisperTool } from "./tools/whisper-tool.js";
 import { createDiffusersTool } from "./tools/diffusers-tool.js";
 import { createQdrantTool } from "./tools/qdrant-tool.js";
+import { createOllamaToolsTool } from "./tools/ollama-tools-tool.js";
+import { createPromptfooTool } from "./tools/promptfoo-tool.js";
+import { createvLLMTool } from "./tools/vllm-tool.js";
 
 export function createOpenClawTools(options?: {
   sandboxBrowserBridgeUrl?: string;
@@ -178,6 +181,9 @@ export function createOpenClawTools(options?: {
     createContinueTool({ config: options?.config }),
     createWhisperTool({ config: options?.config }),
     createDiffusersTool({ config: options?.config }),
+    createOllamaToolsTool({ config: options?.config }),
+    createPromptfooTool({ config: options?.config }),
+    createvLLMTool({ config: options?.config }),
   ];
 
   const pluginTools = resolvePluginTools({
