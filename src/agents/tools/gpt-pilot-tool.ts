@@ -45,21 +45,20 @@ const GPTPilotToolSchema = Type.Object({
 
 type GPTPilotConfig = {
   enabled: boolean;
-  workingDir?: string;
-  autoApprove?: boolean;
+  iterativeMode?: boolean;
+  testingEnabled?: boolean;
 };
 
 function resolveGPTPilotConfig(cfg: OpenClawConfig | undefined): GPTPilotConfig {
   const toolsCfg = (cfg as Record<string, unknown> | undefined)?.tools as
     | Record<string, unknown>
     | undefined;
-  const gptpilot = toolsCfg?.gptpilot as Record<string, unknown> | undefined;
+  const gptPilot = toolsCfg?.gptPilot as Record<string, unknown> | undefined;
 
   return {
-    enabled: (gptpilot?.enabled as boolean) ?? true,
-    workingDir:
-      (gptpilot?.workingDir as string) ?? process.env.GPT_PILOT_WORKSPACE ?? "./workspace",
-    autoApprove: (gptpilot?.autoApprove as boolean) ?? false,
+    enabled: (gptPilot?.enabled as boolean) ?? true,
+    iterativeMode: (gptPilot?.iterativeMode as boolean) ?? true,
+    testingEnabled: (gptPilot?.testingEnabled as boolean) ?? true,
   };
 }
 
@@ -118,7 +117,7 @@ export function createGPTPilotTool(options?: { config?: OpenClawConfig }): AnyAg
               success: true,
               project_id: id,
               message: `Project '${name}' created`,
-              working_dir: `${config.workingDir}/${id}`,
+              working_dir: `./workspace/${id}`,
             });
           }
 
@@ -161,15 +160,15 @@ export function createGPTPilotTool(options?: { config?: OpenClawConfig }): AnyAg
             const featureData = {
               description: feature,
               implementedAt: new Date().toISOString(),
-              status: config.autoApprove ? "implemented" : "pending_review",
+              status: "pending_review",
               changes: ["Modified src/index.js", "Added src/features/newFeature.js"],
             };
             (project.features as Array<Record<string, unknown>>).push(featureData);
             return jsonResult({
               success: true,
-              message: `Feature development ${config.autoApprove ? "completed" : "pending review"}`,
+              message: "Feature development pending review",
               feature: featureData,
-              requires_approval: !config.autoApprove,
+              requires_approval: true,
               note: "Feature implementation simulated (GPT Pilot not installed)",
             });
           }

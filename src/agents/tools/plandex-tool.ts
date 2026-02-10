@@ -47,8 +47,8 @@ const PlandexToolSchema = Type.Object({
 
 type PlandexConfig = {
   enabled: boolean;
-  autoCommit?: boolean;
-  trackHistory?: boolean;
+  terminalMode?: boolean;
+  refactorScope?: string;
 };
 
 function resolvePlandexConfig(cfg: OpenClawConfig | undefined): PlandexConfig {
@@ -59,8 +59,8 @@ function resolvePlandexConfig(cfg: OpenClawConfig | undefined): PlandexConfig {
 
   return {
     enabled: (plandex?.enabled as boolean) ?? true,
-    autoCommit: (plandex?.autoCommit as boolean) ?? false,
-    trackHistory: (plandex?.trackHistory as boolean) ?? true,
+    terminalMode: (plandex?.terminalMode as boolean) ?? true,
+    refactorScope: (plandex?.refactorScope as string) ?? "large",
   };
 }
 
@@ -137,17 +137,15 @@ export function createPlandexTool(options?: { config?: OpenClawConfig }): AnyAge
               timestamp: new Date().toISOString(),
               changes,
               filesModified: changes.map((c: Record<string, unknown>) => c.file),
-              status: config.autoCommit ? "committed" : "staged",
+              status: "staged",
             };
             (plan.steps as Array<Record<string, unknown>>).push(editData);
-            if (config.trackHistory) {
-              const history = changeHistory.get(planId) ?? [];
-              history.push(editData);
-              changeHistory.set(planId, history);
-            }
+            const history = changeHistory.get(planId) ?? [];
+            history.push(editData);
+            changeHistory.set(planId, history);
             return jsonResult({
               success: true,
-              message: `Multi-file edit ${config.autoCommit ? "committed" : "staged"}`,
+              message: "Multi-file edit staged",
               edit: editData,
               note: "Multi-file edit simulated (Plandex not installed)",
             });
@@ -171,11 +169,9 @@ export function createPlandexTool(options?: { config?: OpenClawConfig }): AnyAge
               status: "completed",
             };
             (plan.steps as Array<Record<string, unknown>>).push(refactorData);
-            if (config.trackHistory) {
-              const history = changeHistory.get(planId) ?? [];
-              history.push(refactorData);
-              changeHistory.set(planId, history);
-            }
+            const history = changeHistory.get(planId) ?? [];
+            history.push(refactorData);
+            changeHistory.set(planId, history);
             return jsonResult({
               success: true,
               message: `Refactor '${refactorType}' completed`,
@@ -187,9 +183,6 @@ export function createPlandexTool(options?: { config?: OpenClawConfig }): AnyAge
           case "track_changes": {
             if (!planId) {
               return jsonResult({ error: "plan_id is required for track_changes" });
-            }
-            if (!config.trackHistory) {
-              return jsonResult({ error: "Change tracking is disabled in config" });
             }
             const history = changeHistory.get(planId) ?? [];
             return jsonResult({

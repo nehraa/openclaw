@@ -55,9 +55,7 @@ const SuperAGIToolSchema = Type.Object({
 type SuperAGIConfig = {
   enabled: boolean;
   maxAgents?: number;
-  defaultDeploymentTarget?: string;
-  monitoringEnabled?: boolean;
-  autoScaling?: boolean;
+  scalingEnabled?: boolean;
 };
 
 function resolveSuperAGIConfig(cfg: OpenClawConfig | undefined): SuperAGIConfig {
@@ -69,9 +67,7 @@ function resolveSuperAGIConfig(cfg: OpenClawConfig | undefined): SuperAGIConfig 
   return {
     enabled: (superagi?.enabled as boolean) ?? true,
     maxAgents: (superagi?.maxAgents as number) ?? 100,
-    defaultDeploymentTarget: (superagi?.defaultDeploymentTarget as string) ?? "cloud",
-    monitoringEnabled: (superagi?.monitoringEnabled as boolean) ?? true,
-    autoScaling: (superagi?.autoScaling as boolean) ?? true,
+    scalingEnabled: (superagi?.scalingEnabled as boolean) ?? true,
   };
 }
 
@@ -225,9 +221,6 @@ export function createSuperAGITool(options?: { config?: OpenClawConfig }): AnyAg
           }
 
           case "get_metrics": {
-            if (!config.monitoringEnabled) {
-              return jsonResult({ error: "Monitoring is disabled in config" });
-            }
             const totalAgents = agents.size;
             const totalTemplates = agentTemplates.size;
             const totalAssemblyLines = assemblyLines.size;
@@ -243,8 +236,8 @@ export function createSuperAGITool(options?: { config?: OpenClawConfig }): AnyAg
                 total_assembly_lines: totalAssemblyLines,
                 average_throughput: avgThroughput,
                 max_agents: config.maxAgents,
-                auto_scaling: config.autoScaling,
-                deployment_target: config.defaultDeploymentTarget,
+                auto_scaling: config.scalingEnabled,
+                deployment_target: "cloud",
               },
               recent_metrics: metrics.slice(-10),
             });
@@ -258,7 +251,7 @@ export function createSuperAGITool(options?: { config?: OpenClawConfig }): AnyAg
             if (!agent) {
               return jsonResult({ error: `Agent ${agentId} not found` });
             }
-            const target = deploymentTarget ?? config.defaultDeploymentTarget;
+            const target = deploymentTarget ?? "cloud";
             agent.status = "deployed";
             agent.deploymentTarget = target;
             agent.deployedAt = new Date().toISOString();
@@ -293,9 +286,6 @@ export function createSuperAGITool(options?: { config?: OpenClawConfig }): AnyAg
           }
 
           case "monitor_performance": {
-            if (!config.monitoringEnabled) {
-              return jsonResult({ error: "Monitoring is disabled in config" });
-            }
             const agentId = readStringParam(params, "agent_id");
             if (agentId) {
               const agent = agents.get(agentId);

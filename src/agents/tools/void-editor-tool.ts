@@ -45,10 +45,8 @@ const VoidEditorToolSchema = Type.Object({
 
 type VoidEditorConfig = {
   enabled: boolean;
-  defaultModel?: string;
-  privacyLevel?: string;
-  localModelsOnly?: boolean;
-  telemetryEnabled?: boolean;
+  apiEndpoint?: string;
+  offlineMode?: boolean;
 };
 
 function resolveVoidEditorConfig(cfg: OpenClawConfig | undefined): VoidEditorConfig {
@@ -59,10 +57,11 @@ function resolveVoidEditorConfig(cfg: OpenClawConfig | undefined): VoidEditorCon
 
   return {
     enabled: (voidEditor?.enabled as boolean) ?? true,
-    defaultModel: (voidEditor?.defaultModel as string) ?? "local-codellama",
-    privacyLevel: (voidEditor?.privacyLevel as string) ?? "maximum",
-    localModelsOnly: (voidEditor?.localModelsOnly as boolean) ?? true,
-    telemetryEnabled: (voidEditor?.telemetryEnabled as boolean) ?? false,
+    apiEndpoint:
+      (voidEditor?.apiEndpoint as string) ??
+      process.env.VOID_EDITOR_API_ENDPOINT ??
+      "http://localhost:8080",
+    offlineMode: (voidEditor?.offlineMode as boolean) ?? true,
   };
 }
 
@@ -114,7 +113,7 @@ export function createVoidEditorTool(options?: { config?: OpenClawConfig }): Any
               path: projectPath,
               openedAt: new Date().toISOString(),
               privacyLevel: currentPrivacyLevel,
-              telemetryEnabled: config.telemetryEnabled,
+              telemetryEnabled: false,
               model: currentModel,
             });
             return jsonResult({
@@ -123,8 +122,8 @@ export function createVoidEditorTool(options?: { config?: OpenClawConfig }): Any
               project_path: projectPath,
               message: `Project opened with ${currentPrivacyLevel} privacy`,
               privacy_guarantees: {
-                no_telemetry: !config.telemetryEnabled,
-                local_models: config.localModelsOnly,
+                no_telemetry: true,
+                local_models: config.offlineMode,
                 data_retention: "none",
               },
             });
@@ -319,7 +318,7 @@ export function createVoidEditorTool(options?: { config?: OpenClawConfig }): Any
             if (!modelName) {
               return jsonResult({ error: "model_name is required for switch_model" });
             }
-            if (config.localModelsOnly && !modelName.startsWith("local-")) {
+            if (config.offlineMode && !modelName.startsWith("local-")) {
               return jsonResult({
                 error: "Only local models allowed in current privacy configuration",
               });

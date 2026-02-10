@@ -40,8 +40,8 @@ const MentatToolSchema = Type.Object({
 
 type MentatConfig = {
   enabled: boolean;
-  trackDependencies?: boolean;
-  autoReview?: boolean;
+  coordinationMode?: string;
+  githubIntegration?: boolean;
 };
 
 function resolveMentatConfig(cfg: OpenClawConfig | undefined): MentatConfig {
@@ -52,8 +52,8 @@ function resolveMentatConfig(cfg: OpenClawConfig | undefined): MentatConfig {
 
   return {
     enabled: (mentat?.enabled as boolean) ?? true,
-    trackDependencies: (mentat?.trackDependencies as boolean) ?? true,
-    autoReview: (mentat?.autoReview as boolean) ?? false,
+    coordinationMode: (mentat?.coordinationMode as string) ?? "automatic",
+    githubIntegration: (mentat?.githubIntegration as boolean) ?? true,
   };
 }
 
@@ -107,9 +107,7 @@ export function createMentatTool(options?: { config?: OpenClawConfig }): AnyAgen
               status: "pending",
               changes: [],
             });
-            if (config.trackDependencies) {
-              dependencies.set(id, []);
-            }
+            dependencies.set(id, []);
             return jsonResult({
               success: true,
               coordination_id: id,
@@ -137,14 +135,14 @@ export function createMentatTool(options?: { config?: OpenClawConfig }): AnyAgen
                 "Add test coverage for edge cases",
                 "Update documentation",
               ],
-              status: config.autoReview ? "approved" : "pending_approval",
+              status: "pending_approval",
             };
             coordination.review = review;
             return jsonResult({
               success: true,
               message: "Issue reviewed",
               review,
-              requires_approval: !config.autoReview,
+              requires_approval: true,
               note: "Issue review simulated (Mentat not installed)",
             });
           }
@@ -170,21 +168,19 @@ export function createMentatTool(options?: { config?: OpenClawConfig }): AnyAgen
             coordination.status = "in_progress";
 
             // Track dependencies
-            if (config.trackDependencies) {
-              const coordinationDeps = dependencies.get(coordinationId) ?? [];
-              for (const change of changes) {
-                if (change.dependencies) {
-                  for (const dep of change.dependencies as string[]) {
-                    coordinationDeps.push({
-                      file: change.file,
-                      dependency: dep,
-                      timestamp: new Date().toISOString(),
-                    });
-                  }
+            const coordinationDeps = dependencies.get(coordinationId) ?? [];
+            for (const change of changes) {
+              if (change.dependencies) {
+                for (const dep of change.dependencies as string[]) {
+                  coordinationDeps.push({
+                    file: change.file,
+                    dependency: dep,
+                    timestamp: new Date().toISOString(),
+                  });
                 }
               }
-              dependencies.set(coordinationId, coordinationDeps);
             }
+            dependencies.set(coordinationId, coordinationDeps);
 
             return jsonResult({
               success: true,
@@ -199,9 +195,6 @@ export function createMentatTool(options?: { config?: OpenClawConfig }): AnyAgen
               return jsonResult({
                 error: "coordination_id is required for track_dependencies",
               });
-            }
-            if (!config.trackDependencies) {
-              return jsonResult({ error: "Dependency tracking is disabled in config" });
             }
             const coordinationDeps = dependencies.get(coordinationId) ?? [];
             return jsonResult({

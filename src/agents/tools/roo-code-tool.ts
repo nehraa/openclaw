@@ -46,8 +46,7 @@ const RooCodeToolSchema = Type.Object({
 type RooCodeConfig = {
   enabled: boolean;
   defaultRole?: string;
-  defaultMode?: string;
-  maxConcurrency?: number;
+  updateSpeed?: string;
 };
 
 function resolveRooCodeConfig(cfg: OpenClawConfig | undefined): RooCodeConfig {
@@ -59,8 +58,7 @@ function resolveRooCodeConfig(cfg: OpenClawConfig | undefined): RooCodeConfig {
   return {
     enabled: (rooCode?.enabled as boolean) ?? true,
     defaultRole: (rooCode?.defaultRole as string) ?? "Developer",
-    defaultMode: (rooCode?.defaultMode as string) ?? "balanced",
-    maxConcurrency: (rooCode?.maxConcurrency as number) ?? 3,
+    updateSpeed: (rooCode?.updateSpeed as string) ?? "fast",
   };
 }
 
@@ -259,10 +257,11 @@ export function createRooCodeTool(options?: { config?: OpenClawConfig }): AnyAge
 
           case "optimize_workflow": {
             const pendingTasks = Array.from(tasks.values()).filter((t) => t.status === "pending");
+            const maxConcurrency = 3;
             const optimizations: Array<string> = [];
-            if (pendingTasks.length > config.maxConcurrency!) {
+            if (pendingTasks.length > maxConcurrency) {
               optimizations.push(
-                `Consider batching ${pendingTasks.length} pending tasks (max concurrency: ${config.maxConcurrency})`,
+                `Consider batching ${pendingTasks.length} pending tasks (max concurrency: ${maxConcurrency})`,
               );
             }
             if (currentMode === "thorough" && pendingTasks.length > 5) {
@@ -312,9 +311,10 @@ export function createRooCodeTool(options?: { config?: OpenClawConfig }): AnyAge
               return jsonResult({ error: "batch_tasks is required for batch_execute" });
             }
             const taskDescriptions = JSON.parse(batchTasks) as Array<string>;
-            if (taskDescriptions.length > config.maxConcurrency!) {
+            const maxConcurrency = 3;
+            if (taskDescriptions.length > maxConcurrency) {
               return jsonResult({
-                error: `Batch size ${taskDescriptions.length} exceeds max concurrency ${config.maxConcurrency}`,
+                error: `Batch size ${taskDescriptions.length} exceeds max concurrency ${maxConcurrency}`,
               });
             }
             const batchResults = taskDescriptions.map((desc) => {
