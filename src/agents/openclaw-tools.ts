@@ -43,6 +43,25 @@ import { createSWEAgentTool } from "./tools/swe-agent-tool.js";
 import { createTGITool } from "./tools/tgi-tool.js";
 import { createHaystackTool } from "./tools/haystack-tool.js";
 import { createPiperTool } from "./tools/piper-tts-tool.js";
+import { createCamelTool } from "./tools/camel-tool.js";
+import { createSemanticKernelTool } from "./tools/semantic-kernel-tool.js";
+import { createLangflowTool } from "./tools/langflow-tool.js";
+import { createAutoGPTTool } from "./tools/autogpt-tool.js";
+import { createClineTool } from "./tools/cline-tool.js";
+import { createRooCodeTool } from "./tools/roo-code-tool.js";
+import { createOpenHandsTool } from "./tools/openhands-tool.js";
+import { createVoidEditorTool } from "./tools/void-editor-tool.js";
+import { createOpenCodeTool } from "./tools/opencode-tool.js";
+import { createSuperAGITool } from "./tools/superagi-tool.js";
+import { createCodeGeeXTool } from "./tools/codegeex-tool.js";
+import { createGPTPilotTool } from "./tools/gpt-pilot-tool.js";
+import { createPlandexTool } from "./tools/plandex-tool.js";
+import { createGooseTool } from "./tools/goose-tool.js";
+import { createAgentGPTTool } from "./tools/agentgpt-tool.js";
+import { createMentatTool } from "./tools/mentat-tool.js";
+import { createAutoCodeRoverTool } from "./tools/autocoderover-tool.js";
+import { createAnythingLLMTool } from "./tools/anythingllm-tool.js";
+import { createTransformersJSTool } from "./tools/transformers-js-tool.js";
 
 export function createOpenClawTools(options?: {
   sandboxBrowserBridgeUrl?: string;
@@ -196,6 +215,29 @@ export function createOpenClawTools(options?: {
     createTGITool({ config: options?.config }),
     createHaystackTool({ config: options?.config }),
     createPiperTool({ config: options?.config }),
+    // Agent Orchestration Tools
+    createCamelTool({ config: options?.config }),
+    createSemanticKernelTool({ config: options?.config }),
+    createLangflowTool({ config: options?.config }),
+    createAutoGPTTool({ config: options?.config }),
+    // Coding Agent Tools
+    createClineTool({ config: options?.config }),
+    createRooCodeTool({ config: options?.config }),
+    createOpenHandsTool({ config: options?.config }),
+    createVoidEditorTool({ config: options?.config }),
+    createOpenCodeTool({ config: options?.config }),
+    createSuperAGITool({ config: options?.config }),
+    createCodeGeeXTool({ config: options?.config }),
+    createGPTPilotTool({ config: options?.config }),
+    createPlandexTool({ config: options?.config }),
+    createGooseTool({ config: options?.config }),
+    createAgentGPTTool({ config: options?.config }),
+    createMentatTool({ config: options?.config }),
+    createAutoCodeRoverTool({ config: options?.config }),
+    // RAG & Knowledge Tools
+    createAnythingLLMTool({ config: options?.config }),
+    // Multimedia Tools
+    createTransformersJSTool({ config: options?.config }),
   ];
 
   const pluginTools = resolvePluginTools({
