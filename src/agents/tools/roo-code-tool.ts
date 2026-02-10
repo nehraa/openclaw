@@ -88,7 +88,7 @@ export function createRooCodeTool(options?: { config?: OpenClawConfig }): AnyAge
         return jsonResult({ error: "Roo Code integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const taskId = readStringParam(params, "task_id");
       const description = readStringParam(params, "description");
       const role = readStringParam(params, "role");
@@ -274,7 +274,10 @@ export function createRooCodeTool(options?: { config?: OpenClawConfig }): AnyAge
               current_mode: currentMode,
               current_role: currentRole,
               optimizations,
-              message: optimizations.length > 0 ? "Optimization suggestions available" : "Workflow is optimized",
+              message:
+                optimizations.length > 0
+                  ? "Optimization suggestions available"
+                  : "Workflow is optimized",
             });
           }
 

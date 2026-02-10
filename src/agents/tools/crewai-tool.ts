@@ -26,36 +26,21 @@ const CREWAI_ACTIONS = [
 
 const CrewAIToolSchema = Type.Object({
   action: stringEnum(CREWAI_ACTIONS),
-  name: Type.Optional(
-    Type.String({ description: "Name of the crew, agent, or task to create." }),
-  ),
-  crew_id: Type.Optional(
-    Type.String({ description: "Crew ID for execution or status queries." }),
-  ),
-  agent_id: Type.Optional(
-    Type.String({ description: "Agent ID for task assignment." }),
-  ),
-  task_id: Type.Optional(
-    Type.String({ description: "Task ID for assignment operations." }),
-  ),
+  name: Type.Optional(Type.String({ description: "Name of the crew, agent, or task to create." })),
+  crew_id: Type.Optional(Type.String({ description: "Crew ID for execution or status queries." })),
+  agent_id: Type.Optional(Type.String({ description: "Agent ID for task assignment." })),
+  task_id: Type.Optional(Type.String({ description: "Task ID for assignment operations." })),
   role: Type.Optional(
     Type.String({
-      description:
-        "Agent role (e.g., 'researcher', 'coder', 'reviewer', 'architect', 'tester').",
+      description: "Agent role (e.g., 'researcher', 'coder', 'reviewer', 'architect', 'tester').",
     }),
   ),
-  goal: Type.Optional(
-    Type.String({ description: "Goal description for the agent or task." }),
-  ),
-  backstory: Type.Optional(
-    Type.String({ description: "Backstory/context for the agent role." }),
-  ),
+  goal: Type.Optional(Type.String({ description: "Goal description for the agent or task." })),
+  backstory: Type.Optional(Type.String({ description: "Backstory/context for the agent role." })),
   task_description: Type.Optional(
     Type.String({ description: "Description of the task to create or assign." }),
   ),
-  config: Type.Optional(
-    Type.String({ description: "JSON configuration for crew creation." }),
-  ),
+  config: Type.Optional(Type.String({ description: "JSON configuration for crew creation." })),
   process_type: Type.Optional(
     Type.String({
       description: "Crew process type: 'sequential' or 'hierarchical'. Default: 'sequential'.",
@@ -140,7 +125,7 @@ export function createCrewAITool(options?: { config?: OpenClawConfig }): AnyAgen
         return jsonResult({ error: "CrewAI integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const name = readStringParam(params, "name");
       const crewId = readStringParam(params, "crew_id");
       const agentId = readStringParam(params, "agent_id");

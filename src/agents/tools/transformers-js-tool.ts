@@ -25,19 +25,18 @@ const TRANSFORMERS_ACTIONS = [
 const TransformersToolSchema = Type.Object({
   action: stringEnum(TRANSFORMERS_ACTIONS),
   model_name: Type.Optional(
-    Type.String({ description: "Model name from Hugging Face Hub (e.g., 'gpt2', 'bert-base-uncased')." }),
+    Type.String({
+      description: "Model name from Hugging Face Hub (e.g., 'gpt2', 'bert-base-uncased').",
+    }),
   ),
   task: Type.Optional(
     Type.String({
-      description: "Task type: 'text-generation', 'sentiment-analysis', 'image-classification', 'object-detection', 'feature-extraction'.",
+      description:
+        "Task type: 'text-generation', 'sentiment-analysis', 'image-classification', 'object-detection', 'feature-extraction'.",
     }),
   ),
-  text: Type.Optional(
-    Type.String({ description: "Input text for processing." }),
-  ),
-  image_path: Type.Optional(
-    Type.String({ description: "Path to input image file." }),
-  ),
+  text: Type.Optional(Type.String({ description: "Input text for processing." })),
+  image_path: Type.Optional(Type.String({ description: "Path to input image file." })),
   max_length: Type.Optional(
     Type.Number({ description: "Maximum length for text generation.", minimum: 1, maximum: 2048 }),
   ),
@@ -54,7 +53,11 @@ const TransformersToolSchema = Type.Object({
     Type.Number({ description: "Number of beams for beam search.", minimum: 1, maximum: 10 }),
   ),
   confidence_threshold: Type.Optional(
-    Type.Number({ description: "Minimum confidence for detection results.", minimum: 0, maximum: 1 }),
+    Type.Number({
+      description: "Minimum confidence for detection results.",
+      minimum: 0,
+      maximum: 1,
+    }),
   ),
   quantized: Type.Optional(
     Type.Boolean({ description: "Use quantized model variant for faster inference." }),
@@ -104,7 +107,11 @@ const POPULAR_MODELS = [
   { name: "t5-small", task: "text2text-generation", size: "small" },
   { name: "vit-base-patch16-224", task: "image-classification", size: "medium" },
   { name: "facebook/detr-resnet-50", task: "object-detection", size: "large" },
-  { name: "distilbert-base-uncased-finetuned-sst-2-english", task: "sentiment-analysis", size: "small" },
+  {
+    name: "distilbert-base-uncased-finetuned-sst-2-english",
+    task: "sentiment-analysis",
+    size: "small",
+  },
   { name: "whisper-tiny", task: "automatic-speech-recognition", size: "small" },
 ];
 
@@ -128,7 +135,7 @@ export function createTransformersJSTool(options?: { config?: OpenClawConfig }):
         return jsonResult({ error: "Transformers.js integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const modelName = readStringParam(params, "model_name");
       const task = readStringParam(params, "task");
       const text = readStringParam(params, "text");
@@ -139,7 +146,8 @@ export function createTransformersJSTool(options?: { config?: OpenClawConfig }):
       const topP = (params.top_p as number | undefined) ?? 0.9;
       const numBeams = (params.num_beams as number | undefined) ?? 1;
       const confidenceThreshold = (params.confidence_threshold as number | undefined) ?? 0.5;
-      const quantized = (params.quantized as boolean | undefined) ?? config.defaultQuantized;
+      const quantized =
+        (params.quantized as boolean | undefined) ?? config.defaultQuantized ?? true;
 
       try {
         switch (action) {
@@ -338,11 +346,12 @@ export function createTransformersJSTool(options?: { config?: OpenClawConfig }):
             const modelInfo = loadedModels.get(model)!;
             modelInfo.inferenceCount++;
 
-            const sentiment = text.toLowerCase().includes("good") ||
+            const sentiment =
+              text.toLowerCase().includes("good") ||
               text.toLowerCase().includes("great") ||
               text.toLowerCase().includes("excellent")
-              ? "POSITIVE"
-              : "NEGATIVE";
+                ? "POSITIVE"
+                : "NEGATIVE";
             const score = Math.random() * 0.3 + 0.7;
 
             return jsonResult({

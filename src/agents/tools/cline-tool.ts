@@ -82,7 +82,7 @@ export function createClineTool(options?: { config?: OpenClawConfig }): AnyAgent
         return jsonResult({ error: "Cline integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const taskId = readStringParam(params, "task_id");
       const description = readStringParam(params, "description");
       const plan = readStringParam(params, "plan");
@@ -180,9 +180,7 @@ export function createClineTool(options?: { config?: OpenClawConfig }): AnyAgent
             }
             return jsonResult({
               success: true,
-              message: config.requireApproval
-                ? "Action pending approval"
-                : "Action executed",
+              message: config.requireApproval ? "Action pending approval" : "Action executed",
               action: actionData,
               note: "Action execution simulated (Cline not installed)",
             });
@@ -198,7 +196,9 @@ export function createClineTool(options?: { config?: OpenClawConfig }): AnyAgent
             if (!task) {
               return jsonResult({ error: `Task ${taskId} not found` });
             }
-            const diff = changes ?? `--- a/${filePath}\n+++ b/${filePath}\n@@ -1,1 +1,1 @@\n-old content\n+new content`;
+            const diff =
+              changes ??
+              `--- a/${filePath}\n+++ b/${filePath}\n@@ -1,1 +1,1 @@\n-old content\n+new content`;
             return jsonResult({
               success: true,
               file_path: filePath,

@@ -31,15 +31,15 @@ const PlandexToolSchema = Type.Object({
       description: "Comma-separated list of file paths to include in the plan.",
     }),
   ),
-  changes: Type.Optional(
-    Type.String({ description: "JSON array of changes to apply to files." }),
-  ),
+  changes: Type.Optional(Type.String({ description: "JSON array of changes to apply to files." })),
   refactor_type: Type.Optional(
     Type.String({
       description: "Refactor type (e.g., 'rename', 'extract', 'inline', 'move').",
     }),
   ),
-  target: Type.Optional(Type.String({ description: "Refactor target (e.g., function, class name)." })),
+  target: Type.Optional(
+    Type.String({ description: "Refactor target (e.g., function, class name)." }),
+  ),
   checkpoint: Type.Optional(
     Type.String({ description: "Checkpoint ID for rollback or tracking." }),
   ),
@@ -86,7 +86,7 @@ export function createPlandexTool(options?: { config?: OpenClawConfig }): AnyAge
         return jsonResult({ error: "Plandex integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const planId = readStringParam(params, "plan_id");
       const name = readStringParam(params, "name");
       const description = readStringParam(params, "description");

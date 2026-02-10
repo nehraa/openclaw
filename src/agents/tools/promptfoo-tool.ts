@@ -24,24 +24,14 @@ const PROMPTFOO_ACTIONS = [
 
 const PromptfooToolSchema = Type.Object({
   action: stringEnum(PROMPTFOO_ACTIONS),
-  suite_name: Type.Optional(
-    Type.String({ description: "Name of the test suite." }),
-  ),
-  suite_id: Type.Optional(
-    Type.String({ description: "Test suite ID for operations." }),
-  ),
-  prompt: Type.Optional(
-    Type.String({ description: "Prompt to test or evaluate." }),
-  ),
+  suite_name: Type.Optional(Type.String({ description: "Name of the test suite." })),
+  suite_id: Type.Optional(Type.String({ description: "Test suite ID for operations." })),
+  prompt: Type.Optional(Type.String({ description: "Prompt to test or evaluate." })),
   alternate_prompt: Type.Optional(
     Type.String({ description: "Alternate prompt for A/B comparison." }),
   ),
-  test_input: Type.Optional(
-    Type.String({ description: "Input data for test case." }),
-  ),
-  expected_output: Type.Optional(
-    Type.String({ description: "Expected output for validation." }),
-  ),
+  test_input: Type.Optional(Type.String({ description: "Input data for test case." })),
+  expected_output: Type.Optional(Type.String({ description: "Expected output for validation." })),
   model: Type.Optional(
     Type.String({ description: "Model to use for evaluation (e.g., 'gpt-4', 'claude-3')." }),
   ),
@@ -130,7 +120,7 @@ export function createPromptfooTool(options?: { config?: OpenClawConfig }): AnyA
         return jsonResult({ error: "Promptfoo integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const suiteName = readStringParam(params, "suite_name");
       const suiteId = readStringParam(params, "suite_id");
       const prompt = readStringParam(params, "prompt");

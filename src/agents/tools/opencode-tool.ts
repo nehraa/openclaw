@@ -38,9 +38,7 @@ const SUPPORTED_LANGUAGES = [
 
 const OpenCodeToolSchema = Type.Object({
   action: stringEnum(OPENCODE_ACTIONS),
-  prompt: Type.Optional(
-    Type.String({ description: "Code generation prompt or description." }),
-  ),
+  prompt: Type.Optional(Type.String({ description: "Code generation prompt or description." })),
   code: Type.Optional(Type.String({ description: "Code snippet for operations." })),
   source_language: Type.Optional(stringEnum(SUPPORTED_LANGUAGES)),
   target_language: Type.Optional(stringEnum(SUPPORTED_LANGUAGES)),
@@ -106,7 +104,7 @@ export function createOpenCodeTool(options?: { config?: OpenClawConfig }): AnyAg
         return jsonResult({ error: "OpenCode integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const prompt = readStringParam(params, "prompt");
       const code = readStringParam(params, "code");
       const sourceLanguage = readStringParam(params, "source_language");

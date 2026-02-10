@@ -82,7 +82,7 @@ export function createHaystackTool(options?: { config?: OpenClawConfig }): AnyAg
         return jsonResult({ error: "Haystack integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const pipelineName = readStringParam(params, "pipeline_name");
       const pipelineId = readStringParam(params, "pipeline_id");
       const documentsStr = readStringParam(params, "documents");

@@ -36,9 +36,7 @@ const SuperAGIToolSchema = Type.Object({
   action: stringEnum(SUPERAGI_ACTIONS),
   template_name: Type.Optional(stringEnum(AGENT_TEMPLATES)),
   agent_id: Type.Optional(Type.String({ description: "Agent ID for operations." })),
-  assembly_line_id: Type.Optional(
-    Type.String({ description: "Assembly line ID for operations." }),
-  ),
+  assembly_line_id: Type.Optional(Type.String({ description: "Assembly line ID for operations." })),
   scale_factor: Type.Optional(
     Type.String({ description: "Scale factor: 1-10 for agent replication." }),
   ),
@@ -48,9 +46,7 @@ const SuperAGIToolSchema = Type.Object({
   resource_limits: Type.Optional(
     Type.String({ description: "JSON resource limits (cpu, memory, storage)." }),
   ),
-  workflow_steps: Type.Optional(
-    Type.String({ description: "JSON array of workflow steps." }),
-  ),
+  workflow_steps: Type.Optional(Type.String({ description: "JSON array of workflow steps." })),
   deployment_target: Type.Optional(
     Type.String({ description: "Deployment target: local, cloud, hybrid." }),
   ),
@@ -104,7 +100,7 @@ export function createSuperAGITool(options?: { config?: OpenClawConfig }): AnyAg
         return jsonResult({ error: "SuperAGI integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const templateName = readStringParam(params, "template_name");
       const agentId = readStringParam(params, "agent_id");
       const assemblyLineId = readStringParam(params, "assembly_line_id");
@@ -237,8 +233,7 @@ export function createSuperAGITool(options?: { config?: OpenClawConfig }): AnyAg
             const totalAssemblyLines = assemblyLines.size;
             const avgThroughput =
               metrics.length > 0
-                ? metrics.reduce((sum, m) => sum + (m.throughput as number), 0) /
-                  metrics.length
+                ? metrics.reduce((sum, m) => sum + (m.throughput as number), 0) / metrics.length
                 : 0;
             return jsonResult({
               success: true,

@@ -88,7 +88,7 @@ export function createCamelTool(options?: { config?: OpenClawConfig }): AnyAgent
         return jsonResult({ error: "CAMEL AI integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const societyId = readStringParam(params, "society_id");
       const agentId = readStringParam(params, "agent_id");
       const role = readStringParam(params, "role");
@@ -244,12 +244,14 @@ export function createCamelTool(options?: { config?: OpenClawConfig }): AnyAgent
               if (!society) {
                 return jsonResult({ error: `Society ${societyId} not found` });
               }
-              agentList = (society.agents as string[]).map((id) => {
-                const agent = agentsMap.get(id);
-                return agent
-                  ? { id, role: agent.role, model: agent.model, createdAt: agent.createdAt }
-                  : null;
-              }).filter(Boolean);
+              agentList = (society.agents as string[])
+                .map((id) => {
+                  const agent = agentsMap.get(id);
+                  return agent
+                    ? { id, role: agent.role, model: agent.model, createdAt: agent.createdAt }
+                    : null;
+                })
+                .filter(Boolean);
             } else {
               agentList = Array.from(agentsMap.values()).map((agent) => ({
                 id: agent.id,

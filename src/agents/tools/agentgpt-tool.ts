@@ -26,9 +26,7 @@ const AgentGPTToolSchema = Type.Object({
   agent_id: Type.Optional(Type.String({ description: "Agent ID for operations." })),
   name: Type.Optional(Type.String({ description: "Agent name." })),
   goal: Type.Optional(Type.String({ description: "Goal description for the agent." })),
-  sub_goals: Type.Optional(
-    Type.String({ description: "JSON array of sub-goals for the agent." }),
-  ),
+  sub_goals: Type.Optional(Type.String({ description: "JSON array of sub-goals for the agent." })),
   max_iterations: Type.Optional(
     Type.String({ description: "Maximum iterations for autonomous execution." }),
   ),
@@ -56,9 +54,7 @@ function resolveAgentGPTConfig(cfg: OpenClawConfig | undefined): AgentGPTConfig 
   return {
     enabled: (agentgpt?.enabled as boolean) ?? true,
     webUrl:
-      (agentgpt?.webUrl as string) ??
-      process.env.AGENTGPT_WEB_URL ??
-      "https://agentgpt.reworkd.ai",
+      (agentgpt?.webUrl as string) ?? process.env.AGENTGPT_WEB_URL ?? "https://agentgpt.reworkd.ai",
     apiKey: (agentgpt?.apiKey as string) ?? process.env.AGENTGPT_API_KEY,
     defaultModel: (agentgpt?.defaultModel as string) ?? "gpt-3.5-turbo",
   };
@@ -86,7 +82,7 @@ export function createAgentGPTTool(options?: { config?: OpenClawConfig }): AnyAg
         return jsonResult({ error: "AgentGPT integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const agentId = readStringParam(params, "agent_id");
       const name = readStringParam(params, "name");
       const goal = readStringParam(params, "goal");

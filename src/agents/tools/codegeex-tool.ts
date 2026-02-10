@@ -48,15 +48,11 @@ const SUPPORTED_LANGUAGES = [
 
 const CodeGeeXToolSchema = Type.Object({
   action: stringEnum(CODEGEEX_ACTIONS),
-  prompt: Type.Optional(
-    Type.String({ description: "Code generation prompt or description." }),
-  ),
+  prompt: Type.Optional(Type.String({ description: "Code generation prompt or description." })),
   code: Type.Optional(Type.String({ description: "Code snippet for operations." })),
   source_language: Type.Optional(stringEnum(SUPPORTED_LANGUAGES)),
   target_language: Type.Optional(stringEnum(SUPPORTED_LANGUAGES)),
-  context: Type.Optional(
-    Type.String({ description: "Additional context for code generation." }),
-  ),
+  context: Type.Optional(Type.String({ description: "Additional context for code generation." })),
   max_tokens: Type.Optional(Type.String({ description: "Maximum tokens to generate." })),
   temperature: Type.Optional(Type.String({ description: "Temperature (0.0-1.0)." })),
   include_examples: Type.Optional(
@@ -111,7 +107,7 @@ export function createCodeGeeXTool(options?: { config?: OpenClawConfig }): AnyAg
         return jsonResult({ error: "CodeGeeX integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const prompt = readStringParam(params, "prompt");
       const code = readStringParam(params, "code");
       const sourceLanguage = readStringParam(params, "source_language");
@@ -122,9 +118,7 @@ export function createCodeGeeXTool(options?: { config?: OpenClawConfig }): AnyAg
       const includeExamples = readStringParam(params, "include_examples");
 
       const maxTokens = maxTokensStr ? Number.parseInt(maxTokensStr, 10) : config.maxTokens;
-      const temperature = temperatureStr
-        ? Number.parseFloat(temperatureStr)
-        : config.temperature;
+      const temperature = temperatureStr ? Number.parseFloat(temperatureStr) : config.temperature;
 
       try {
         switch (action) {
@@ -160,7 +154,8 @@ export function createCodeGeeXTool(options?: { config?: OpenClawConfig }): AnyAg
           case "translate_language": {
             if (!code || !sourceLanguage || !targetLanguage) {
               return jsonResult({
-                error: "code, source_language, and target_language are required for translate_language",
+                error:
+                  "code, source_language, and target_language are required for translate_language",
               });
             }
             const id = `translation_${Date.now()}_${Math.random().toString(36).slice(2)}`;

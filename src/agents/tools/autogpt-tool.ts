@@ -30,8 +30,7 @@ const AutoGPTToolSchema = Type.Object({
   block_id: Type.Optional(Type.String({ description: "Block ID within the agent workflow." })),
   block_type: Type.Optional(
     Type.String({
-      description:
-        "Block type (e.g., 'task', 'condition', 'loop', 'api_call', 'web_search').",
+      description: "Block type (e.g., 'task', 'condition', 'loop', 'api_call', 'web_search').",
     }),
   ),
   source_block: Type.Optional(Type.String({ description: "Source block ID for connection." })),
@@ -92,7 +91,7 @@ export function createAutoGPTTool(options?: { config?: OpenClawConfig }): AnyAge
         return jsonResult({ error: "AutoGPT integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const agentId = readStringParam(params, "agent_id");
       const name = readStringParam(params, "name");
       const blockId = readStringParam(params, "block_id");

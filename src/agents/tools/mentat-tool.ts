@@ -79,7 +79,7 @@ export function createMentatTool(options?: { config?: OpenClawConfig }): AnyAgen
         return jsonResult({ error: "Mentat integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const coordinationId = readStringParam(params, "coordination_id");
       const name = readStringParam(params, "name");
       const description = readStringParam(params, "description");

@@ -31,9 +31,7 @@ const OllamaToolSchema = Type.Object({
       description: "Model name (e.g., 'llama3', 'mistral', 'codellama', 'qwen2.5').",
     }),
   ),
-  prompt: Type.Optional(
-    Type.String({ description: "Prompt for inference." }),
-  ),
+  prompt: Type.Optional(Type.String({ description: "Prompt for inference." })),
   new_model_name: Type.Optional(
     Type.String({ description: "New model name for create or copy operations." }),
   ),
@@ -46,9 +44,7 @@ const OllamaToolSchema = Type.Object({
   max_tokens: Type.Optional(
     Type.Number({ description: "Maximum tokens to generate.", minimum: 1 }),
   ),
-  stream: Type.Optional(
-    Type.Boolean({ description: "Enable streaming responses." }),
-  ),
+  stream: Type.Optional(Type.Boolean({ description: "Enable streaming responses." })),
 });
 
 type OllamaConfig = {
@@ -68,10 +64,7 @@ function resolveOllamaConfig(cfg: OpenClawConfig | undefined): OllamaConfig {
 
   return {
     enabled: (ollama?.enabled as boolean) ?? true,
-    baseUrl:
-      (ollama?.baseUrl as string) ??
-      process.env.OLLAMA_BASE_URL ??
-      "http://localhost:11434",
+    baseUrl: (ollama?.baseUrl as string) ?? process.env.OLLAMA_BASE_URL ?? "http://localhost:11434",
     defaultModel: (ollama?.defaultModel as string) ?? "llama3",
   };
 }
@@ -123,7 +116,7 @@ export function createOllamaToolsTool(options?: { config?: OpenClawConfig }): An
         return jsonResult({ error: "Ollama integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const model = readStringParam(params, "model");
       const prompt = readStringParam(params, "prompt");
       const newModelName = readStringParam(params, "new_model_name");

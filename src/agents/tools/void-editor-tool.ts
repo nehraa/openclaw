@@ -39,12 +39,8 @@ const VoidEditorToolSchema = Type.Object({
   ),
   suggestion_id: Type.Optional(Type.String({ description: "Suggestion ID to apply." })),
   privacy_level: Type.Optional(stringEnum(PRIVACY_LEVELS)),
-  model_name: Type.Optional(
-    Type.String({ description: "Model name to use (local or remote)." }),
-  ),
-  export_format: Type.Optional(
-    Type.String({ description: "Export format: markdown, json, txt." }),
-  ),
+  model_name: Type.Optional(Type.String({ description: "Model name to use (local or remote)." })),
+  export_format: Type.Optional(Type.String({ description: "Export format: markdown, json, txt." })),
 });
 
 type VoidEditorConfig = {
@@ -95,7 +91,7 @@ export function createVoidEditorTool(options?: { config?: OpenClawConfig }): Any
         return jsonResult({ error: "Void Editor integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const projectPath = readStringParam(params, "project_path");
       const sessionId = readStringParam(params, "session_id");
       const message = readStringParam(params, "message");
@@ -279,9 +275,7 @@ export function createVoidEditorTool(options?: { config?: OpenClawConfig }): Any
                 error: "privacy_level is required for configure_privacy",
               });
             }
-            if (
-              !PRIVACY_LEVELS.includes(privacyLevel as (typeof PRIVACY_LEVELS)[number])
-            ) {
+            if (!PRIVACY_LEVELS.includes(privacyLevel as (typeof PRIVACY_LEVELS)[number])) {
               return jsonResult({
                 error: `Invalid privacy level. Must be one of: ${PRIVACY_LEVELS.join(", ")}`,
               });

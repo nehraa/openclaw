@@ -57,7 +57,8 @@ function resolveGPTPilotConfig(cfg: OpenClawConfig | undefined): GPTPilotConfig 
 
   return {
     enabled: (gptpilot?.enabled as boolean) ?? true,
-    workingDir: (gptpilot?.workingDir as string) ?? process.env.GPT_PILOT_WORKSPACE ?? "./workspace",
+    workingDir:
+      (gptpilot?.workingDir as string) ?? process.env.GPT_PILOT_WORKSPACE ?? "./workspace",
     autoApprove: (gptpilot?.autoApprove as boolean) ?? false,
   };
 }
@@ -84,7 +85,7 @@ export function createGPTPilotTool(options?: { config?: OpenClawConfig }): AnyAg
         return jsonResult({ error: "GPT Pilot integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const projectId = readStringParam(params, "project_id");
       const name = readStringParam(params, "name");
       const description = readStringParam(params, "description");
@@ -184,8 +185,18 @@ export function createGPTPilotTool(options?: { config?: OpenClawConfig }): AnyAg
             const review = {
               reviewedAt: new Date().toISOString(),
               issues: [
-                { severity: "low", file: "src/index.js", line: 42, message: "Consider refactoring" },
-                { severity: "medium", file: "src/routes/api.js", line: 15, message: "Add error handling" },
+                {
+                  severity: "low",
+                  file: "src/index.js",
+                  line: 42,
+                  message: "Consider refactoring",
+                },
+                {
+                  severity: "medium",
+                  file: "src/routes/api.js",
+                  line: 15,
+                  message: "Add error handling",
+                },
               ],
               rating: "good",
             };

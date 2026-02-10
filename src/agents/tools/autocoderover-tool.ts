@@ -85,7 +85,7 @@ export function createAutoCodeRoverTool(options?: { config?: OpenClawConfig }): 
         return jsonResult({ error: "AutoCodeRover integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const bugId = readStringParam(params, "bug_id");
       const name = readStringParam(params, "name");
       const description = readStringParam(params, "description");
@@ -320,7 +320,7 @@ export function createAutoCodeRoverTool(options?: { config?: OpenClawConfig }): 
               checksPassed: {
                 syntax: true,
                 semantics: true,
-                tests: fix.testResults?.allPassed ?? false,
+                tests: (fix.testResults as Record<string, unknown> | undefined)?.allPassed ?? false,
                 regressions: true,
               },
               isValid: true,

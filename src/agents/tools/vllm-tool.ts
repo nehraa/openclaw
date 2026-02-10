@@ -25,12 +25,8 @@ const vLLMToolSchema = Type.Object({
   model: Type.Optional(
     Type.String({ description: "Model name (e.g., 'llama-3-8b', 'mistral-7b')." }),
   ),
-  prompt: Type.Optional(
-    Type.String({ description: "Prompt for completion." }),
-  ),
-  messages: Type.Optional(
-    Type.String({ description: "JSON array of chat messages." }),
-  ),
+  prompt: Type.Optional(Type.String({ description: "Prompt for completion." })),
+  messages: Type.Optional(Type.String({ description: "JSON array of chat messages." })),
   max_tokens: Type.Optional(
     Type.Number({ description: "Maximum tokens to generate.", minimum: 1, maximum: 4096 }),
   ),
@@ -40,15 +36,9 @@ const vLLMToolSchema = Type.Object({
   top_p: Type.Optional(
     Type.Number({ description: "Top-p sampling parameter.", minimum: 0, maximum: 1 }),
   ),
-  top_k: Type.Optional(
-    Type.Number({ description: "Top-k sampling parameter.", minimum: 1 }),
-  ),
-  stream: Type.Optional(
-    Type.Boolean({ description: "Enable streaming responses." }),
-  ),
-  stop: Type.Optional(
-    Type.String({ description: "Comma-separated stop sequences." }),
-  ),
+  top_k: Type.Optional(Type.Number({ description: "Top-k sampling parameter.", minimum: 1 })),
+  stream: Type.Optional(Type.Boolean({ description: "Enable streaming responses." })),
+  stop: Type.Optional(Type.String({ description: "Comma-separated stop sequences." })),
 });
 
 type vLLMConfig = {
@@ -112,7 +102,7 @@ export function createvLLMTool(options?: { config?: OpenClawConfig }): AnyAgentT
         return jsonResult({ error: "vLLM integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const model = readStringParam(params, "model") ?? currentModel;
       const prompt = readStringParam(params, "prompt");
       const messagesStr = readStringParam(params, "messages");

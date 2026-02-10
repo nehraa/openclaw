@@ -23,21 +23,11 @@ const SWE_AGENT_ACTIONS = [
 
 const SWEAgentToolSchema = Type.Object({
   action: stringEnum(SWE_AGENT_ACTIONS),
-  issue_url: Type.Optional(
-    Type.String({ description: "GitHub issue URL." }),
-  ),
-  issue_number: Type.Optional(
-    Type.Number({ description: "GitHub issue number." }),
-  ),
-  repository: Type.Optional(
-    Type.String({ description: "Repository (e.g., 'owner/repo')." }),
-  ),
-  fix_id: Type.Optional(
-    Type.String({ description: "Fix ID for status queries." }),
-  ),
-  patch: Type.Optional(
-    Type.String({ description: "Patch content to apply." }),
-  ),
+  issue_url: Type.Optional(Type.String({ description: "GitHub issue URL." })),
+  issue_number: Type.Optional(Type.Number({ description: "GitHub issue number." })),
+  repository: Type.Optional(Type.String({ description: "Repository (e.g., 'owner/repo')." })),
+  fix_id: Type.Optional(Type.String({ description: "Fix ID for status queries." })),
+  patch: Type.Optional(Type.String({ description: "Patch content to apply." })),
   auto_create_pr: Type.Optional(
     Type.Boolean({ description: "Automatically create PR after fix." }),
   ),
@@ -100,7 +90,7 @@ export function createSWEAgentTool(options?: { config?: OpenClawConfig }): AnyAg
         return jsonResult({ error: "GitHub token not configured. Set GITHUB_TOKEN env var." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const issueUrl = readStringParam(params, "issue_url");
       const issueNumber = params.issue_number as number | undefined;
       const repository = readStringParam(params, "repository") ?? config.defaultRepo;

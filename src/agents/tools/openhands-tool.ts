@@ -23,14 +23,7 @@ const OPENHANDS_ACTIONS = [
   "export_findings",
 ] as const;
 
-const AGENT_TYPES = [
-  "researcher",
-  "coder",
-  "tester",
-  "reviewer",
-  "architect",
-  "debugger",
-] as const;
+const AGENT_TYPES = ["researcher", "coder", "tester", "reviewer", "architect", "debugger"] as const;
 
 const OpenHandsToolSchema = Type.Object({
   action: stringEnum(OPENHANDS_ACTIONS),
@@ -47,9 +40,7 @@ const OpenHandsToolSchema = Type.Object({
   benchmark_type: Type.Optional(
     Type.String({ description: "Benchmark type: swe-bench, humaneval, mbpp." }),
   ),
-  export_format: Type.Optional(
-    Type.String({ description: "Export format: json, markdown, pdf." }),
-  ),
+  export_format: Type.Optional(Type.String({ description: "Export format: json, markdown, pdf." })),
 });
 
 type OpenHandsConfig = {
@@ -97,7 +88,7 @@ export function createOpenHandsTool(options?: { config?: OpenClawConfig }): AnyA
         return jsonResult({ error: "OpenHands integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const delegationId = readStringParam(params, "delegation_id");
       const issueId = readStringParam(params, "issue_id");
       const agentType = readStringParam(params, "agent_type");
@@ -141,9 +132,7 @@ export function createOpenHandsTool(options?: { config?: OpenClawConfig }): AnyA
             if (!delegation) {
               return jsonResult({ error: `Delegation ${delegationId} not found` });
             }
-            if (
-              (delegation.assignedAgents as Array<unknown>).length >= config.maxAgents!
-            ) {
+            if ((delegation.assignedAgents as Array<unknown>).length >= config.maxAgents!) {
               return jsonResult({
                 error: `Max agents limit reached (${config.maxAgents})`,
               });
@@ -240,10 +229,8 @@ export function createOpenHandsTool(options?: { config?: OpenClawConfig }): AnyA
             const totalFindings = researchFindings.length;
             const avgConfidence =
               researchFindings.length > 0
-                ? researchFindings.reduce(
-                    (sum, f) => sum + (f.confidence as number),
-                    0,
-                  ) / researchFindings.length
+                ? researchFindings.reduce((sum, f) => sum + (f.confidence as number), 0) /
+                  researchFindings.length
                 : 0;
             return jsonResult({
               success: true,
@@ -273,8 +260,7 @@ export function createOpenHandsTool(options?: { config?: OpenClawConfig }): AnyA
               humaneval: 0.72,
               mbpp: 0.68,
             };
-            const score =
-              benchmarkScores[benchmarkType as keyof typeof benchmarkScores] ?? 0.5;
+            const score = benchmarkScores[benchmarkType as keyof typeof benchmarkScores] ?? 0.5;
             const result = {
               benchmarkType,
               score,
@@ -335,8 +321,7 @@ export function createOpenHandsTool(options?: { config?: OpenClawConfig }): AnyA
               totalFindings: findings.length,
               avgConfidence:
                 findings.length > 0
-                  ? findings.reduce((sum, f) => sum + (f.confidence as number), 0) /
-                    findings.length
+                  ? findings.reduce((sum, f) => sum + (f.confidence as number), 0) / findings.length
                   : 0,
               synthesizedAt: new Date().toISOString(),
               summary: `Synthesized ${findings.length} research findings`,

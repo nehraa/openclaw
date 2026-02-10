@@ -30,8 +30,7 @@ const LangflowToolSchema = Type.Object({
   component_id: Type.Optional(Type.String({ description: "Component ID within the flow." })),
   component_type: Type.Optional(
     Type.String({
-      description:
-        "Component type (e.g., 'llm', 'prompt', 'chain', 'agent', 'tool', 'memory').",
+      description: "Component type (e.g., 'llm', 'prompt', 'chain', 'agent', 'tool', 'memory').",
     }),
   ),
   source_id: Type.Optional(Type.String({ description: "Source component ID for connection." })),
@@ -56,9 +55,7 @@ function resolveLangflowConfig(cfg: OpenClawConfig | undefined): LangflowConfig 
   return {
     enabled: (langflow?.enabled as boolean) ?? true,
     serverUrl:
-      (langflow?.serverUrl as string) ??
-      process.env.LANGFLOW_SERVER_URL ??
-      "http://localhost:7860",
+      (langflow?.serverUrl as string) ?? process.env.LANGFLOW_SERVER_URL ?? "http://localhost:7860",
     port: (langflow?.port as number) ?? 7860,
   };
 }
@@ -94,7 +91,7 @@ export function createLangflowTool(options?: { config?: OpenClawConfig }): AnyAg
         return jsonResult({ error: "Langflow integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const flowId = readStringParam(params, "flow_id");
       const name = readStringParam(params, "name");
       const componentId = readStringParam(params, "component_id");
@@ -233,9 +230,7 @@ export function createLangflowTool(options?: { config?: OpenClawConfig }): AnyAg
               success: true,
               flow_id: flowId,
               flow,
-              components: flowComponents
-                ? Array.from(flowComponents.values())
-                : [],
+              components: flowComponents ? Array.from(flowComponents.values()) : [],
               connections: flowConnections ?? [],
             });
           }

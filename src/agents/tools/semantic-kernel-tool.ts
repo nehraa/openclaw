@@ -32,7 +32,9 @@ const SemanticKernelToolSchema = Type.Object({
   parameters: Type.Optional(
     Type.String({ description: "JSON parameters for function invocation." }),
   ),
-  plan_description: Type.Optional(Type.String({ description: "Description of the plan to create." })),
+  plan_description: Type.Optional(
+    Type.String({ description: "Description of the plan to create." }),
+  ),
   plan_id: Type.Optional(Type.String({ description: "Plan ID for execution." })),
   filter_type: Type.Optional(
     Type.String({ description: "Filter type (e.g., 'prompt_filter', 'result_filter')." }),
@@ -57,8 +59,7 @@ function resolveSemanticKernelConfig(cfg: OpenClawConfig | undefined): SemanticK
 
   return {
     enabled: (sk?.enabled as boolean) ?? true,
-    modelProvider:
-      (sk?.modelProvider as string) ?? process.env.SK_MODEL_PROVIDER ?? "openai",
+    modelProvider: (sk?.modelProvider as string) ?? process.env.SK_MODEL_PROVIDER ?? "openai",
     apiKey: (sk?.apiKey as string) ?? process.env.SK_API_KEY,
     telemetryEnabled: (sk?.telemetryEnabled as boolean) ?? true,
   };
@@ -70,9 +71,7 @@ const plugins = new Map<string, Map<string, Record<string, unknown>>>();
 const plans = new Map<string, Record<string, unknown>>();
 const telemetryData: Array<Record<string, unknown>> = [];
 
-export function createSemanticKernelTool(options?: {
-  config?: OpenClawConfig;
-}): AnyAgentTool {
+export function createSemanticKernelTool(options?: { config?: OpenClawConfig }): AnyAgentTool {
   const tool: AnyAgentTool = {
     name: "semantic_kernel",
     label: "Semantic Kernel",
@@ -91,7 +90,7 @@ export function createSemanticKernelTool(options?: {
         return jsonResult({ error: "Semantic Kernel integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const kernelId = readStringParam(params, "kernel_id");
       const pluginName = readStringParam(params, "plugin_name");
       const functionName = readStringParam(params, "function_name");
@@ -192,8 +191,7 @@ export function createSemanticKernelTool(options?: {
           case "invoke_function": {
             if (!kernelId || !pluginName || !functionName) {
               return jsonResult({
-                error:
-                  "kernel_id, plugin_name, and function_name are required for invoke_function",
+                error: "kernel_id, plugin_name, and function_name are required for invoke_function",
               });
             }
             const kernelPlugins = plugins.get(kernelId);

@@ -28,12 +28,8 @@ const TGIToolSchema = Type.Object({
   model: Type.Optional(
     Type.String({ description: "Model name (e.g., 'meta-llama/Llama-2-70b-hf')." }),
   ),
-  prompt: Type.Optional(
-    Type.String({ description: "Prompt for text generation." }),
-  ),
-  messages: Type.Optional(
-    Type.String({ description: "JSON array of chat messages." }),
-  ),
+  prompt: Type.Optional(Type.String({ description: "Prompt for text generation." })),
+  messages: Type.Optional(Type.String({ description: "JSON array of chat messages." })),
   max_new_tokens: Type.Optional(
     Type.Number({ description: "Maximum tokens to generate.", minimum: 1, maximum: 4096 }),
   ),
@@ -43,9 +39,7 @@ const TGIToolSchema = Type.Object({
   top_p: Type.Optional(
     Type.Number({ description: "Nucleus sampling parameter.", minimum: 0, maximum: 1 }),
   ),
-  lora_adapter: Type.Optional(
-    Type.String({ description: "LoRA adapter name or path." }),
-  ),
+  lora_adapter: Type.Optional(Type.String({ description: "LoRA adapter name or path." })),
 });
 
 type TGIConfig = {
@@ -97,7 +91,7 @@ export function createTGITool(options?: { config?: OpenClawConfig }): AnyAgentTo
         return jsonResult({ error: "TGI integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const model = readStringParam(params, "model") ?? config.defaultModel;
       const prompt = readStringParam(params, "prompt");
       const messagesStr = readStringParam(params, "messages");

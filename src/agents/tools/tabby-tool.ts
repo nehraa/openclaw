@@ -23,9 +23,7 @@ const TABBY_ACTIONS = [
 
 const TabbyToolSchema = Type.Object({
   action: stringEnum(TABBY_ACTIONS),
-  code: Type.Optional(
-    Type.String({ description: "Code context for completion." }),
-  ),
+  code: Type.Optional(Type.String({ description: "Code context for completion." })),
   language: Type.Optional(
     Type.String({ description: "Programming language (e.g., 'python', 'typescript')." }),
   ),
@@ -35,9 +33,7 @@ const TabbyToolSchema = Type.Object({
   repository_path: Type.Optional(
     Type.String({ description: "Path to repository for indexing or fine-tuning." }),
   ),
-  query: Type.Optional(
-    Type.String({ description: "Search query for code search." }),
-  ),
+  query: Type.Optional(Type.String({ description: "Search query for code search." })),
   max_length: Type.Optional(
     Type.Number({ description: "Maximum completion length.", minimum: 1, maximum: 512 }),
   ),
@@ -91,7 +87,7 @@ export function createTabbyTool(options?: { config?: OpenClawConfig }): AnyAgent
         return jsonResult({ error: "Tabby integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const code = readStringParam(params, "code");
       const language = readStringParam(params, "language");
       const model = readStringParam(params, "model") ?? currentModel;

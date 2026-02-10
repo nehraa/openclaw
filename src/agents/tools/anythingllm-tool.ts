@@ -27,20 +27,16 @@ const AnythingLLMToolSchema = Type.Object({
   workspace_name: Type.Optional(
     Type.String({ description: "Name of the workspace to create or query." }),
   ),
-  document_path: Type.Optional(
-    Type.String({ description: "Path to document file to upload." }),
-  ),
-  document_id: Type.Optional(
-    Type.String({ description: "ID of the document to process." }),
-  ),
-  message: Type.Optional(
-    Type.String({ description: "Chat message to send to the workspace." }),
-  ),
-  query: Type.Optional(
-    Type.String({ description: "Search query for semantic document search." }),
-  ),
+  document_path: Type.Optional(Type.String({ description: "Path to document file to upload." })),
+  document_id: Type.Optional(Type.String({ description: "ID of the document to process." })),
+  message: Type.Optional(Type.String({ description: "Chat message to send to the workspace." })),
+  query: Type.Optional(Type.String({ description: "Search query for semantic document search." })),
   chunk_size: Type.Optional(
-    Type.Number({ description: "Size of document chunks in characters.", minimum: 100, maximum: 4000 }),
+    Type.Number({
+      description: "Size of document chunks in characters.",
+      minimum: 100,
+      maximum: 4000,
+    }),
   ),
   chunk_overlap: Type.Optional(
     Type.Number({ description: "Overlap between chunks in characters.", minimum: 0, maximum: 500 }),
@@ -73,7 +69,7 @@ function resolveAnythingLLMConfig(cfg: OpenClawConfig | undefined): AnythingLLMC
   return {
     enabled: (anythingllm?.enabled as boolean) ?? true,
     host: (anythingllm?.host as string) ?? process.env.ANYTHINGLLM_HOST ?? "localhost",
-    port: (anythingllm?.port as number) ?? Number(process.env.ANYTHINGLLM_PORT) || 3001,
+    port: (anythingllm?.port as number) ?? (Number(process.env.ANYTHINGLLM_PORT) || 3001),
     apiKey: (anythingllm?.apiKey as string) ?? process.env.ANYTHINGLLM_API_KEY,
     defaultWorkspace: (anythingllm?.defaultWorkspace as string) ?? "default",
   };
@@ -156,7 +152,7 @@ export function createAnythingLLMTool(options?: { config?: OpenClawConfig }): An
         return jsonResult({ error: "AnythingLLM integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const workspaceName = readStringParam(params, "workspace_name");
       const documentPath = readStringParam(params, "document_path");
       const documentId = readStringParam(params, "document_id");
@@ -322,9 +318,7 @@ export function createAnythingLLMTool(options?: { config?: OpenClawConfig }): An
               .filter((chunk) => chunk.embedding)
               .map((chunk) => ({
                 chunk,
-                similarity: chunk.embedding
-                  ? cosineSimilarity(queryEmbedding, chunk.embedding)
-                  : 0,
+                similarity: chunk.embedding ? cosineSimilarity(queryEmbedding, chunk.embedding) : 0,
               }))
               .sort((a, b) => b.similarity - a.similarity)
               .slice(0, 3);
@@ -369,9 +363,7 @@ export function createAnythingLLMTool(options?: { config?: OpenClawConfig }): An
               .map((chunk) => ({
                 chunk_id: chunk.id,
                 text: chunk.text,
-                similarity: chunk.embedding
-                  ? cosineSimilarity(queryEmbedding, chunk.embedding)
-                  : 0,
+                similarity: chunk.embedding ? cosineSimilarity(queryEmbedding, chunk.embedding) : 0,
                 metadata: includeMetadata ? chunk.metadata : undefined,
               }))
               .sort((a, b) => b.similarity - a.similarity)

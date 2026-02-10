@@ -81,7 +81,7 @@ export function createGooseTool(options?: { config?: OpenClawConfig }): AnyAgent
         return jsonResult({ error: "Goose integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const blockId = readStringParam(params, "block_id");
       const workflowId = readStringParam(params, "workflow_id");
       const name = readStringParam(params, "name");
@@ -137,6 +137,7 @@ export function createGooseTool(options?: { config?: OpenClawConfig }): AnyAgent
               duration: Math.random() * 5 + 1,
               status: Math.random() > 0.1 ? "success" : "failed",
               output: { result: "execution completed", data: { processed: true } },
+              completedAt: "",
             };
             executionData.completedAt = new Date(
               new Date(executionData.startedAt).getTime() + executionData.duration * 1000,
@@ -248,7 +249,7 @@ export function createGooseTool(options?: { config?: OpenClawConfig }): AnyAgent
               return jsonResult({ error: `Metrics for block ${blockId} not found` });
             }
             const meetsThreshold =
-              (blockMetrics.reliability as number) >= config.reliabilityThreshold;
+              (blockMetrics.reliability as number) >= (config.reliabilityThreshold ?? 0.95);
             return jsonResult({
               success: true,
               block_id: blockId,
