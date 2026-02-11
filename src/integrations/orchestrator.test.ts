@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import type { ContentItem } from "../learning/recommendations.js";
 import type { OllamaModelInfo } from "../providers/ollama/dynamic-model-switch.js";
+import type { PrivacyResult } from "../faculties/privacy.js";
 import { clearAllEmotionalContexts } from "../emotional-context/context-tracker.js";
 import { clearAllChatLogs, configureLearning } from "../learning/chat-logger.js";
 import { clearAllPreferences } from "../learning/preference-engine.js";
@@ -237,6 +238,12 @@ describe("cognitive architecture - faculty routing", () => {
     expect(result.facultyActivation).toBeDefined();
     expect(result.facultyActivation?.faculty).toBe("privacy");
     expect(result.facultyResult).toBeDefined();
+    if (result.facultyResult?.success) {
+      const privacyResult = result.facultyResult.data as PrivacyResult;
+      expect(privacyResult.hasPII).toBe(true);
+      expect(privacyResult.piiTypes).toContain("email");
+      expect(privacyResult.piiTypes).toContain("phone");
+    }
   });
 
   it("should return 'none' for general queries without special routing", async () => {

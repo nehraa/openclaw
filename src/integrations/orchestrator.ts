@@ -19,6 +19,7 @@
  *   - Autodidact: Capability discovery
  */
 
+import type { OpenClawConfig } from "../config/config.js";
 import type { EmotionalContext, EmotionAnalysis } from "../emotional-context/types.js";
 import type { ContentItem } from "../learning/recommendations.js";
 import type { UserPreferences, Recommendation } from "../learning/types.js";
@@ -158,7 +159,7 @@ export type OrchestratorConfig = {
   /** Channel where the interaction occurred. */
   channel?: string;
   /** OpenClaw config for faculties. */
-  openClawConfig?: unknown;
+  openClawConfig?: OpenClawConfig;
 };
 
 /**
@@ -434,7 +435,7 @@ async function activateFaculty(
   faculty: Exclude<FacultyActivation["faculty"], "none">,
   input: string,
   analysis: InputAnalysis,
-  config: { config?: unknown; userId?: string; sessionKey?: string },
+  config: FacultyConfig,
 ): Promise<
   FacultyResult<
     | SelfHealingResult
@@ -451,14 +452,45 @@ async function activateFaculty(
 > {
   try {
     switch (faculty) {
-      case "self-healing":
-        return await healError(
-          {
-            error: input,
-            autoCreatePR: false,
-          },
-          config,
-        );
+      case "self-healing": {
+        // Self-healing requires issue identifiers for SWE-agent.
+        // If the input contains structured JSON with issue info, use it.
+        // Otherwise, provide a clear error message.
+        let healRequest: Parameters<typeof healError>[0] = {
+          error: input,
+          autoCreatePR: false,
+        };
+
+        // Attempt to parse structured input containing issue identifiers
+        try {
+          const parsed = JSON.parse(input);
+          if (parsed && typeof parsed === "object") {
+            const maybeIssueUrl = (parsed as { issue_url?: string }).issue_url;
+            const maybeRepository = (parsed as { repository?: string }).repository;
+            if (maybeIssueUrl || maybeRepository) {
+              healRequest = {
+                ...healRequest,
+                issueUrl: maybeIssueUrl,
+                repository: maybeRepository,
+              };
+            }
+          }
+        } catch {
+          // Not JSON, proceed with plain error text
+        }
+
+        // If we still don't have issue identifiers, fail with a clear message
+        if (!healRequest.issueUrl && !healRequest.repository) {
+          return {
+            success: false,
+            error:
+              "Self-healing requires an issue_url or repository. " +
+              "Provide structured JSON input with these fields, or create a GitHub issue first.",
+          };
+        }
+
+        return await healError(healRequest, config);
+      }
 
       case "council":
         return await deliberate(

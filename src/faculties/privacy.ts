@@ -46,10 +46,10 @@ export async function protect(
     if (piiAnalysis.hasPII && request.useLocalModel) {
       const litellmTool = createLiteLLMTool({ config: config.config });
 
-      // Set fallback chain to prefer local models
+      // Set fallback chain to use local-only models when PII is present
       await litellmTool.execute("set_fallback", {
         action: "set_fallback_chain",
-        fallback_models: "ollama/llama3,ollama/mistral,gpt-4",
+        fallback_models: "ollama/llama3,ollama/mistral",
       });
 
       recommendedModel = "ollama/llama3";
@@ -180,6 +180,8 @@ function redactPII(text: string, piiTypes: string[]): string {
 
 /**
  * Detect if input contains or is about PII/privacy concerns.
+ *
+ * This uses both generic privacy-related keywords and concrete PII patterns.
  */
 export function detectPrivacyIntent(input: string): boolean {
   const privacyKeywords = [
@@ -197,5 +199,27 @@ export function detectPrivacyIntent(input: string): boolean {
   ];
 
   const lowerInput = input.toLowerCase();
-  return privacyKeywords.some((keyword) => lowerInput.includes(keyword));
+
+  // 1. Check for explicit privacy/PII-related language
+  if (privacyKeywords.some((keyword) => lowerInput.includes(keyword))) {
+    return true;
+  }
+
+  // 2. Check for concrete PII patterns (aligned with detectPII)
+  const piiPatterns: RegExp[] = [
+    // Email addresses
+    /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/,
+    // Phone numbers (simple North American-style patterns with optional country code)
+    /\b(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/,
+    // Social Security numbers (US-style)
+    /\b\d{3}-\d{2}-\d{4}\b/,
+    // Credit card numbers (16 digits with optional separators)
+    /\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/,
+    // IPv4 addresses
+    /\b(?:\d{1,3}\.){3}\d{1,3}\b/,
+    // Simple street addresses (number + street name + type)
+    /\b\d+\s+[A-Za-z]+\s+(Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd)\b/i,
+  ];
+
+  return piiPatterns.some((pattern) => pattern.test(input));
 }

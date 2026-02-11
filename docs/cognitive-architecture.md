@@ -314,10 +314,10 @@ Tests for the cognitive architecture are in `src/integrations/orchestrator.test.
 
 ```bash
 # Run tests
-npm test src/integrations/orchestrator.test.ts
+pnpm test src/integrations/orchestrator.test.ts
 
 # Or with coverage
-npm test -- --coverage src/integrations/orchestrator.test.ts
+pnpm test -- --coverage src/integrations/orchestrator.test.ts
 ```
 
 ## Extending the System

@@ -58,6 +58,7 @@ export async function remember(
       case "index":
         return await indexDocuments(request, llamaIndexTool, qdrantTool);
       case "search":
+      case "retrieve":
         return await searchMemory(request, llamaIndexTool);
       case "stats":
         return await getMemoryStats(request, llamaIndexTool);

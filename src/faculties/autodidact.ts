@@ -44,7 +44,7 @@ export async function learn(
   config: FacultyConfig,
 ): Promise<FacultyResult<AutodidactResult>> {
   try {
-    const publicApisTool = createPublicApisTool({ config: config.config });
+    const publicApisTool = createPublicApisTool();
 
     // Search for APIs
     const searchResult = await publicApisTool.execute("search", {
