@@ -119,12 +119,12 @@ function buildContentCatalog(userId: string): ContentItem[] {
  * @param sessionCtx Template context with channel/user info
  * @returns Orchestration result and derived hints, or undefined if integration is disabled
  */
-export function integrateOrchestratorForMessage(
+export async function integrateOrchestratorForMessage(
   userMessage: string,
   sessionKey: string,
   cfg: OpenClawConfig | undefined,
   sessionCtx: TemplateContext,
-): OrchestratorIntegrationResult | undefined {
+): Promise<OrchestratorIntegrationResult | undefined> {
   const integrationCfg = resolveOrchestratorIntegrationConfig(cfg);
   if (!integrationCfg.enabled) {
     return undefined;
@@ -135,12 +135,13 @@ export function integrateOrchestratorForMessage(
     const ollamaModels = resolveOllamaModelsFromConfig(cfg);
     const contentCatalog = integrationCfg.enableLearning ? buildContentCatalog(userId) : undefined;
 
-    const orchestrationResult = orchestrateMessage(userMessage, {
+    const orchestrationResult = await orchestrateMessage(userMessage, {
       userId,
       sessionKey,
       channel: sessionCtx.OriginatingChannel ?? sessionCtx.Provider,
       ollamaModels: ollamaModels.length > 0 ? ollamaModels : undefined,
       contentCatalog: contentCatalog && contentCatalog.length > 0 ? contentCatalog : undefined,
+      openClawConfig: cfg,
     });
 
     const hints = orchestrationResult.responseHints;
