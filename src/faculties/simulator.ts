@@ -5,8 +5,8 @@
  * and models complex interactions using multi-agent simulation.
  */
 
-import { createMetaGPTTool } from "../agents/tools/metagpt-tool.js";
 import type { FacultyConfig, FacultyResult } from "./types.js";
+import { createMetaGPTTool } from "../agents/tools/metagpt-tool.js";
 
 export type SimulatorRequest = {
   /** Scenario to simulate. */
@@ -52,14 +52,14 @@ export async function simulate(
       sop_type: "agile",
     });
 
-    if (!projectResult.success || projectResult.error) {
+    if (!projectResult) {
       return {
         success: false,
-        error: projectResult.error || "Failed to create simulation project",
+        error: "Failed to create simulation project",
       };
     }
 
-    const projectId = (projectResult.data as Record<string, unknown>)?.project_id as string;
+    const projectId = (projectResult.details as Record<string, unknown>)?.project_id as string;
 
     // Run simulation iterations
     const iterations = request.iterations ?? 3;

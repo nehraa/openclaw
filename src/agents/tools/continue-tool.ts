@@ -26,15 +26,9 @@ const CONTINUE_ACTIONS = [
 
 const ContinueToolSchema = Type.Object({
   action: stringEnum(CONTINUE_ACTIONS),
-  code: Type.Optional(
-    Type.String({ description: "Code snippet for completion or analysis." }),
-  ),
-  query: Type.Optional(
-    Type.String({ description: "Query or prompt for chat/search operations." }),
-  ),
-  file_path: Type.Optional(
-    Type.String({ description: "File path for code operations." }),
-  ),
+  code: Type.Optional(Type.String({ description: "Code snippet for completion or analysis." })),
+  query: Type.Optional(Type.String({ description: "Query or prompt for chat/search operations." })),
+  file_path: Type.Optional(Type.String({ description: "File path for code operations." })),
   model: Type.Optional(
     Type.String({ description: "Model name to use (e.g., 'gpt-4', 'ollama/codellama')." }),
   ),
@@ -68,9 +62,7 @@ function resolveContinueConfig(cfg: OpenClawConfig | undefined): ContinueConfig 
   return {
     enabled: (continuedev?.enabled as boolean) ?? true,
     defaultModel:
-      (continuedev?.defaultModel as string) ??
-      process.env.CONTINUE_MODEL ??
-      "ollama/codellama",
+      (continuedev?.defaultModel as string) ?? process.env.CONTINUE_MODEL ?? "ollama/codellama",
     enableOffline: (continuedev?.enableOffline as boolean) ?? true,
     indexPath: (continuedev?.indexPath as string) ?? ".continue/index",
   };
@@ -109,7 +101,7 @@ export function createContinueTool(options?: { config?: OpenClawConfig }): AnyAg
         return jsonResult({ error: "Continue.dev integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const code = readStringParam(params, "code");
       const query = readStringParam(params, "query");
       const filePath = readStringParam(params, "file_path");
@@ -168,9 +160,7 @@ export function createContinueTool(options?: { config?: OpenClawConfig }): AnyAg
               return jsonResult({ error: "query is required for search_code" });
             }
             const results = Array.from(codebaseIndex.entries())
-              .filter(([path, data]) =>
-                path.includes(query) || data.content.includes(query),
-              )
+              .filter(([path, data]) => path.includes(query) || data.content.includes(query))
               .map(([path, data]) => ({
                 file: path,
                 language: data.language,

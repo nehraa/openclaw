@@ -23,9 +23,7 @@ const DIFFUSERS_ACTIONS = [
 
 const DiffusersToolSchema = Type.Object({
   action: stringEnum(DIFFUSERS_ACTIONS),
-  prompt: Type.Optional(
-    Type.String({ description: "Text prompt for image/video generation." }),
-  ),
+  prompt: Type.Optional(Type.String({ description: "Text prompt for image/video generation." })),
   negative_prompt: Type.Optional(
     Type.String({ description: "Negative prompt to avoid unwanted features." }),
   ),
@@ -49,9 +47,7 @@ const DiffusersToolSchema = Type.Object({
   guidance_scale: Type.Optional(
     Type.Number({ description: "Classifier-free guidance scale.", minimum: 1, maximum: 20 }),
   ),
-  seed: Type.Optional(
-    Type.Number({ description: "Random seed for reproducibility." }),
-  ),
+  seed: Type.Optional(Type.Number({ description: "Random seed for reproducibility." })),
   num_frames: Type.Optional(
     Type.Number({ description: "Number of video frames (for video generation).", minimum: 8 }),
   ),
@@ -130,7 +126,7 @@ export function createDiffusersTool(options?: { config?: OpenClawConfig }): AnyA
         return jsonResult({ error: "Diffusers integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const prompt = readStringParam(params, "prompt");
       const negativePrompt = readStringParam(params, "negative_prompt");
       const model = readStringParam(params, "model") ?? currentModel;

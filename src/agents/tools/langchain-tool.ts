@@ -30,30 +30,18 @@ const LangChainToolSchema = Type.Object({
   name: Type.Optional(
     Type.String({ description: "Name of the chain, agent, or graph to create or reference." }),
   ),
-  chain_id: Type.Optional(
-    Type.String({ description: "Chain ID for execution or state queries." }),
-  ),
-  agent_id: Type.Optional(
-    Type.String({ description: "Agent ID for execution or state queries." }),
-  ),
-  graph_id: Type.Optional(
-    Type.String({ description: "Graph ID for execution or state queries." }),
-  ),
+  chain_id: Type.Optional(Type.String({ description: "Chain ID for execution or state queries." })),
+  agent_id: Type.Optional(Type.String({ description: "Agent ID for execution or state queries." })),
+  graph_id: Type.Optional(Type.String({ description: "Graph ID for execution or state queries." })),
   config: Type.Optional(
     Type.String({ description: "JSON configuration for chain/agent/graph creation." }),
   ),
-  input: Type.Optional(
-    Type.String({ description: "Input data for chain/agent/graph execution." }),
-  ),
+  input: Type.Optional(Type.String({ description: "Input data for chain/agent/graph execution." })),
   memory_key: Type.Optional(
     Type.String({ description: "Memory key for storage/retrieval operations." }),
   ),
-  memory_value: Type.Optional(
-    Type.String({ description: "Memory value to store." }),
-  ),
-  query: Type.Optional(
-    Type.String({ description: "Query string for memory search operations." }),
-  ),
+  memory_value: Type.Optional(Type.String({ description: "Memory value to store." })),
+  query: Type.Optional(Type.String({ description: "Query string for memory search operations." })),
 });
 
 type LangChainConfig = {
@@ -107,7 +95,7 @@ export function createLangChainTool(options?: { config?: OpenClawConfig }): AnyA
         return jsonResult({ error: "LangChain integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const name = readStringParam(params, "name");
       const chainId = readStringParam(params, "chain_id");
       const agentId = readStringParam(params, "agent_id");

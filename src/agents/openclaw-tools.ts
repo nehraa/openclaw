@@ -3,46 +3,63 @@ import type { GatewayMessageChannel } from "../utils/message-channel.js";
 import type { AnyAgentTool } from "./tools/common.js";
 import { resolvePluginTools } from "../plugins/tools.js";
 import { resolveSessionAgentId } from "./agent-scope.js";
+import { createAgentGPTTool } from "./tools/agentgpt-tool.js";
 import { createAgentsListTool } from "./tools/agents-list-tool.js";
+import { createAnythingLLMTool } from "./tools/anythingllm-tool.js";
+import { createAutoCodeRoverTool } from "./tools/autocoderover-tool.js";
+import { createAutoGenTool } from "./tools/autogen-tool.js";
+import { createAutoGPTTool } from "./tools/autogpt-tool.js";
 import { createBrowserTool } from "./tools/browser-tool.js";
+import { createCamelTool } from "./tools/camel-tool.js";
 import { createCanvasTool } from "./tools/canvas-tool.js";
+import { createChromaDBTool } from "./tools/chromadb-tool.js";
+import { createClineTool } from "./tools/cline-tool.js";
+import { createCodeGeeXTool } from "./tools/codegeex-tool.js";
+import { createContinueTool } from "./tools/continue-tool.js";
+import { createCrewAITool } from "./tools/crewai-tool.js";
 import { createCronTool } from "./tools/cron-tool.js";
+import { createDiffusersTool } from "./tools/diffusers-tool.js";
 import { createGatewayTool } from "./tools/gateway-tool.js";
+import { createGooseTool } from "./tools/goose-tool.js";
+import { createGPTPilotTool } from "./tools/gpt-pilot-tool.js";
+import { createHaystackTool } from "./tools/haystack-tool.js";
 import { createImageTool } from "./tools/image-tool.js";
+import { createLangChainTool } from "./tools/langchain-tool.js";
+import { createLangflowTool } from "./tools/langflow-tool.js";
 import { createLearningTool } from "./tools/learning-tool.js";
+import { createLiteLLMTool } from "./tools/litellm-tool.js";
+import { createLlamaIndexTool } from "./tools/llamaindex-tool.js";
+import { createMentatTool } from "./tools/mentat-tool.js";
 import { createMessageTool } from "./tools/message-tool.js";
+import { createMetaGPTTool } from "./tools/metagpt-tool.js";
 import { createN8nTool } from "./tools/n8n-tool.js";
 import { createNodesTool } from "./tools/nodes-tool.js";
+import { createOllamaToolsTool } from "./tools/ollama-tools-tool.js";
+import { createOpenCodeTool } from "./tools/opencode-tool.js";
+import { createOpenHandsTool } from "./tools/openhands-tool.js";
+import { createPiperTool } from "./tools/piper-tts-tool.js";
+import { createPlandexTool } from "./tools/plandex-tool.js";
 import { createProactiveTool } from "./tools/proactive-tool.js";
+import { createPromptfooTool } from "./tools/promptfoo-tool.js";
 import { createPublicApisTool } from "./tools/public-apis-tool.js";
+import { createQdrantTool } from "./tools/qdrant-tool.js";
+import { createRooCodeTool } from "./tools/roo-code-tool.js";
 import { createSelfUpdateTool } from "./tools/self-update-tool.js";
+import { createSemanticKernelTool } from "./tools/semantic-kernel-tool.js";
 import { createSessionStatusTool } from "./tools/session-status-tool.js";
 import { createSessionsHistoryTool } from "./tools/sessions-history-tool.js";
 import { createSessionsListTool } from "./tools/sessions-list-tool.js";
 import { createSessionsSendTool } from "./tools/sessions-send-tool.js";
 import { createSessionsSpawnTool } from "./tools/sessions-spawn-tool.js";
 import { createShannonTool } from "./tools/shannon-tool.js";
-import { createTtsTool } from "./tools/tts-tool.js";
-import { createWebFetchTool, createWebSearchTool } from "./tools/web-tools.js";
-import { createLangChainTool } from "./tools/langchain-tool.js";
-import { createCrewAITool } from "./tools/crewai-tool.js";
-import { createLiteLLMTool } from "./tools/litellm-tool.js";
-import { createLlamaIndexTool } from "./tools/llamaindex-tool.js";
-import { createChromaDBTool } from "./tools/chromadb-tool.js";
-import { createAutoGenTool } from "./tools/autogen-tool.js";
-import { createContinueTool } from "./tools/continue-tool.js";
-import { createWhisperTool } from "./tools/whisper-tool.js";
-import { createDiffusersTool } from "./tools/diffusers-tool.js";
-import { createQdrantTool } from "./tools/qdrant-tool.js";
-import { createOllamaToolsTool } from "./tools/ollama-tools-tool.js";
-import { createPromptfooTool } from "./tools/promptfoo-tool.js";
-import { createvLLMTool } from "./tools/vllm-tool.js";
-import { createMetaGPTTool } from "./tools/metagpt-tool.js";
-import { createTabbyTool } from "./tools/tabby-tool.js";
+import { createSuperAGITool } from "./tools/superagi-tool.js";
 import { createSWEAgentTool } from "./tools/swe-agent-tool.js";
-import { createTGITool } from "./tools/tgi-tool.js";
-import { createHaystackTool } from "./tools/haystack-tool.js";
-import { createPiperTool } from "./tools/piper-tts-tool.js";
+import { createTransformersJSTool } from "./tools/transformers-js-tool.js";
+import { createTtsTool } from "./tools/tts-tool.js";
+import { createvLLMTool } from "./tools/vllm-tool.js";
+import { createVoidEditorTool } from "./tools/void-editor-tool.js";
+import { createWebFetchTool, createWebSearchTool } from "./tools/web-tools.js";
+import { createWhisperTool } from "./tools/whisper-tool.js";
 
 export function createOpenClawTools(options?: {
   sandboxBrowserBridgeUrl?: string;
@@ -191,11 +208,32 @@ export function createOpenClawTools(options?: {
     createPromptfooTool({ config: options?.config }),
     createvLLMTool({ config: options?.config }),
     createMetaGPTTool({ config: options?.config }),
-    createTabbyTool({ config: options?.config }),
     createSWEAgentTool({ config: options?.config }),
-    createTGITool({ config: options?.config }),
     createHaystackTool({ config: options?.config }),
     createPiperTool({ config: options?.config }),
+    // Agent Orchestration Tools
+    createCamelTool({ config: options?.config }),
+    createSemanticKernelTool({ config: options?.config }),
+    createLangflowTool({ config: options?.config }),
+    createAutoGPTTool({ config: options?.config }),
+    // Coding Agent Tools
+    createClineTool({ config: options?.config }),
+    createRooCodeTool({ config: options?.config }),
+    createOpenHandsTool({ config: options?.config }),
+    createVoidEditorTool({ config: options?.config }),
+    createOpenCodeTool({ config: options?.config }),
+    createSuperAGITool({ config: options?.config }),
+    createCodeGeeXTool({ config: options?.config }),
+    createGPTPilotTool({ config: options?.config }),
+    createPlandexTool({ config: options?.config }),
+    createGooseTool({ config: options?.config }),
+    createAgentGPTTool({ config: options?.config }),
+    createMentatTool({ config: options?.config }),
+    createAutoCodeRoverTool({ config: options?.config }),
+    // RAG & Knowledge Tools
+    createAnythingLLMTool({ config: options?.config }),
+    // Multimedia Tools
+    createTransformersJSTool({ config: options?.config }),
   ];
 
   const pluginTools = resolvePluginTools({

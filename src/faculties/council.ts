@@ -5,9 +5,9 @@
  * subtasks and coordinate multiple specialized agents to solve them.
  */
 
+import type { FacultyConfig, FacultyResult } from "./types.js";
 import { createCrewAITool } from "../agents/tools/crewai-tool.js";
 import { createMetaGPTTool } from "../agents/tools/metagpt-tool.js";
-import type { FacultyConfig, FacultyResult } from "./types.js";
 
 export type CouncilRequest = {
   /** Complex problem to decompose and solve. */
@@ -54,7 +54,8 @@ export async function deliberate(
     const metagptTool = createMetaGPTTool({ config: config.config });
 
     // Determine if this is a software project or general reasoning task
-    const isSoftwareProject = request.techStack || /build|create|develop|implement/.test(request.problem.toLowerCase());
+    const isSoftwareProject =
+      request.techStack || /build|create|develop|implement/.test(request.problem.toLowerCase());
 
     if (isSoftwareProject) {
       // Use MetaGPT for software development
@@ -84,14 +85,14 @@ async function handleSoftwareProject(
     sop_type: request.processType === "hierarchical" ? "waterfall" : "agile",
   });
 
-  if (!projectResult.success || projectResult.error) {
+  if (!projectResult) {
     return {
       success: false,
-      error: projectResult.error || "Failed to create project",
+      error: "Failed to create project",
     };
   }
 
-  const projectData = projectResult.data as Record<string, unknown>;
+  const projectData = projectResult.details as Record<string, unknown>;
   const projectId = projectData.project_id as string;
 
   // Generate PRD
@@ -112,11 +113,15 @@ async function handleSoftwareProject(
     project_id: projectId,
   });
 
-  const prd = prdResult.success ? ((prdResult.data as Record<string, unknown>)?.prd as string) : undefined;
-  const architecture = archResult.success
-    ? ((archResult.data as Record<string, unknown>)?.architecture as string)
+  const prd = prdResult
+    ? ((prdResult.details as Record<string, unknown>)?.prd as string)
     : undefined;
-  const code = codeResult.success ? ((codeResult.data as Record<string, unknown>)?.code as string) : undefined;
+  const architecture = archResult
+    ? ((archResult.details as Record<string, unknown>)?.architecture as string)
+    : undefined;
+  const code = codeResult
+    ? ((codeResult.details as Record<string, unknown>)?.code as string)
+    : undefined;
 
   return {
     success: true,
@@ -146,14 +151,14 @@ async function handleGeneralReasoning(
     process_type: request.processType ?? "sequential",
   });
 
-  if (!crewResult.success || crewResult.error) {
+  if (!crewResult) {
     return {
       success: false,
-      error: crewResult.error || "Failed to create crew",
+      error: "Failed to create crew",
     };
   }
 
-  const crewData = crewResult.data as Record<string, unknown>;
+  const crewData = crewResult.details as Record<string, unknown>;
   const crewId = crewData.crew_id as string;
 
   // Create agents based on requested roles or defaults
@@ -169,8 +174,8 @@ async function handleGeneralReasoning(
       backstory: `Expert ${role} with deep domain knowledge`,
     });
 
-    if (agentResult.success) {
-      const agentId = (agentResult.data as Record<string, unknown>)?.agent_id as string;
+    if (agentResult) {
+      const agentId = (agentResult.details as Record<string, unknown>)?.agent_id as string;
       agentIds.push(agentId);
     }
   }
@@ -182,7 +187,9 @@ async function handleGeneralReasoning(
     task_description: request.problem,
   });
 
-  const taskId = taskResult.success ? ((taskResult.data as Record<string, unknown>)?.task_id as string) : undefined;
+  const taskId = taskResult
+    ? ((taskResult.details as Record<string, unknown>)?.task_id as string)
+    : undefined;
 
   if (taskId && agentIds.length > 0) {
     await tool.execute("assign", {
@@ -214,8 +221,8 @@ async function handleGeneralReasoning(
             },
           ]
         : [],
-      executionResults: execResult.success
-        ? ((execResult.data as Record<string, unknown>)?.message as string)
+      executionResults: execResult
+        ? ((execResult.details as Record<string, unknown>)?.message as string)
         : undefined,
     },
     metadata: {

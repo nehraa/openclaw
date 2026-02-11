@@ -24,12 +24,8 @@ const METAGPT_ACTIONS = [
 
 const MetaGPTToolSchema = Type.Object({
   action: stringEnum(METAGPT_ACTIONS),
-  project_name: Type.Optional(
-    Type.String({ description: "Name of the software project." }),
-  ),
-  project_id: Type.Optional(
-    Type.String({ description: "Project ID for operations." }),
-  ),
+  project_name: Type.Optional(Type.String({ description: "Name of the software project." })),
+  project_id: Type.Optional(Type.String({ description: "Project ID for operations." })),
   requirements: Type.Optional(
     Type.String({ description: "Product requirements document or description." }),
   ),
@@ -104,7 +100,7 @@ export function createMetaGPTTool(options?: { config?: OpenClawConfig }): AnyAge
         return jsonResult({ error: "MetaGPT integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const projectName = readStringParam(params, "project_name");
       const projectId = readStringParam(params, "project_id");
       const requirements = readStringParam(params, "requirements");

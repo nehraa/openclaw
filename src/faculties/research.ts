@@ -5,8 +5,8 @@
  * web search, and knowledge aggregation using Haystack's modular pipelines.
  */
 
-import { createHaystackTool } from "../agents/tools/haystack-tool.js";
 import type { FacultyConfig, FacultyResult } from "./types.js";
+import { createHaystackTool } from "../agents/tools/haystack-tool.js";
 
 export type ResearchRequest = {
   /** Research query or topic. */
@@ -51,14 +51,14 @@ export async function research(
       retriever_type: request.retrieverType ?? "hybrid",
     });
 
-    if (!pipelineResult.success || pipelineResult.error) {
+    if (!pipelineResult) {
       return {
         success: false,
-        error: pipelineResult.error || "Failed to create research pipeline",
+        error: "Failed to create research pipeline",
       };
     }
 
-    const pipelineId = (pipelineResult.data as Record<string, unknown>)?.pipeline_id as string;
+    const pipelineId = (pipelineResult.details as Record<string, unknown>)?.pipeline_id as string;
 
     // Add documents if provided
     if (request.documents && request.documents.length > 0) {
@@ -68,7 +68,7 @@ export async function research(
         documents: JSON.stringify(request.documents),
       });
 
-      if (!docsResult.success) {
+      if (!docsResult) {
         return {
           success: false,
           error: "Failed to add documents to pipeline",
@@ -84,14 +84,14 @@ export async function research(
       top_k: request.topK ?? 5,
     });
 
-    if (!queryResult.success || queryResult.error) {
+    if (!queryResult) {
       return {
         success: false,
-        error: queryResult.error || "Research query failed",
+        error: "Research query failed",
       };
     }
 
-    const queryData = queryResult.data as Record<string, unknown>;
+    const queryData = queryResult.details as Record<string, unknown>;
     const results = (queryData.results as Array<Record<string, unknown>>) ?? [];
 
     // Generate summary from findings

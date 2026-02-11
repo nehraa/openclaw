@@ -82,7 +82,7 @@ export function createPiperTool(options?: { config?: OpenClawConfig }): AnyAgent
         return jsonResult({ error: "Piper TTS integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const text = readStringParam(params, "text");
       const voice = readStringParam(params, "voice") ?? currentVoice;
       const outputPath = readStringParam(params, "output_path");
@@ -160,8 +160,7 @@ export function createPiperTool(options?: { config?: OpenClawConfig }): AnyAgent
               return jsonResult({ error: "text is required for synthesize_to_file" });
             }
 
-            const filePath =
-              outputPath ?? `${config.outputPath}/speech_${Date.now()}.wav`;
+            const filePath = outputPath ?? `${config.outputPath}/speech_${Date.now()}.wav`;
 
             return jsonResult({
               success: true,

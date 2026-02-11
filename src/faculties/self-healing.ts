@@ -5,8 +5,8 @@
  * generate fixes, run tests, and create pull requests.
  */
 
-import { createSWEAgentTool } from "../agents/tools/swe-agent-tool.js";
 import type { FacultyConfig, FacultyResult } from "./types.js";
+import { createSWEAgentTool } from "../agents/tools/swe-agent-tool.js";
 
 export type SelfHealingRequest = {
   /** Error message or stack trace to fix. */
@@ -55,14 +55,14 @@ export async function healError(
       repository: request.repository,
     });
 
-    if (!analysisResult.success || analysisResult.error) {
+    if (!analysisResult) {
       return {
         success: false,
-        error: analysisResult.error || "Failed to analyze issue",
+        error: "Failed to analyze issue",
       };
     }
 
-    const analysis = (analysisResult.data as Record<string, unknown>)?.analysis as
+    const analysis = (analysisResult.details as Record<string, unknown>)?.analysis as
       | Record<string, unknown>
       | undefined;
 
@@ -74,10 +74,10 @@ export async function healError(
       auto_create_pr: request.autoCreatePR ?? false,
     });
 
-    if (!fixResult.success || fixResult.error) {
+    if (!fixResult) {
       return {
         success: false,
-        error: fixResult.error || "Failed to fix issue",
+        error: "Failed to fix issue",
         data: {
           analysis: analysis
             ? {
@@ -90,7 +90,7 @@ export async function healError(
       };
     }
 
-    const fixData = fixResult.data as Record<string, unknown>;
+    const fixData = fixResult.details as Record<string, unknown>;
 
     // Run tests on the fix
     const testResult = await tool.execute("test", {
@@ -98,7 +98,8 @@ export async function healError(
       fix_id: fixData.fix_id as string,
     });
 
-    const testsPass = testResult.success && (testResult.data as Record<string, unknown>)?.tests_pass === true;
+    const testsPass =
+      testResult && (testResult.details as Record<string, unknown>)?.tests_pass === true;
 
     // Optionally create PR
     let prUrl: string | undefined;
@@ -107,8 +108,8 @@ export async function healError(
         action: "create_pr",
         fix_id: fixData.fix_id as string,
       });
-      if (prResult.success) {
-        prUrl = (prResult.data as Record<string, unknown>)?.pr_url as string | undefined;
+      if (prResult) {
+        prUrl = (prResult.details as Record<string, unknown>)?.pr_url as string | undefined;
       }
     }
 

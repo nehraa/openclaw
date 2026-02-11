@@ -27,15 +27,9 @@ const AUTOGEN_ACTIONS = [
 
 const AutoGenToolSchema = Type.Object({
   action: stringEnum(AUTOGEN_ACTIONS),
-  name: Type.Optional(
-    Type.String({ description: "Name of the agent or group chat to create." }),
-  ),
-  agent_id: Type.Optional(
-    Type.String({ description: "Agent ID for operations." }),
-  ),
-  chat_id: Type.Optional(
-    Type.String({ description: "Group chat ID for operations." }),
-  ),
+  name: Type.Optional(Type.String({ description: "Name of the agent or group chat to create." })),
+  agent_id: Type.Optional(Type.String({ description: "Agent ID for operations." })),
+  chat_id: Type.Optional(Type.String({ description: "Group chat ID for operations." })),
   role: Type.Optional(
     Type.String({
       description:
@@ -45,12 +39,8 @@ const AutoGenToolSchema = Type.Object({
   system_message: Type.Optional(
     Type.String({ description: "System message/prompt for the agent." }),
   ),
-  message: Type.Optional(
-    Type.String({ description: "Message to send to the group chat." }),
-  ),
-  code: Type.Optional(
-    Type.String({ description: "Code to execute in sandbox." }),
-  ),
+  message: Type.Optional(Type.String({ description: "Message to send to the group chat." })),
+  code: Type.Optional(Type.String({ description: "Code to execute in sandbox." })),
   language: Type.Optional(
     Type.String({ description: "Programming language for code execution (default: 'python')." }),
   ),
@@ -59,9 +49,7 @@ const AutoGenToolSchema = Type.Object({
       description: "Human input mode: 'ALWAYS', 'NEVER', or 'TERMINATE' (default).",
     }),
   ),
-  action_id: Type.Optional(
-    Type.String({ description: "Action ID for approval/rejection." }),
-  ),
+  action_id: Type.Optional(Type.String({ description: "Action ID for approval/rejection." })),
   max_consecutive_auto_reply: Type.Optional(
     Type.Number({ description: "Max auto-replies before requiring human input.", minimum: 1 }),
   ),
@@ -144,7 +132,7 @@ export function createAutoGenTool(options?: { config?: OpenClawConfig }): AnyAge
         return jsonResult({ error: "AutoGen integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const name = readStringParam(params, "name");
       const agentId = readStringParam(params, "agent_id");
       const chatId = readStringParam(params, "chat_id");

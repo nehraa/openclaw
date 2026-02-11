@@ -21,12 +21,8 @@ const WHISPER_ACTIONS = [
 
 const WhisperToolSchema = Type.Object({
   action: stringEnum(WHISPER_ACTIONS),
-  audio_path: Type.Optional(
-    Type.String({ description: "Path to audio file for transcription." }),
-  ),
-  audio_url: Type.Optional(
-    Type.String({ description: "URL to audio file for transcription." }),
-  ),
+  audio_path: Type.Optional(Type.String({ description: "Path to audio file for transcription." })),
+  audio_url: Type.Optional(Type.String({ description: "URL to audio file for transcription." })),
   model: Type.Optional(
     Type.String({
       description:
@@ -108,7 +104,7 @@ export function createWhisperTool(options?: { config?: OpenClawConfig }): AnyAge
         return jsonResult({ error: "Whisper.cpp integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const audioPath = readStringParam(params, "audio_path");
       const audioUrl = readStringParam(params, "audio_url");
       const model = readStringParam(params, "model") ?? currentModel;

@@ -21,6 +21,8 @@
 
 import type { OpenClawConfig } from "../config/config.js";
 import type { EmotionalContext, EmotionAnalysis } from "../emotional-context/types.js";
+import type { FacultyConfig } from "../faculties/types.js";
+import type { FacultyActivation, InputAnalysis, FacultyResult } from "../faculties/types.js";
 import type { ContentItem } from "../learning/recommendations.js";
 import type { UserPreferences, Recommendation } from "../learning/types.js";
 import type { Notification } from "../proactive/types.js";
@@ -31,6 +33,16 @@ import type {
 } from "../providers/ollama/dynamic-model-switch.js";
 import { analyzeEmotion } from "../emotional-context/analyzer.js";
 import { processMessage as processEmotionalMessage } from "../emotional-context/context-tracker.js";
+import { learn, detectAutodidactIntent, type AutodidactResult } from "../faculties/autodidact.js";
+import { deliberate, detectCouncilIntent, type CouncilResult } from "../faculties/council.js";
+import { remember, detectMemoryIntent, type MemoryResult } from "../faculties/memory.js";
+import { protect, detectPrivacyIntent, type PrivacyResult } from "../faculties/privacy.js";
+import { research, detectResearchIntent, type ResearchResult } from "../faculties/research.js";
+import { healError, detectErrorIntent, type SelfHealingResult } from "../faculties/self-healing.js";
+import { sense, detectSensesIntent, type SensesResult } from "../faculties/senses.js";
+import { shepherd, detectShepherdIntent, type ShepherdResult } from "../faculties/shepherd.js";
+import { simulate, detectSimulatorIntent, type SimulatorResult } from "../faculties/simulator.js";
+import { automate, detectWorkflowIntent, type WorkflowResult } from "../faculties/workflow.js";
 import { logInteraction, extractTopics } from "../learning/chat-logger.js";
 import { updatePreferences, getTopInterests } from "../learning/preference-engine.js";
 import { generateRecommendations } from "../learning/recommendations.js";
@@ -41,61 +53,6 @@ import {
   classifyTaskComplexity,
   selectModelForTask,
 } from "../providers/ollama/dynamic-model-switch.js";
-import type {
-  FacultyActivation,
-  InputAnalysis,
-  FacultyResult,
-} from "../faculties/types.js";
-import {
-  healError,
-  detectErrorIntent,
-  type SelfHealingResult,
-} from "../faculties/self-healing.js";
-import {
-  deliberate,
-  detectCouncilIntent,
-  type CouncilResult,
-} from "../faculties/council.js";
-import {
-  remember,
-  detectMemoryIntent,
-  type MemoryResult,
-} from "../faculties/memory.js";
-import {
-  sense,
-  detectSensesIntent,
-  type SensesResult,
-} from "../faculties/senses.js";
-import {
-  research,
-  detectResearchIntent,
-  type ResearchResult,
-} from "../faculties/research.js";
-import {
-  automate,
-  detectWorkflowIntent,
-  type WorkflowResult,
-} from "../faculties/workflow.js";
-import {
-  protect,
-  detectPrivacyIntent,
-  type PrivacyResult,
-} from "../faculties/privacy.js";
-import {
-  shepherd,
-  detectShepherdIntent,
-  type ShepherdResult,
-} from "../faculties/shepherd.js";
-import {
-  simulate,
-  detectSimulatorIntent,
-  type SimulatorResult,
-} from "../faculties/simulator.js";
-import {
-  learn,
-  detectAutodidactIntent,
-  type AutodidactResult,
-} from "../faculties/autodidact.js";
 
 /** Full result from processing a message through all subsystems. */
 export type OrchestrationResult = {
@@ -200,12 +157,11 @@ export async function processMessage(
     | undefined;
 
   if (facultyActivation.faculty !== "none") {
-    facultyResult = await activateFaculty(
-      facultyActivation.faculty,
-      input,
-      inputAnalysis,
-      { config: openClawConfig, userId, sessionKey },
-    );
+    facultyResult = await activateFaculty(facultyActivation.faculty, input, inputAnalysis, {
+      config: openClawConfig,
+      userId,
+      sessionKey,
+    });
   }
 
   // 4. Task complexity classification + model selection

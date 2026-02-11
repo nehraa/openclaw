@@ -5,8 +5,8 @@
  * for recurring tasks and integrations.
  */
 
-import { createN8nTool } from "../agents/tools/n8n-tool.js";
 import type { FacultyConfig, FacultyResult } from "./types.js";
+import { createN8nTool } from "../agents/tools/n8n-tool.js";
 
 export type WorkflowRequest = {
   /** Action to perform. */
@@ -109,14 +109,14 @@ async function createWorkflow(
     workflow_json: workflowDef,
   });
 
-  if (!result.success || result.error) {
+  if (!result || !result.details) {
     return {
       success: false,
-      error: result.error || "Failed to create workflow",
+      error: "Failed to create workflow",
     };
   }
 
-  const workflowId = (result.data as Record<string, unknown>)?.id as string | undefined;
+  const workflowId = (result.details as Record<string, unknown>)?.id as string | undefined;
 
   return {
     success: true,
@@ -129,21 +129,23 @@ async function createWorkflow(
   };
 }
 
-async function listWorkflows(tool: ReturnType<typeof createN8nTool>): Promise<FacultyResult<WorkflowResult>> {
+async function listWorkflows(
+  tool: ReturnType<typeof createN8nTool>,
+): Promise<FacultyResult<WorkflowResult>> {
   const result = await tool.execute("list", {
     action: "list_workflows",
     limit: 50,
   });
 
-  if (!result.success || result.error) {
+  if (!result || !result.details) {
     return {
       success: false,
-      error: result.error || "Failed to list workflows",
+      error: "Failed to list workflows",
     };
   }
 
-  const data = result.data as Record<string, unknown>;
-  const workflows = (data.data as Array<Record<string, unknown>> | undefined) ?? [];
+  const data = result.details as Record<string, unknown>;
+  const workflows = (data.details as Array<Record<string, unknown>> | undefined) ?? [];
 
   return {
     success: true,
@@ -173,10 +175,10 @@ async function executeWorkflow(
     workflow_id: request.workflowId,
   });
 
-  if (!result.success || result.error) {
+  if (!result || !result.details) {
     return {
       success: false,
-      error: result.error || "Failed to execute workflow",
+      error: "Failed to execute workflow",
     };
   }
 
@@ -184,7 +186,7 @@ async function executeWorkflow(
     success: true,
     data: {
       workflowId: request.workflowId,
-      executionResult: result.data as Record<string, unknown>,
+      executionResult: result.details as Record<string, unknown>,
     },
   };
 }
@@ -205,10 +207,10 @@ async function activateWorkflow(
     workflow_id: request.workflowId,
   });
 
-  if (!result.success || result.error) {
+  if (!result || !result.details) {
     return {
       success: false,
-      error: result.error || "Failed to activate workflow",
+      error: "Failed to activate workflow",
     };
   }
 
@@ -220,19 +222,21 @@ async function activateWorkflow(
   };
 }
 
-async function getTemplates(tool: ReturnType<typeof createN8nTool>): Promise<FacultyResult<WorkflowResult>> {
+async function getTemplates(
+  tool: ReturnType<typeof createN8nTool>,
+): Promise<FacultyResult<WorkflowResult>> {
   const result = await tool.execute("templates", {
     action: "list_templates",
   });
 
-  if (!result.success || result.error) {
+  if (!result || !result.details) {
     return {
       success: false,
-      error: result.error || "Failed to get templates",
+      error: "Failed to get templates",
     };
   }
 
-  const templates = (result.data as Record<string, unknown>)?.templates as
+  const templates = (result.details as Record<string, unknown>)?.templates as
     | Array<Record<string, unknown>>
     | undefined;
 

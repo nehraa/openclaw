@@ -5,9 +5,9 @@
  * documentation, and other content for semantic search and RAG.
  */
 
+import type { FacultyConfig, FacultyResult } from "./types.js";
 import { createLlamaIndexTool } from "../agents/tools/llamaindex-tool.js";
 import { createQdrantTool } from "../agents/tools/qdrant-tool.js";
-import type { FacultyConfig, FacultyResult } from "./types.js";
 
 export type MemoryRequest = {
   /** Action to perform: index, search, or retrieve. */
@@ -90,14 +90,14 @@ async function indexDocuments(
     embedding_model: "text-embedding-ada-002",
   });
 
-  if (!indexResult.success || indexResult.error) {
+  if (!indexResult) {
     return {
       success: false,
-      error: indexResult.error || "Failed to create index",
+      error: "Failed to create index",
     };
   }
 
-  const indexId = (indexResult.data as Record<string, unknown>)?.index_id as string;
+  const indexId = (indexResult.details as Record<string, unknown>)?.index_id as string;
 
   // Create corresponding Qdrant collection
   const collectionResult = await qdrantTool.execute("create", {
@@ -119,8 +119,8 @@ async function indexDocuments(
         document_text: doc.text,
       });
 
-      if (ingestResult.success) {
-        const docId = (ingestResult.data as Record<string, unknown>)?.document_id as string;
+      if (ingestResult) {
+        const docId = (ingestResult.details as Record<string, unknown>)?.document_id as string;
         if (docId) {
           documentIds.push(docId);
         }
@@ -132,8 +132,8 @@ async function indexDocuments(
     success: true,
     data: {
       indexId,
-      collectionId: collectionResult.success
-        ? ((collectionResult.data as Record<string, unknown>)?.collection_name as string)
+      collectionId: collectionResult
+        ? ((collectionResult.details as Record<string, unknown>)?.collection_name as string)
         : undefined,
       documentIds,
     },
@@ -160,14 +160,16 @@ async function searchMemory(
     action: "list_indexes",
   });
 
-  if (!listResult.success) {
+  if (!listResult) {
     return {
       success: false,
       error: "Failed to list indexes",
     };
   }
 
-  const indexes = (listResult.data as Record<string, unknown>)?.indexes as Array<Record<string, unknown>>;
+  const indexes = (listResult.details as Record<string, unknown>)?.indexes as Array<
+    Record<string, unknown>
+  >;
   const targetIndex = indexes?.find((idx) => idx.name === request.indexName);
 
   if (!targetIndex) {
@@ -187,14 +189,14 @@ async function searchMemory(
     top_k: request.topK ?? 5,
   });
 
-  if (!searchResult.success || searchResult.error) {
+  if (!searchResult) {
     return {
       success: false,
-      error: searchResult.error || "Search failed",
+      error: "Search failed",
     };
   }
 
-  const results = (searchResult.data as Record<string, unknown>)?.results as
+  const results = (searchResult.details as Record<string, unknown>)?.results as
     | Array<Record<string, unknown>>
     | undefined;
 
@@ -230,14 +232,16 @@ async function getMemoryStats(
     action: "list_indexes",
   });
 
-  if (!listResult.success) {
+  if (!listResult) {
     return {
       success: false,
       error: "Failed to list indexes",
     };
   }
 
-  const indexes = (listResult.data as Record<string, unknown>)?.indexes as Array<Record<string, unknown>>;
+  const indexes = (listResult.details as Record<string, unknown>)?.indexes as Array<
+    Record<string, unknown>
+  >;
   const targetIndex = indexes?.find((idx) => idx.name === request.indexName);
 
   if (!targetIndex) {
@@ -254,14 +258,16 @@ async function getMemoryStats(
     index_id: indexId,
   });
 
-  if (!statsResult.success) {
+  if (!statsResult) {
     return {
       success: false,
       error: "Failed to get stats",
     };
   }
 
-  const stats = (statsResult.data as Record<string, unknown>)?.stats as Record<string, unknown> | undefined;
+  const stats = (statsResult.details as Record<string, unknown>)?.stats as
+    | Record<string, unknown>
+    | undefined;
 
   return {
     success: true,

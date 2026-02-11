@@ -29,21 +29,11 @@ const LiteLLMToolSchema = Type.Object({
   provider: Type.Optional(
     Type.String({ description: "Provider name (e.g., 'openai', 'anthropic', 'ollama')." }),
   ),
-  model: Type.Optional(
-    Type.String({ description: "Model name for completion requests." }),
-  ),
-  prompt: Type.Optional(
-    Type.String({ description: "Prompt text for completion." }),
-  ),
-  messages: Type.Optional(
-    Type.String({ description: "JSON array of chat messages." }),
-  ),
-  api_key: Type.Optional(
-    Type.String({ description: "API key for provider (when adding)." }),
-  ),
-  base_url: Type.Optional(
-    Type.String({ description: "Base URL for provider API." }),
-  ),
+  model: Type.Optional(Type.String({ description: "Model name for completion requests." })),
+  prompt: Type.Optional(Type.String({ description: "Prompt text for completion." })),
+  messages: Type.Optional(Type.String({ description: "JSON array of chat messages." })),
+  api_key: Type.Optional(Type.String({ description: "API key for provider (when adding)." })),
+  base_url: Type.Optional(Type.String({ description: "Base URL for provider API." })),
   fallback_models: Type.Optional(
     Type.String({
       description:
@@ -78,9 +68,7 @@ function resolveLiteLLMConfig(cfg: OpenClawConfig | undefined): LiteLLMConfig {
   return {
     enabled: (litellm?.enabled as boolean) ?? true,
     baseUrl:
-      (litellm?.baseUrl as string) ??
-      process.env.LITELLM_BASE_URL ??
-      "http://localhost:4000",
+      (litellm?.baseUrl as string) ?? process.env.LITELLM_BASE_URL ?? "http://localhost:4000",
     apiKey: (litellm?.apiKey as string) ?? process.env.LITELLM_API_KEY,
     defaultModel: (litellm?.defaultModel as string) ?? "gpt-4",
     enableCostTracking: (litellm?.enableCostTracking as boolean) ?? true,
@@ -129,7 +117,7 @@ export function createLiteLLMTool(options?: { config?: OpenClawConfig }): AnyAge
         return jsonResult({ error: "LiteLLM integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const provider = readStringParam(params, "provider");
       const model = readStringParam(params, "model");
       const prompt = readStringParam(params, "prompt");
@@ -173,7 +161,7 @@ export function createLiteLLMTool(options?: { config?: OpenClawConfig }): AnyAge
               usage: {
                 prompt_tokens: (prompt.length / 4) | 0,
                 completion_tokens: 50,
-                total_tokens: (prompt.length / 4) | 0 + 50,
+                total_tokens: (prompt.length / 4) | (0 + 50),
               },
             });
           }

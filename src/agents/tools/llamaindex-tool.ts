@@ -25,24 +25,16 @@ const LLAMAINDEX_ACTIONS = [
 
 const LlamaIndexToolSchema = Type.Object({
   action: stringEnum(LLAMAINDEX_ACTIONS),
-  index_name: Type.Optional(
-    Type.String({ description: "Name of the index to create or query." }),
-  ),
-  index_id: Type.Optional(
-    Type.String({ description: "Index ID for operations." }),
-  ),
+  index_name: Type.Optional(Type.String({ description: "Name of the index to create or query." })),
+  index_id: Type.Optional(Type.String({ description: "Index ID for operations." })),
   document_path: Type.Optional(
     Type.String({ description: "File path to document for ingestion." }),
   ),
   document_paths: Type.Optional(
     Type.String({ description: "Comma-separated file paths for batch ingestion." }),
   ),
-  document_text: Type.Optional(
-    Type.String({ description: "Raw text content to ingest." }),
-  ),
-  query: Type.Optional(
-    Type.String({ description: "Query string for semantic search." }),
-  ),
+  document_text: Type.Optional(Type.String({ description: "Raw text content to ingest." })),
+  query: Type.Optional(Type.String({ description: "Query string for semantic search." })),
   query_engine_name: Type.Optional(
     Type.String({ description: "Name for the query engine to create." }),
   ),
@@ -72,8 +64,7 @@ function resolveLlamaIndexConfig(cfg: OpenClawConfig | undefined): LlamaIndexCon
 
   return {
     enabled: (llamaindex?.enabled as boolean) ?? true,
-    embeddingModel:
-      (llamaindex?.embeddingModel as string) ?? "text-embedding-ada-002",
+    embeddingModel: (llamaindex?.embeddingModel as string) ?? "text-embedding-ada-002",
     defaultTopK: (llamaindex?.defaultTopK as number) ?? 5,
     storePath: (llamaindex?.storePath as string) ?? ".llamaindex",
   };
@@ -120,7 +111,7 @@ export function createLlamaIndexTool(options?: { config?: OpenClawConfig }): Any
         return jsonResult({ error: "LlamaIndex integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const indexName = readStringParam(params, "index_name");
       const indexId = readStringParam(params, "index_id");
       const documentPath = readStringParam(params, "document_path");
@@ -128,9 +119,11 @@ export function createLlamaIndexTool(options?: { config?: OpenClawConfig }): Any
       const documentText = readStringParam(params, "document_text");
       const query = readStringParam(params, "query");
       const queryEngineName = readStringParam(params, "query_engine_name");
-      const topK = (params.top_k as number | undefined) ?? config.defaultTopK;
+      const topK = (params.top_k as number | undefined) ?? config.defaultTopK ?? 5;
       const embeddingModel =
-        readStringParam(params, "embedding_model") ?? config.embeddingModel ?? "text-embedding-ada-002";
+        readStringParam(params, "embedding_model") ??
+        config.embeddingModel ??
+        "text-embedding-ada-002";
 
       try {
         switch (action) {

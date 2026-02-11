@@ -26,18 +26,12 @@ const QDRANT_ACTIONS = [
 
 const QdrantToolSchema = Type.Object({
   action: stringEnum(QDRANT_ACTIONS),
-  collection_name: Type.Optional(
-    Type.String({ description: "Name of the collection." }),
-  ),
-  vectors: Type.Optional(
-    Type.String({ description: "JSON array of vectors to upsert." }),
-  ),
+  collection_name: Type.Optional(Type.String({ description: "Name of the collection." })),
+  vectors: Type.Optional(Type.String({ description: "JSON array of vectors to upsert." })),
   payloads: Type.Optional(
     Type.String({ description: "JSON array of payload objects (metadata)." }),
   ),
-  ids: Type.Optional(
-    Type.String({ description: "Comma-separated point IDs." }),
-  ),
+  ids: Type.Optional(Type.String({ description: "Comma-separated point IDs." })),
   query_vector: Type.Optional(
     Type.String({ description: "JSON array representing the query vector." }),
   ),
@@ -78,7 +72,7 @@ function resolveQdrantConfig(cfg: OpenClawConfig | undefined): QdrantConfig {
   return {
     enabled: (qdrant?.enabled as boolean) ?? true,
     host: (qdrant?.host as string) ?? process.env.QDRANT_HOST ?? "localhost",
-    port: (qdrant?.port as number) ?? Number(process.env.QDRANT_PORT) || 6333,
+    port: (qdrant?.port as number) ?? (Number(process.env.QDRANT_PORT) || 6333),
     apiKey: (qdrant?.apiKey as string) ?? process.env.QDRANT_API_KEY,
     grpcPort: (qdrant?.grpcPort as number) ?? 6334,
   };
@@ -134,7 +128,7 @@ export function createQdrantTool(options?: { config?: OpenClawConfig }): AnyAgen
         return jsonResult({ error: "Qdrant integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const collectionName = readStringParam(params, "collection_name");
       const vectorsStr = readStringParam(params, "vectors");
       const payloadsStr = readStringParam(params, "payloads");

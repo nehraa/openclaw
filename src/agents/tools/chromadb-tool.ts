@@ -28,20 +28,20 @@ const ChromaDBToolSchema = Type.Object({
   collection_name: Type.Optional(
     Type.String({ description: "Name of the collection to create or query." }),
   ),
-  documents: Type.Optional(
-    Type.String({ description: "JSON array of document texts to add." }),
-  ),
+  documents: Type.Optional(Type.String({ description: "JSON array of document texts to add." })),
   metadatas: Type.Optional(
     Type.String({ description: "JSON array of metadata objects (one per document)." }),
   ),
-  ids: Type.Optional(
-    Type.String({ description: "Comma-separated document IDs." }),
-  ),
+  ids: Type.Optional(Type.String({ description: "Comma-separated document IDs." })),
   query_texts: Type.Optional(
     Type.String({ description: "JSON array of query texts for semantic search." }),
   ),
   n_results: Type.Optional(
-    Type.Number({ description: "Number of results to return per query.", minimum: 1, maximum: 100 }),
+    Type.Number({
+      description: "Number of results to return per query.",
+      minimum: 1,
+      maximum: 100,
+    }),
   ),
   where: Type.Optional(
     Type.String({ description: "JSON filter expression for metadata filtering." }),
@@ -70,7 +70,7 @@ function resolveChromaDBConfig(cfg: OpenClawConfig | undefined): ChromaDBConfig 
   return {
     enabled: (chromadb?.enabled as boolean) ?? true,
     host: (chromadb?.host as string) ?? process.env.CHROMADB_HOST ?? "localhost",
-    port: (chromadb?.port as number) ?? Number(process.env.CHROMADB_PORT) || 8000,
+    port: (chromadb?.port as number) ?? (Number(process.env.CHROMADB_PORT) || 8000),
     apiKey: (chromadb?.apiKey as string) ?? process.env.CHROMADB_API_KEY,
   };
 }
@@ -131,7 +131,7 @@ export function createChromaDBTool(options?: { config?: OpenClawConfig }): AnyAg
         return jsonResult({ error: "ChromaDB integration is disabled in config." });
       }
 
-      const action = readStringParam(params, "action", true);
+      const action = readStringParam(params, "action", { required: true });
       const collectionName = readStringParam(params, "collection_name");
       const documentsStr = readStringParam(params, "documents");
       const metadatasStr = readStringParam(params, "metadatas");
@@ -260,9 +260,7 @@ export function createChromaDBTool(options?: { config?: OpenClawConfig }): AnyAg
                   id: doc.id,
                   text: doc.text,
                   metadata: doc.metadata,
-                  distance: doc.embedding
-                    ? 1 - cosineSimilarity(queryEmbedding, doc.embedding)
-                    : 1,
+                  distance: doc.embedding ? 1 - cosineSimilarity(queryEmbedding, doc.embedding) : 1,
                 }))
                 .sort((a, b) => a.distance - b.distance)
                 .slice(0, nResults);

@@ -5,8 +5,8 @@
  * relevant APIs and learning how to integrate them.
  */
 
-import { createPublicApisTool } from "../agents/tools/public-apis-tool.js";
 import type { FacultyConfig, FacultyResult } from "./types.js";
+import { createPublicApisTool } from "../agents/tools/public-apis-tool.js";
 
 export type AutodidactRequest = {
   /** What capability to discover. */
@@ -54,14 +54,20 @@ export async function learn(
       limit: request.limit ?? 5,
     });
 
-    if (!searchResult.success || searchResult.error) {
+    // Handle AgentToolResult format
+    if (
+      !searchResult ||
+      searchResult.content.some(
+        (c) => c.type === "text" && "text" in c && c.text?.includes("error"),
+      )
+    ) {
       return {
         success: false,
-        error: searchResult.error || "Failed to search APIs",
+        error: "Failed to search APIs",
       };
     }
 
-    const apis = (searchResult.data as Record<string, unknown>)?.apis as
+    const apis = (searchResult.details as Record<string, unknown>)?.apis as
       | Array<Record<string, unknown>>
       | undefined;
 
@@ -122,9 +128,7 @@ function generateSetupSteps(api: Record<string, unknown>): string[] {
   const auth = (api.auth as string) ?? "No";
   const url = (api.url as string) ?? "";
 
-  const steps = [
-    `Visit the ${apiName} documentation at ${url}`,
-  ];
+  const steps = [`Visit the ${apiName} documentation at ${url}`];
 
   if (auth !== "No") {
     steps.push(`Register for an API key (auth type: ${auth})`);
@@ -149,7 +153,8 @@ function generateIntegrationExamples(apis: Array<Record<string, unknown>>): stri
     const apiName = (api.name as string) ?? "API";
     const auth = (api.auth as string) ?? "No";
 
-    const authHeader = auth !== "No" ? '\n  headers: { "Authorization": "Bearer YOUR_API_KEY" },' : "";
+    const authHeader =
+      auth !== "No" ? '\n  headers: { "Authorization": "Bearer YOUR_API_KEY" },' : "";
 
     const example = `// Example: Using ${apiName}
 const response = await fetch("${api.url}/endpoint",{${authHeader}

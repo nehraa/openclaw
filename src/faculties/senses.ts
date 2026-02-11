@@ -5,10 +5,10 @@
  * and text-to-speech (Piper TTS) for multimodal agent interactions.
  */
 
-import { createWhisperTool } from "../agents/tools/whisper-tool.js";
+import type { FacultyConfig, FacultyResult } from "./types.js";
 import { createDiffusersTool } from "../agents/tools/diffusers-tool.js";
 import { createPiperTool } from "../agents/tools/piper-tts-tool.js";
-import type { FacultyConfig, FacultyResult } from "./types.js";
+import { createWhisperTool } from "../agents/tools/whisper-tool.js";
 
 export type SensesRequest = {
   /** Type of sensory operation. */
@@ -114,14 +114,14 @@ async function transcribeAudio(
     model: request.model ?? "base",
   });
 
-  if (!result.success || result.error) {
+  if (!result || !result.details) {
     return {
       success: false,
-      error: result.error || "Transcription failed",
+      error: "Transcription failed",
     };
   }
 
-  const data = result.data as Record<string, unknown>;
+  const data = result.details as Record<string, unknown>;
 
   return {
     success: true,
@@ -157,14 +157,14 @@ async function generateImage(
     model: request.model ?? "sd-1.5",
   });
 
-  if (!result.success || result.error) {
+  if (!result || !result.details) {
     return {
       success: false,
-      error: result.error || "Image generation failed",
+      error: "Image generation failed",
     };
   }
 
-  const data = result.data as Record<string, unknown>;
+  const data = result.details as Record<string, unknown>;
 
   return {
     success: true,
@@ -197,14 +197,14 @@ async function generateVideo(
     model: request.model ?? "stable-video",
   });
 
-  if (!result.success || result.error) {
+  if (!result || !result.details) {
     return {
       success: false,
-      error: result.error || "Video generation failed",
+      error: "Video generation failed",
     };
   }
 
-  const data = result.data as Record<string, unknown>;
+  const data = result.details as Record<string, unknown>;
 
   return {
     success: true,
@@ -237,14 +237,14 @@ async function synthesizeSpeech(
     voice: request.voice ?? "en_US-lessac-medium",
   });
 
-  if (!result.success || result.error) {
+  if (!result || !result.details) {
     return {
       success: false,
-      error: result.error || "Speech synthesis failed",
+      error: "Speech synthesis failed",
     };
   }
 
-  const data = result.data as Record<string, unknown>;
+  const data = result.details as Record<string, unknown>;
 
   return {
     success: true,

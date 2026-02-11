@@ -5,8 +5,8 @@
  * improvements proactively (simulated trigger-based monitoring).
  */
 
-import { createSWEAgentTool } from "../agents/tools/swe-agent-tool.js";
 import type { FacultyConfig, FacultyResult } from "./types.js";
+import { createSWEAgentTool } from "../agents/tools/swe-agent-tool.js";
 
 export type ShepherdRequest = {
   /** Action to perform. */
@@ -80,7 +80,9 @@ async function performHealthCheck(
     action: "list_fixes",
   });
 
-  const fixes = listResult.success ? ((listResult.data as Record<string, unknown>)?.fixes as Array<Record<string, unknown>>) : [];
+  const fixes = listResult
+    ? ((listResult.details as Record<string, unknown>)?.fixes as Array<Record<string, unknown>>)
+    : [];
 
   // Simulate health score calculation
   const recentIssueCount = fixes?.length ?? 0;
@@ -157,17 +159,18 @@ async function runTests(
     coverage: "85.5%",
   };
 
-  const issues = testResults.failed > 0
-    ? [
-        {
-          type: "test" as const,
-          severity: "high" as const,
-          file: "tests/integration.test.ts",
-          description: `${testResults.failed} tests failing`,
-          suggestedFix: "Review failing test cases and fix implementation",
-        },
-      ]
-    : [];
+  const issues =
+    testResults.failed > 0
+      ? [
+          {
+            type: "test" as const,
+            severity: "high" as const,
+            file: "tests/integration.test.ts",
+            description: `${testResults.failed} tests failing`,
+            suggestedFix: "Review failing test cases and fix implementation",
+          },
+        ]
+      : [];
 
   return {
     success: true,
