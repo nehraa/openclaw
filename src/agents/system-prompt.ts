@@ -225,7 +225,7 @@ export function buildAgentSystemPrompt(params: {
     ls: "List directory contents",
     exec: "Run shell commands (pty available for TTY-required CLIs)",
     process: "Manage background exec sessions",
-    web_search: "Search the web (Brave API)",
+    web_search: "Search the web (Perplexity or Brave API)",
     web_fetch: "Fetch and extract readable content from a URL",
     // Channel docking: add login tools here when a channel needs interactive linking.
     browser: "Control web browser",
@@ -239,6 +239,7 @@ export function buildAgentSystemPrompt(params: {
     sessions_history: "Fetch history for another session/sub-agent",
     sessions_send: "Send a message to another session/sub-agent",
     sessions_spawn: "Spawn a sub-agent session",
+    picoclaw: "Run a task using a PicoClaw helper via the picoclaw CLI",
     session_status:
       "Show a /status-equivalent status card (usage + time + Reasoning/Verbose/Elevated); use for model-use questions (📊 session_status); optional per-session model override",
     image: "Analyze an image with the configured image model",
@@ -267,6 +268,7 @@ export function buildAgentSystemPrompt(params: {
     "sessions_history",
     "sessions_send",
     "session_status",
+    "picoclaw",
     "image",
   ];
 

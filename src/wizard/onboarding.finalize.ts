@@ -480,29 +480,44 @@ export async function finalizeOnboardingWizard(
     );
   }
 
-  const webSearchKey = (nextConfig.tools?.web?.search?.apiKey ?? "").trim();
-  const webSearchEnv = (process.env.BRAVE_API_KEY ?? "").trim();
+  const webSearchProvider = nextConfig.tools?.web?.search?.provider ?? "perplexity";
+  const webSearchKey =
+    webSearchProvider === "brave"
+      ? (nextConfig.tools?.web?.search?.apiKey ?? "").trim()
+      : (nextConfig.tools?.web?.search?.perplexity?.apiKey ?? "").trim();
+  const webSearchEnv =
+    webSearchProvider === "brave"
+      ? (process.env.BRAVE_API_KEY ?? "").trim()
+      : (process.env.PERPLEXITY_API_KEY ?? "").trim() ||
+        (process.env.OPENROUTER_API_KEY ?? "").trim();
   const hasWebSearchKey = Boolean(webSearchKey || webSearchEnv);
+  const providerLabel = webSearchProvider === "brave" ? "Brave Search" : "Perplexity Sonar";
+  const configKeyLabel =
+    webSearchProvider === "brave"
+      ? "tools.web.search.apiKey"
+      : "tools.web.search.perplexity.apiKey";
+  const envKeyLabel =
+    webSearchProvider === "brave" ? "BRAVE_API_KEY" : "PERPLEXITY_API_KEY or OPENROUTER_API_KEY";
   await prompter.note(
     hasWebSearchKey
       ? [
           "Web search is enabled, so your agent can look things up online when needed.",
           "",
           webSearchKey
-            ? "API key: stored in config (tools.web.search.apiKey)."
-            : "API key: provided via BRAVE_API_KEY env var (Gateway environment).",
+            ? `API key: stored in config (${configKeyLabel}).`
+            : `API key: provided via ${envKeyLabel} env var (Gateway environment).`,
           "Docs: https://docs.openclaw.ai/tools/web",
         ].join("\n")
       : [
           "If you want your agent to be able to search the web, you’ll need an API key.",
           "",
-          "OpenClaw uses Brave Search for the `web_search` tool. Without a Brave Search API key, web search won’t work.",
+          `OpenClaw uses ${providerLabel} for the \`web_search\` tool. Without an API key, web search won’t work.`,
           "",
           "Set it up interactively:",
           `- Run: ${formatCliCommand("openclaw configure --section web")}`,
-          "- Enable web_search and paste your Brave Search API key",
+          `- Enable web_search and paste your ${providerLabel} API key`,
           "",
-          "Alternative: set BRAVE_API_KEY in the Gateway environment (no config changes).",
+          `Alternative: set ${envKeyLabel} in the Gateway environment (no config changes).`,
           "Docs: https://docs.openclaw.ai/tools/web",
         ].join("\n"),
     "Web search (optional)",

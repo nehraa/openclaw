@@ -148,7 +148,7 @@ Available groups:
 - `group:memory`: `memory_search`, `memory_get`
 - `group:web`: `web_search`, `web_fetch`
 - `group:ui`: `browser`, `canvas`
-- `group:automation`: `cron`, `gateway`
+- `group:automation`: `cron`, `gateway`, `n8n`, `picoclaw`
 - `group:messaging`: `message`
 - `group:nodes`: `nodes`
 - `group:openclaw`: all built-in OpenClaw tools (excludes provider plugins)
@@ -225,7 +225,7 @@ Notes:
 
 ### `web_search`
 
-Search the web using Brave Search API.
+Search the web using Perplexity Sonar (default) or Brave Search.
 
 Core parameters:
 
@@ -234,7 +234,7 @@ Core parameters:
 
 Notes:
 
-- Requires a Brave API key (recommended: `openclaw configure --section web`, or set `BRAVE_API_KEY`).
+- Requires a Perplexity API key (recommended: `openclaw configure --section web`, or set `PERPLEXITY_API_KEY` or `OPENROUTER_API_KEY`).
 - Enable via `tools.web.search.enabled`.
 - Responses are cached (default 15 min).
 - See [Web tools](/tools/web) for setup.
@@ -407,6 +407,23 @@ Notes:
 
 - `add` expects a full cron job object (same schema as `cron.add` RPC).
 - `update` uses `{ id, patch }`.
+
+### `picoclaw`
+
+Run a PicoClaw helper via the `picoclaw` CLI.
+
+Core parameters:
+
+- `message` (required prompt)
+- `helper` (optional helper id)
+- `session` (optional session override)
+- `timeoutSeconds` (optional timeout override)
+
+Notes:
+
+- Requires the PicoClaw binary and `~/.picoclaw/config.json` to be configured.
+- Helper definitions live under `tools.picoclaw.helpers`.
+- See [PicoClaw Helpers](/tools/picoclaw) for configuration details.
 
 ### `gateway`
 

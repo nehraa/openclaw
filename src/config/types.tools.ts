@@ -336,9 +336,9 @@ export type ToolsConfig = {
     search?: {
       /** Enable web search tool (default: true when API key is present). */
       enabled?: boolean;
-      /** Search provider ("brave" or "perplexity"). */
+      /** Search provider ("perplexity" default, or "brave"). */
       provider?: "brave" | "perplexity";
-      /** Brave Search API key (optional; defaults to BRAVE_API_KEY env var). */
+      /** Brave Search API key (provider="brave"; defaults to BRAVE_API_KEY env var). */
       apiKey?: string;
       /** Default search results count (1-10). */
       maxResults?: number;
@@ -455,5 +455,27 @@ export type ToolsConfig = {
     baseUrl?: string;
     /** n8n API key for authentication. */
     apiKey?: string;
+  };
+  /** PicoClaw helper tool configuration. */
+  picoclaw?: {
+    /** Optional path to the picoclaw binary (defaults to `picoclaw` on PATH). */
+    binPath?: string;
+    /** Default helper id to use when helpers are configured. */
+    defaultHelper?: string;
+    /** Default timeout for helper runs in seconds. */
+    timeoutSeconds?: number;
+    /** Helper definitions for multiple PicoClaw instances. */
+    helpers?: Array<{
+      /** Unique helper id. */
+      id: string;
+      /** Override binary path for this helper. */
+      binPath?: string;
+      /** Override HOME directory for this helper (controls ~/.picoclaw). */
+      homeDir?: string;
+      /** Default session key for this helper. */
+      session?: string;
+      /** Timeout override for this helper in seconds. */
+      timeoutSeconds?: number;
+    }>;
   };
 };

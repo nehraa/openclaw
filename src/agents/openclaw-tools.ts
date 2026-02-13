@@ -37,6 +37,7 @@ import { createNodesTool } from "./tools/nodes-tool.js";
 import { createOllamaToolsTool } from "./tools/ollama-tools-tool.js";
 import { createOpenCodeTool } from "./tools/opencode-tool.js";
 import { createOpenHandsTool } from "./tools/openhands-tool.js";
+import { createPicoclawTool } from "./tools/picoclaw-tool.js";
 import { createPiperTool } from "./tools/piper-tts-tool.js";
 import { createPlandexTool } from "./tools/plandex-tool.js";
 import { createProactiveTool } from "./tools/proactive-tool.js";
@@ -189,6 +190,7 @@ export function createOpenClawTools(options?: {
     ...(webFetchTool ? [webFetchTool] : []),
     ...(imageTool ? [imageTool] : []),
     createN8nTool({ config: options?.config }),
+    createPicoclawTool({ config: options?.config }),
     createShannonTool({ sandboxRoot: options?.sandboxRoot ?? options?.workspaceDir }),
     createSelfUpdateTool(),
     createLearningTool({ senderId: options?.agentAccountId }),

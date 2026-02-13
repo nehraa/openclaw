@@ -286,8 +286,10 @@ describe("runOnboardingWizard", () => {
   });
 
   it("shows the web search hint at the end of onboarding", async () => {
-    const prevBraveKey = process.env.BRAVE_API_KEY;
-    delete process.env.BRAVE_API_KEY;
+    const prevPerplexityKey = process.env.PERPLEXITY_API_KEY;
+    const prevOpenRouterKey = process.env.OPENROUTER_API_KEY;
+    delete process.env.PERPLEXITY_API_KEY;
+    delete process.env.OPENROUTER_API_KEY;
 
     try {
       const note: WizardPrompter["note"] = vi.fn(async () => {});
@@ -327,10 +329,15 @@ describe("runOnboardingWizard", () => {
       expect(calls.length).toBeGreaterThan(0);
       expect(calls.some((call) => call?.[1] === "Web search (optional)")).toBe(true);
     } finally {
-      if (prevBraveKey === undefined) {
-        delete process.env.BRAVE_API_KEY;
+      if (prevPerplexityKey === undefined) {
+        delete process.env.PERPLEXITY_API_KEY;
       } else {
-        process.env.BRAVE_API_KEY = prevBraveKey;
+        process.env.PERPLEXITY_API_KEY = prevPerplexityKey;
+      }
+      if (prevOpenRouterKey === undefined) {
+        delete process.env.OPENROUTER_API_KEY;
+      } else {
+        process.env.OPENROUTER_API_KEY = prevOpenRouterKey;
       }
     }
   });

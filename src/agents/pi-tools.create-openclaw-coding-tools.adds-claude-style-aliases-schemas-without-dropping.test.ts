@@ -264,6 +264,7 @@ describe("createOpenClawCodingTools", () => {
       "sessions_send",
       "sessions_spawn",
       "session_status",
+      "picoclaw",
       "image",
     ]);
     const offenders: Array<{
