@@ -1,8 +1,8 @@
 ---
-summary: "Web search + fetch tools (Brave Search API, Perplexity direct/OpenRouter)"
+summary: "Web search + fetch tools (Perplexity Sonar, Brave Search API)"
 read_when:
   - You want to enable web_search or web_fetch
-  - You need Brave Search API key setup
+  - You need Perplexity API key setup
   - You want to use Perplexity Sonar for web search
 title: "Web Tools"
 ---
@@ -11,7 +11,7 @@ title: "Web Tools"
 
 OpenClaw ships two lightweight web tools:
 
-- `web_search` — Search the web via Brave Search API (default) or Perplexity Sonar (direct or via OpenRouter).
+- `web_search` — Search the web via Perplexity Sonar (default) or Brave Search API.
 - `web_fetch` — HTTP fetch + readable extraction (HTML → markdown/text).
 
 These are **not** browser automation. For JS-heavy sites or logins, use the
@@ -20,8 +20,8 @@ These are **not** browser automation. For JS-heavy sites or logins, use the
 ## How it works
 
 - `web_search` calls your configured provider and returns results.
-  - **Brave** (default): returns structured results (title, URL, snippet).
-  - **Perplexity**: returns AI-synthesized answers with citations from real-time web search.
+  - **Perplexity** (default): returns AI-synthesized answers with citations from real-time web search.
+  - **Brave**: returns structured results (title, URL, snippet).
 - Results are cached by query for 15 minutes (configurable).
 - `web_fetch` does a plain HTTP GET and extracts readable content
   (HTML → markdown/text). It does **not** execute JavaScript.
@@ -29,10 +29,10 @@ These are **not** browser automation. For JS-heavy sites or logins, use the
 
 ## Choosing a search provider
 
-| Provider            | Pros                                         | Cons                                     | API Key                                      |
-| ------------------- | -------------------------------------------- | ---------------------------------------- | -------------------------------------------- |
-| **Brave** (default) | Fast, structured results, free tier          | Traditional search results               | `BRAVE_API_KEY`                              |
-| **Perplexity**      | AI-synthesized answers, citations, real-time | Requires Perplexity or OpenRouter access | `OPENROUTER_API_KEY` or `PERPLEXITY_API_KEY` |
+| Provider                 | Pros                                         | Cons                                     | API Key                                      |
+| ------------------------ | -------------------------------------------- | ---------------------------------------- | -------------------------------------------- |
+| **Perplexity** (default) | AI-synthesized answers, citations, real-time | Requires Perplexity or OpenRouter access | `OPENROUTER_API_KEY` or `PERPLEXITY_API_KEY` |
+| **Brave**                | Fast, structured results, free tier          | Traditional search results               | `BRAVE_API_KEY`                              |
 
 See [Brave Search setup](/brave-search) and [Perplexity Sonar](/perplexity) for provider-specific details.
 
@@ -43,7 +43,7 @@ Set the provider in config:
   tools: {
     web: {
       search: {
-        provider: "brave", // or "perplexity"
+        provider: "perplexity", // or "brave"
       },
     },
   },
@@ -69,16 +69,16 @@ Example: switch to Perplexity Sonar (direct API):
 }
 ```
 
-## Getting a Brave API key
+## Using Brave Search (optional)
 
 1. Create a Brave Search API account at [https://brave.com/search/api/](https://brave.com/search/api/)
 2. In the dashboard, choose the **Data for Search** plan (not “Data for AI”) and generate an API key.
-3. Run `openclaw configure --section web` to store the key in config (recommended), or set `BRAVE_API_KEY` in your environment.
+3. Set `tools.web.search.provider` to `brave`, then run `openclaw configure --section web` to store the key (or set `BRAVE_API_KEY` in your environment).
 
 Brave provides a free tier plus paid plans; check the Brave API portal for the
 current limits and pricing.
 
-### Where to set the key (recommended)
+### Where to set the Brave key (recommended)
 
 **Recommended:** run `openclaw configure --section web`. It stores the key in
 `~/.openclaw/openclaw.json` under `tools.web.search.apiKey`.

@@ -44,7 +44,10 @@ describe("web_search country and language parameters", () => {
     // @ts-expect-error mock fetch
     global.fetch = mockFetch;
 
-    const tool = createWebSearchTool({ config: undefined, sandboxed: true });
+    const tool = createWebSearchTool({
+      config: { tools: { web: { search: { provider: "brave" } } } },
+      sandboxed: true,
+    });
     expect(tool).not.toBeNull();
 
     await tool?.execute?.(1, { query: "test", country: "DE" });
@@ -64,7 +67,10 @@ describe("web_search country and language parameters", () => {
     // @ts-expect-error mock fetch
     global.fetch = mockFetch;
 
-    const tool = createWebSearchTool({ config: undefined, sandboxed: true });
+    const tool = createWebSearchTool({
+      config: { tools: { web: { search: { provider: "brave" } } } },
+      sandboxed: true,
+    });
     await tool?.execute?.(1, { query: "test", search_lang: "de" });
 
     const url = new URL(mockFetch.mock.calls[0][0] as string);
@@ -81,7 +87,10 @@ describe("web_search country and language parameters", () => {
     // @ts-expect-error mock fetch
     global.fetch = mockFetch;
 
-    const tool = createWebSearchTool({ config: undefined, sandboxed: true });
+    const tool = createWebSearchTool({
+      config: { tools: { web: { search: { provider: "brave" } } } },
+      sandboxed: true,
+    });
     await tool?.execute?.(1, { query: "test", ui_lang: "de" });
 
     const url = new URL(mockFetch.mock.calls[0][0] as string);
@@ -98,7 +107,10 @@ describe("web_search country and language parameters", () => {
     // @ts-expect-error mock fetch
     global.fetch = mockFetch;
 
-    const tool = createWebSearchTool({ config: undefined, sandboxed: true });
+    const tool = createWebSearchTool({
+      config: { tools: { web: { search: { provider: "brave" } } } },
+      sandboxed: true,
+    });
     await tool?.execute?.(1, { query: "test", freshness: "pw" });
 
     const url = new URL(mockFetch.mock.calls[0][0] as string);
@@ -115,7 +127,10 @@ describe("web_search country and language parameters", () => {
     // @ts-expect-error mock fetch
     global.fetch = mockFetch;
 
-    const tool = createWebSearchTool({ config: undefined, sandboxed: true });
+    const tool = createWebSearchTool({
+      config: { tools: { web: { search: { provider: "brave" } } } },
+      sandboxed: true,
+    });
     const result = await tool?.execute?.(1, { query: "test", freshness: "yesterday" });
 
     expect(mockFetch).not.toHaveBeenCalled();
@@ -338,7 +353,10 @@ describe("web_search external content wrapping", () => {
     // @ts-expect-error mock fetch
     global.fetch = mockFetch;
 
-    const tool = createWebSearchTool({ config: undefined, sandboxed: true });
+    const tool = createWebSearchTool({
+      config: { tools: { web: { search: { provider: "brave" } } } },
+      sandboxed: true,
+    });
     const result = await tool?.execute?.(1, { query: "test" });
     const details = result?.details as { results?: Array<{ description?: string }> };
 
@@ -369,7 +387,10 @@ describe("web_search external content wrapping", () => {
     // @ts-expect-error mock fetch
     global.fetch = mockFetch;
 
-    const tool = createWebSearchTool({ config: undefined, sandboxed: true });
+    const tool = createWebSearchTool({
+      config: { tools: { web: { search: { provider: "brave" } } } },
+      sandboxed: true,
+    });
     const result = await tool?.execute?.(1, { query: "unique-test-url-not-wrapped" });
     const details = result?.details as { results?: Array<{ url?: string }> };
 
@@ -400,7 +421,10 @@ describe("web_search external content wrapping", () => {
     // @ts-expect-error mock fetch
     global.fetch = mockFetch;
 
-    const tool = createWebSearchTool({ config: undefined, sandboxed: true });
+    const tool = createWebSearchTool({
+      config: { tools: { web: { search: { provider: "brave" } } } },
+      sandboxed: true,
+    });
     const result = await tool?.execute?.(1, { query: "unique-test-site-name-wrapping" });
     const details = result?.details as { results?: Array<{ siteName?: string }> };
 
@@ -431,7 +455,10 @@ describe("web_search external content wrapping", () => {
     // @ts-expect-error mock fetch
     global.fetch = mockFetch;
 
-    const tool = createWebSearchTool({ config: undefined, sandboxed: true });
+    const tool = createWebSearchTool({
+      config: { tools: { web: { search: { provider: "brave" } } } },
+      sandboxed: true,
+    });
     const result = await tool?.execute?.(1, { query: "unique-test-brave-published-wrapping" });
     const details = result?.details as { results?: Array<{ published?: string }> };
 
