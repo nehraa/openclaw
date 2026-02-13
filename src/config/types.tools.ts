@@ -456,4 +456,26 @@ export type ToolsConfig = {
     /** n8n API key for authentication. */
     apiKey?: string;
   };
+  /** PicoClaw helper tool configuration. */
+  picoclaw?: {
+    /** Optional path to the picoclaw binary (defaults to `picoclaw` on PATH). */
+    binPath?: string;
+    /** Default helper id to use when helpers are configured. */
+    defaultHelper?: string;
+    /** Default timeout for helper runs in seconds. */
+    timeoutSeconds?: number;
+    /** Helper definitions for multiple PicoClaw instances. */
+    helpers?: Array<{
+      /** Unique helper id. */
+      id: string;
+      /** Override binary path for this helper. */
+      binPath?: string;
+      /** Override HOME directory for this helper (controls ~/.picoclaw). */
+      homeDir?: string;
+      /** Default session key for this helper. */
+      session?: string;
+      /** Timeout override for this helper in seconds. */
+      timeoutSeconds?: number;
+    }>;
+  };
 };

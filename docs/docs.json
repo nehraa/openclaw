@@ -927,6 +927,7 @@
                   "tools/lobster",
                   "tools/llm-task",
                   "tools/exec",
+                  "tools/picoclaw",
                   "tools/web",
                   "tools/apply-patch",
                   "tools/elevated",

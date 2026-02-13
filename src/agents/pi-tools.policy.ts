@@ -85,6 +85,8 @@ const DEFAULT_SUBAGENT_TOOL_DENY = [
   // System admin - dangerous from subagent
   "gateway",
   "agents_list",
+  // External helpers - avoid nested agent orchestration
+  "picoclaw",
   // Interactive setup - not a task
   "whatsapp_login",
   // Status/scheduling - main agent coordinates

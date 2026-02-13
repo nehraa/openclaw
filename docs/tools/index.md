@@ -148,7 +148,7 @@ Available groups:
 - `group:memory`: `memory_search`, `memory_get`
 - `group:web`: `web_search`, `web_fetch`
 - `group:ui`: `browser`, `canvas`
-- `group:automation`: `cron`, `gateway`
+- `group:automation`: `cron`, `gateway`, `n8n`, `picoclaw`
 - `group:messaging`: `message`
 - `group:nodes`: `nodes`
 - `group:openclaw`: all built-in OpenClaw tools (excludes provider plugins)
@@ -407,6 +407,23 @@ Notes:
 
 - `add` expects a full cron job object (same schema as `cron.add` RPC).
 - `update` uses `{ id, patch }`.
+
+### `picoclaw`
+
+Run a PicoClaw helper via the `picoclaw` CLI.
+
+Core parameters:
+
+- `message` (required prompt)
+- `helper` (optional helper id)
+- `session` (optional session override)
+- `timeoutSeconds` (optional timeout override)
+
+Notes:
+
+- Requires the PicoClaw binary and `~/.picoclaw/config.json` to be configured.
+- Helper definitions live under `tools.picoclaw.helpers`.
+- See [PicoClaw Helpers](/tools/picoclaw) for configuration details.
 
 ### `gateway`
 

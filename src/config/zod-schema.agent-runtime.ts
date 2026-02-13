@@ -560,6 +560,31 @@ export const ToolsSchema = z
       })
       .strict()
       .optional(),
+    picoclaw: z
+      .object({
+        /** Optional path to the picoclaw binary (defaults to `picoclaw` on PATH). */
+        binPath: z.string().optional(),
+        /** Default helper id when helpers are configured. */
+        defaultHelper: z.string().optional(),
+        /** Default timeout for helper runs in seconds. */
+        timeoutSeconds: z.number().int().positive().optional(),
+        /** Helper definitions for multiple PicoClaw instances. */
+        helpers: z
+          .array(
+            z
+              .object({
+                id: z.string(),
+                binPath: z.string().optional(),
+                homeDir: z.string().optional(),
+                session: z.string().optional(),
+                timeoutSeconds: z.number().int().positive().optional(),
+              })
+              .strict(),
+          )
+          .optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict()
   .superRefine((value, ctx) => {

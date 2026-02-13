@@ -31,7 +31,7 @@ export const TOOL_GROUPS: Record<string, string[]> = {
   // UI helpers
   "group:ui": ["browser", "canvas"],
   // Automation + infra
-  "group:automation": ["cron", "gateway", "n8n"],
+  "group:automation": ["cron", "gateway", "n8n", "picoclaw"],
   // Messaging surface
   "group:messaging": ["message"],
   // Nodes + device tools
@@ -96,6 +96,7 @@ export const TOOL_GROUPS: Record<string, string[]> = {
     "web_fetch",
     "image",
     "n8n",
+    "picoclaw",
     "shannon",
     "self_update",
     "learning",

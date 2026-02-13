@@ -271,6 +271,11 @@
         "timeoutSeconds"
       ]
     },
+    "picoclaw": {
+      "emoji": "🦞",
+      "title": "PicoClaw Helper",
+      "detailKeys": ["helper", "session", "timeoutSeconds"]
+    },
     "session_status": {
       "emoji": "📊",
       "title": "Session Status",
