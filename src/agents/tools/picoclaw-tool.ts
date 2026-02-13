@@ -28,7 +28,7 @@ const PicoclawToolSchema = Type.Object({
 });
 
 const DEFAULT_TIMEOUT_SECONDS = 180;
-const PICOCLAW_AGENT_COMMAND = "agent";
+const PICOCLAW_AGENT_SUBCOMMAND = "agent";
 
 type PicoclawHelperConfig = {
   id: string;
@@ -263,11 +263,17 @@ export function createPicoclawTool(options?: {
           ? Math.max(1, Math.trunc(rawTimeoutSeconds))
           : DEFAULT_TIMEOUT_SECONDS;
         const env = buildHelperEnv(helper?.homeDir);
-        const argv = [PICOCLAW_AGENT_COMMAND, "-m", message, ...(session ? ["-s", session] : [])];
+        const argv = [
+          binPath,
+          PICOCLAW_AGENT_SUBCOMMAND,
+          "-m",
+          message,
+          ...(session ? ["-s", session] : []),
+        ];
 
         const runner = options?.run ?? runPicoclawCommand;
         const result = await runner({
-          argv: [binPath, ...argv],
+          argv,
           env,
           timeoutMs: timeoutSeconds * 1000,
         });
